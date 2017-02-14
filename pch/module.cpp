@@ -1,5 +1,3 @@
-//#include "precomp.hpp"
-//#include "myheader.hpp"
 #include <iostream>
 #include <algorithm>
 
