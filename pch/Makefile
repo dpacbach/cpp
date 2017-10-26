@@ -1,1 +1,1 @@
-../../genorma/genorma.mk
+../../nr-make/nr-make.mk
