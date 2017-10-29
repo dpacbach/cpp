@@ -29,4 +29,7 @@
 *.app
 
 .location
-lib-linux64
+.lib-linux64*
+a.out*
+
+/ranges-test/Makefile
