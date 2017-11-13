@@ -4,6 +4,9 @@
 *.o
 *.obj
 
+# vim
+*.swp
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -29,7 +32,8 @@
 *.app
 
 .location
-.lib-linux64*
+.lib-*
+bin-*
 a.out*
 
 /ranges-test/Makefile
