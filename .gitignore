@@ -36,4 +36,5 @@
 bin-*
 a.out*
 
+/Makefile
 /ranges-test/Makefile

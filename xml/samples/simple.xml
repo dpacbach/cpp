@@ -1,8 +1,0 @@
-<root_node>
-    <child color="red">this is the red child</child>
-    <child color="blue">this is the blue child</child>
-    <child color="green">this is the green child</child>
-    <child>this child has no attributes</child>
-    <child color="white"/>
-    <child color="black"/>
-</root_node>
