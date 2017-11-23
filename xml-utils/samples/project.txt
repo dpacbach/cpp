@@ -1,0 +1,41 @@
+data:
+  project file path 
+  search paths - ItemDefinitionGroup -> Condition=Debug|Win32 -> AdditionalIncludeDirectories
+     split on ; and drop last component
+  clcompiles - ItemGroup -> ClCompile
+     attr Include
+  clincludes - ItemGroup -> ClInclude
+     attr Include
+  debuglibfolder - PGG -> IntDir
+     filter slashes?
+  projectname - PGG -> ProjectName
+  uuid - PGG -> ProjectGuid
+  tlogfolder
+     if projectname > 16 chars then: take 8 name + "." + take 8 UUID + .tlog
+     else projectname + .tlog
+  dllpath - optional string - PGD -> OutDir
+     flipslashes outdir + targetname + targetext
+  targetname - optional string - PGD -> {TargetName, TargetExt}
+
+property group debug: PropertyGroup -> Condition=Debug|Win32 -> name
+property group globals: PropertyGroup -> Label=Globals -> name
+
+convenience:
+
+from-file
+
+lbsFile
+
+tlogfolderpath
+
+unsuccessfulbuild file
+
+is-unit-test
+
+sourceFolderName (src/test)
+
+projects for file
+
+folders for project
+
+abs paths of all relevant files
