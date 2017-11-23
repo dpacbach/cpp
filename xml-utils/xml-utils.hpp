@@ -22,7 +22,7 @@ using XPathVars = std::vector<KeyVal>;
 
 pugi::xpath_node_set xpath( std::string           cmd,
                             pugi::xml_node const& node,
-                            std::vector<KeyVal>   vars );
+                            std::vector<KeyVal>   vars = {} );
 
 template<typename T>
 std::optional<T> attribute( pugi::xml_node const& node,
