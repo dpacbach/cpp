@@ -9,6 +9,7 @@
 #include <experimental/filesystem>
 #include <string>
 #include <optional>
+#include <string>
 #include <type_traits>
 #include <tuple>
 #include <vector>
@@ -48,4 +49,19 @@ err_location offset_to_line( int offset, fs::path file );
 
 void parse( pugi::xml_document& doc, fs::path file );
 
+/****************************************************************
+* XPath Wrappers
+****************************************************************/
+std::vector<std::string>
+attributes( pugi::xml_document const& doc,
+            char const*               x_path,
+            XPathVars const&          vars,
+            bool                      allow_empty = true );
+
+std::vector<std::string>
+texts( pugi::xml_document const& doc,
+       const char*               x_path,
+       xml::XPathVars const&     vars,
+       bool                      allow_empty = true,
+       bool                      strip = true );
 } // namespace xml

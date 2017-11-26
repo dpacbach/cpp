@@ -16,53 +16,24 @@ namespace xpaths {
 char const* cl_compiles = "/Project/ItemGroup/ClCompile/@Include";
 char const* cl_includes = "/Project/ItemGroup/ClInclude/@Include";
 
-char const* search_paths = "/Project/ItemDefinitionGroup[contains(@Condition,$platform)]/ClCompile/AdditionalIncludeDirectories";
-}
-
-vector<string> attributes( pugi::xml_document const& doc,
-                           const char*               xpath,
-                           xml::XPathVars const&     vars,
-                           bool                      allow_empty = true ) {
-    string path( xpath );
-    vector<string> res;
-    for( auto n : xml::xpath( path, doc, vars ) ) {
-        ASSERT_( n.attribute() );
-        string value( n.attribute().value() );
-        if( !allow_empty ) { ASSERT_( !value.empty() ); }
-        res.push_back( value );
-    }
-    return res;
-}
-
-vector<string> texts( pugi::xml_document const& doc,
-                      const char*               xpath,
-                      xml::XPathVars const&     vars,
-                      bool                      allow_empty = true,
-                      bool                      strip = true ) {
-    string path( xpath );
-    vector<string> res;
-    for( auto n : xml::xpath( path, doc, vars ) ) {
-        ASSERT_( n.node() );
-        string_view sv( n.node().text().get() );
-        if( !allow_empty ) ASSERT_( !sv.empty() );
-        if( strip) sv = util::strip( sv );
-        res.push_back( string( sv ) );
-    }
-    return res;
+char const* search_paths = "/Project"
+                           "/ItemDefinitionGroup[contains(@Condition,$platform)]"
+                           "/ClCompile"
+                           "/AdditionalIncludeDirectories";
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {
-    return attributes( doc, xpaths::cl_compiles, {}, false );
+    return xml::attributes( doc, xpaths::cl_compiles, {}, false );
 }
 
 vector<string> cl_includes( pugi::xml_document const& doc ) {
-    return attributes( doc, xpaths::cl_includes, {}, false );
+    return xml::attributes( doc, xpaths::cl_includes, {}, false );
 }
 
 vector<string> search_paths( pugi::xml_document const& doc,
                              string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return texts( doc, xpaths::search_paths, vars, true, true );
+    return xml::texts( doc, xpaths::search_paths, vars, true, true );
     // TODO: need to split on semi colon and drop last part
 }
 

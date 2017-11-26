@@ -1,6 +1,8 @@
 /****************************************************************
 * Utility Functions for Use with PugiXml
 ****************************************************************/
+#include "macros.hpp"
+#include "string-util.hpp"
 #include "xml-utils.hpp"
 
 #include <fstream>
@@ -61,6 +63,45 @@ void parse( pugi::xml_document& doc, fs::path file ) {
 	out << ": " << res.description();
 
     throw runtime_error( out.str() );
+}
+
+/****************************************************************
+* XPath Wrappers
+****************************************************************/
+vector<string>
+attributes( pugi::xml_document const& doc,
+            char const*               x_path,
+            XPathVars const&          vars,
+            bool                      allow_empty ) {
+
+    string path( x_path );
+    vector<string> res;
+    for( auto n : xpath( path, doc, vars ) ) {
+        ASSERT_( n.attribute() );
+        string value( n.attribute().value() );
+        if( !allow_empty ) { ASSERT_( !value.empty() ); }
+        res.push_back( value );
+    }
+    return res;
+}
+
+vector<string>
+texts( pugi::xml_document const& doc,
+       const char*               x_path,
+       xml::XPathVars const&     vars,
+       bool                      allow_empty,
+       bool                      strip ) {
+
+    string path( x_path );
+    vector<string> res;
+    for( auto n : xml::xpath( path, doc, vars ) ) {
+        ASSERT_( n.node() );
+        string_view sv( n.node().text().get() );
+        if( !allow_empty ) ASSERT_( !sv.empty() );
+        if( strip) sv = util::strip( sv );
+        res.push_back( string( sv ) );
+    }
+    return res;
 }
 
 } // namespace xml
