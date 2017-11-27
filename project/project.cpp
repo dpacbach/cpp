@@ -22,11 +22,13 @@ char const* search_paths = "/Project"
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {
-    return xml::attributes( doc, xpaths::cl_compiles, {}, false );
+    return move( xml::attributes(
+                    doc, xpaths::cl_compiles, {}, false ) );
 }
 
 vector<string> cl_includes( pugi::xml_document const& doc ) {
-    return xml::attributes( doc, xpaths::cl_includes, {}, false );
+    return move( xml::attributes(
+                    doc, xpaths::cl_includes, {}, false ) );
 }
 
 vector<string> search_paths( pugi::xml_document const& doc,
@@ -40,7 +42,7 @@ vector<string> search_paths( pugi::xml_document const& doc,
     // rated) list of search paths.
     ASSERT_( paths.size() == 1 );
     auto res = util::split_strip( paths[0], ';' );
-    return util::to_strings( res );
+    return move( util::to_strings( res ) );
 }
 
 Project::Project( vector<string>&& cl_includes,
@@ -58,11 +60,11 @@ Project read( fs::path file, string_view platform ) {
     // path may be relative to bin folder
     xml::parse( doc, file );
 
-    return Project(
+    return move( Project(
         cl_includes( doc ),
         cl_compiles( doc ),
         search_paths( doc, platform )
-    );
+    ) );
 }
 
 ostream& operator<<( ostream& out, Project const& p ) {

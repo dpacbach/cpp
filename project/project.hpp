@@ -19,6 +19,8 @@ struct Project {
              std::vector<std::string>&& cl_compiles,
              std::vector<std::string>&& search_paths );
 
+    Project( Project&& ) = default;
+
     std::vector<std::string> const cl_includes;
     std::vector<std::string> const cl_compiles;
     std::vector<std::string> const search_paths;
