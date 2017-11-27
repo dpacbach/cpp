@@ -1,6 +1,7 @@
 /****************************************************************
 * Test driver for cpp libraries
 ****************************************************************/
+#include "project.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
 
@@ -12,59 +13,24 @@
 
 using namespace std;
 
-namespace xpaths {
-
-
-char const* cl_compiles = "/Project/ItemGroup/ClCompile/@Include";
-char const* cl_includes = "/Project/ItemGroup/ClInclude/@Include";
-
-char const* search_paths = "/Project"
-                           "/ItemDefinitionGroup[contains(@Condition,$platform)]"
-                           "/ClCompile"
-                           "/AdditionalIncludeDirectories";
-}
-
-vector<string> cl_compiles( pugi::xml_document const& doc ) {
-    return xml::attributes( doc, xpaths::cl_compiles, {}, false );
-}
-
-vector<string> cl_includes( pugi::xml_document const& doc ) {
-    return xml::attributes( doc, xpaths::cl_includes, {}, false );
-}
-
-vector<string> search_paths( pugi::xml_document const& doc,
-                             string_view               platform ) {
-    xml::XPathVars vars{ { "platform", string( platform ) } };
-    auto paths = xml::texts(
-            doc, xpaths::search_paths, vars, true, true );
-    if( paths.empty() ) return {};
-    // For  a  given  platform, if we have a non-empty result, we
-    // must  only  have  one  resultant  (possibly semicolon sepa-
-    // rated) list of search paths.
-    ASSERT_( paths.size() == 1 );
-    auto res = util::split_strip( paths[0], ';' );
-    return util::to_strings( res );
-}
+auto project_file = "../xml-utils/samples/pugixml_vs2013.vcxproj";
 
 int main()
 {
-try {
+    try {
 
-    cout << endl;
+        // path may be relative to bin folder
+        project::Project p(
+                project::read( project_file, "Debug|Win32" ) );
 
-    pugi::xml_document doc;
+        cout << p << endl;
 
-    // path may be relative to bin folder
-    xml::parse( doc, "../xml-utils/samples/pugixml_vs2013.vcxproj" );
+        return 0;
 
-    for( auto const& s : search_paths( doc, "Debug|Win32" ) )
-        cout << quoted( s ) << endl;
-    return 0;
-
-} catch( exception const& e ) {
-    cerr << "exception: " << e.what() << endl;
-    return 1;
-}
+    } catch( exception const& e ) {
+        cerr << "exception: " << e.what() << endl;
+        return 1;
+    }
 }
 
 /*
