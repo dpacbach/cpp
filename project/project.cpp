@@ -6,6 +6,8 @@
 #include "string-util.hpp"
 #include "xml-utils.hpp"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace project {
@@ -22,13 +24,19 @@ char const* search_paths = "/Project"
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {
-    return move( xml::attributes(
+    auto res( xml::attributes(
                     doc, xpaths::cl_compiles, {}, false ) );
+    transform( begin( res ), end( res ), begin( res ),
+               util::fwd_slashes );
+    return move( res );
 }
 
 vector<string> cl_includes( pugi::xml_document const& doc ) {
-    return move( xml::attributes(
+    auto res( xml::attributes(
                     doc, xpaths::cl_includes, {}, false ) );
+    transform( begin( res ), end( res ), begin( res ),
+               util::fwd_slashes );
+    return move( res );
 }
 
 vector<string> search_paths( pugi::xml_document const& doc,
@@ -41,8 +49,11 @@ vector<string> search_paths( pugi::xml_document const& doc,
     // must  only  have  one  resultant  (possibly semicolon sepa-
     // rated) list of search paths.
     ASSERT_( paths.size() == 1 );
-    auto res = util::split_strip( paths[0], ';' );
-    return move( util::to_strings( res ) );
+    auto res_win = util::split_strip( paths[0], ';' );
+    vector<string> res( res_win.size() );
+    transform( begin( res_win ), end( res_win ), begin( res ),
+               util::fwd_slashes );
+    return move( res );
 }
 
 Project::Project( vector<string>&& cl_includes,

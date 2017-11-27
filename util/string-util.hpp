@@ -26,4 +26,7 @@ split_strip( std::string_view sv, char c );
 std::vector<std::string>
 to_strings( std::vector<std::string_view> const& svs );
 
+// Flip any backslashes to foward slashes.
+std::string fwd_slashes( std::string_view in );
+
 }

@@ -58,4 +58,11 @@ vector<string> to_strings( vector<string_view> const& svs ) {
     return move( res );
 }
 
+// Flip any backslashes to foward slashes.
+string fwd_slashes( string_view in ) {
+    string out( in );
+    replace( begin( out ), end( out ), '\\', '/' );
+    return move( out );
+}
+
 }

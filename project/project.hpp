@@ -31,14 +31,4 @@ Project read( fs::path file, std::string_view platform );
 
 std::ostream& operator<<( std::ostream& out, Project const& p );
 
-std::vector<std::string>
-cl_compiles( pugi::xml_document const& doc );
-
-std::vector<std::string>
-cl_includes( pugi::xml_document const& doc );
-
-std::vector<std::string>
-search_paths( pugi::xml_document const& doc,
-              std::string_view          platform );
-
 } // namespace project
