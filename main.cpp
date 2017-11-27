@@ -4,7 +4,9 @@
 #include "string-util.hpp"
 #include "xml-utils.hpp"
 
+#include <algorithm>
 #include <string>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
@@ -33,8 +35,15 @@ vector<string> cl_includes( pugi::xml_document const& doc ) {
 vector<string> search_paths( pugi::xml_document const& doc,
                              string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return xml::texts( doc, xpaths::search_paths, vars, true, true );
-    // TODO: need to split on semi colon and drop last part
+    auto paths = xml::texts(
+            doc, xpaths::search_paths, vars, true, true );
+    if( paths.empty() ) return {};
+    // For  a  given  platform, if we have a non-empty result, we
+    // must  only  have  one  resultant  (possibly semicolon sepa-
+    // rated) list of search paths.
+    ASSERT_( paths.size() == 1 );
+    auto res = util::split_strip( paths[0], ';' );
+    return util::to_strings( res );
 }
 
 int main()
@@ -48,8 +57,8 @@ try {
     // path may be relative to bin folder
     xml::parse( doc, "../xml-utils/samples/pugixml_vs2013.vcxproj" );
 
-    for( auto const& s : search_paths( doc, "Debug|x64" ) )
-        cout << s << endl;
+    for( auto const& s : search_paths( doc, "Debug|Win32" ) )
+        cout << quoted( s ) << endl;
     return 0;
 
 } catch( exception const& e ) {

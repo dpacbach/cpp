@@ -82,7 +82,7 @@ attributes( pugi::xml_document const& doc,
         if( !allow_empty ) { ASSERT_( !value.empty() ); }
         res.push_back( value );
     }
-    return res;
+    return move( res );
 }
 
 vector<string>
@@ -101,7 +101,7 @@ texts( pugi::xml_document const& doc,
         if( strip) sv = util::strip( sv );
         res.push_back( string( sv ) );
     }
-    return res;
+    return move( res );
 }
 
 } // namespace xml
