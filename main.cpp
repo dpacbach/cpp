@@ -13,6 +13,8 @@
 
 using namespace std;
 
+namespace pr = project;
+
 auto project_file = "../xml-utils/samples/pugixml_vs2013.vcxproj";
 
 int main()
@@ -20,8 +22,7 @@ int main()
     try {
 
         // path may be relative to bin folder
-        project::Project p(
-                project::read( project_file, "Debug|Win32" ) );
+        auto p( pr::read( project_file, "Debug|Win32" ) );
 
         cout << p << endl;
 
