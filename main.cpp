@@ -15,7 +15,7 @@ using namespace std;
 
 namespace pr = project;
 
-auto project_file = "../xml-utils/samples/pugixml_vs2013.vcxproj";
+auto project_file = "xml-utils/samples/pugixml_vs2013.vcxproj";
 
 int main()
 {

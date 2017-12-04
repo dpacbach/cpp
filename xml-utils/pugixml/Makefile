@@ -5,5 +5,5 @@ else
     locations := # Put any additional sublocations here
     $(call enter_all,$(locations))
 
-    $(call make_so,pugixml,pugixml)
+    $(call make_ar,pugixml,pugixml)
 endif

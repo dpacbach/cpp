@@ -5,5 +5,5 @@ else
     locations := # Put any additional sublocations here
     $(call enter_all,$(locations))
 
-    $(call make_so,util,util)
+    $(call make_ar,util,util)
 endif

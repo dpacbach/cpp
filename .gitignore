@@ -38,3 +38,5 @@ a.out*
 
 /Makefile
 /ranges-test/Makefile
+/main
+/main.opt
