@@ -7,6 +7,7 @@
 #include "xml-utils.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 
@@ -78,21 +79,27 @@ Project read( fs::path file, string_view platform ) {
     ) );
 }
 
-ostream& operator<<( ostream& out, Project const& p ) {
+string Project::to_string() const {
 
-    auto print_list = [&out]( auto const& v ){
+    ostringstream oss;
+
+    auto print_list = [&oss]( auto const& v ){
         for( auto const& s : v )
-            out << "  " <<  quoted( s ) << endl;
+            oss << "  " <<  quoted( s ) << endl;
     };
 
-    out << endl << "Search paths: " << endl;
-    print_list( p.search_paths );
-    out << endl << "Cl Compiles: " << endl;
-    print_list( p.cl_compiles );
-    out << endl << "Cl Includes: " << endl;
-    print_list( p.cl_includes );
+    oss << endl << "Search paths: " << endl;
+    print_list( search_paths );
+    oss << endl << "Cl Compiles: " << endl;
+    print_list( cl_compiles );
+    oss << endl << "Cl Includes: " << endl;
+    print_list( cl_includes );
 
-    return out;
+    return oss.str();
+}
+
+ostream& operator<<( ostream& out, Project const& p ) {
+    return (out << p.to_string());
 }
 
 } // namespace project
