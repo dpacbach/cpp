@@ -5,11 +5,11 @@ done:
      attr Include
   clincludes - ItemGroup -> ClInclude
      attr Include
+  debuglibfolder - IntDir
+     TODO: filter slashes?
+  projectname - PGG -> ProjectName
 
 data:
-  debuglibfolder - PGG -> IntDir
-     filter slashes?
-  projectname - PGG -> ProjectName
   uuid - PGG -> ProjectGuid
   tlogfolder
      if projectname > 16 chars then: take 8 name + "." + take 8 UUID + .tlog

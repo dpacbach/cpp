@@ -64,4 +64,14 @@ texts( pugi::xml_document const& doc,
        xml::XPathVars const&     vars,
        bool                      allow_empty = true,
        bool                      strip = true );
+
+// Just likes texts() but will assert that there is precisely one
+// result (no more no less) and throw otherwise.
+std::string
+text( pugi::xml_document const& doc,
+      const char*               x_path,
+      xml::XPathVars const&     vars,
+      bool                      allow_empty = true,
+      bool                      strip = true );
+
 } // namespace xml
