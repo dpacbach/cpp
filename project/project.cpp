@@ -18,10 +18,10 @@ namespace xpaths {
 char const* cl_compiles = "/Project/ItemGroup/ClCompile/@Include";
 char const* cl_includes = "/Project/ItemGroup/ClInclude/@Include";
 
-char const* search_paths = "/Project"
-                           "/ItemDefinitionGroup[contains(@Condition,$platform)]"
-                           "/ClCompile"
-                           "/AdditionalIncludeDirectories";
+char const* search_paths = "/Project[contains(@Condition,$platform) or not(@Condition)]"
+                           "/ItemDefinitionGroup[contains(@Condition,$platform) or not(@Condition)]"
+                           "/ClCompile[contains(@Condition,$platform) or not(@Condition)]"
+                           "/AdditionalIncludeDirectories[contains(@Condition,$platform) or not(@Condition)]";
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {
@@ -45,11 +45,9 @@ vector<string> search_paths( pugi::xml_document const& doc,
     xml::XPathVars vars{ { "platform", string( platform ) } };
     auto paths = xml::texts(
             doc, xpaths::search_paths, vars, true, true );
-    if( paths.empty() ) return {};
-    // For  a  given  platform, if we have a non-empty result, we
-    // must  only  have  one  resultant  (possibly semicolon sepa-
-    // rated) list of search paths.
-    ASSERT_( paths.size() == 1 );
+    // For a given platform, if we must precisely have one  resul-
+    // tant (possibly semicolon separated)  list  of search paths.
+    ASSERT( paths.size() == 1, "size is " << paths.size() );
     auto res_win = util::split_strip( paths[0], ';' );
     vector<string> res( res_win.size() );
     transform( begin( res_win ), end( res_win ), begin( res ),

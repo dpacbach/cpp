@@ -1,11 +1,12 @@
-data:
-  project file path 
+done:
   search paths - ItemDefinitionGroup -> Condition=Debug|Win32 -> AdditionalIncludeDirectories
      split on ; and drop last component
   clcompiles - ItemGroup -> ClCompile
      attr Include
   clincludes - ItemGroup -> ClInclude
      attr Include
+
+data:
   debuglibfolder - PGG -> IntDir
      filter slashes?
   projectname - PGG -> ProjectName
@@ -16,6 +17,7 @@ data:
   dllpath - optional string - PGD -> OutDir
      flipslashes outdir + targetname + targetext
   targetname - optional string - PGD -> {TargetName, TargetExt}
+  project file path 
 
 property group debug: PropertyGroup -> Condition=Debug|Win32 -> name
 property group globals: PropertyGroup -> Label=Globals -> name
