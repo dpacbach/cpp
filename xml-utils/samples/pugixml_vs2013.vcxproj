@@ -70,9 +70,11 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">vs2013\x32\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">vs2013\x32\Debug\</IntDir>
+    <ProjectName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">my-project-32</ProjectName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pugixmld</TargetName>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">vs2013\x64\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">vs2013\x64\Debug\</IntDir>
+    <ProjectName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">my-project-64</ProjectName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pugixmld</TargetName>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">vs2013\x32\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">vs2013\x32\Release\</IntDir>

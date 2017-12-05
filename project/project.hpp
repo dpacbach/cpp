@@ -17,9 +17,10 @@ namespace project {
 
 struct Project {
 
-    Project( std::vector<std::string>&& cl_includes,
-             std::vector<std::string>&& cl_compiles,
-             std::vector<std::string>&& search_paths );
+    Project( std::vector<fs::path>&& cl_includes,
+             std::vector<fs::path>&& cl_compiles,
+             std::vector<fs::path>&& search_paths,
+             fs::path&&              int_dir );
 
     Project( Project&& )      = default;
     Project( Project const& ) = delete;
@@ -27,9 +28,10 @@ struct Project {
 
     std::string to_string() const;
 
-    std::vector<std::string> const cl_includes;
-    std::vector<std::string> const cl_compiles;
-    std::vector<std::string> const search_paths;
+    std::vector<fs::path> const cl_includes;
+    std::vector<fs::path> const cl_compiles;
+    std::vector<fs::path> const search_paths;
+    fs::path              const int_dir;
 
 };
 

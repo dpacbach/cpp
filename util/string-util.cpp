@@ -58,11 +58,35 @@ vector<string> to_strings( vector<string_view> const& svs ) {
     return move( res );
 }
 
+// Convert string to path
+fs::path to_path( string_view sv ) {
+    return fs::path( sv );
+}
+
+// Convert element type.
+vector<fs::path> to_paths( vector<string> const& ss ) {
+
+    vector<fs::path> res;
+    for( auto s : ss )
+        res.emplace_back( s );
+    return move( res );
+}
+
 // Flip any backslashes to foward slashes.
 string fwd_slashes( string_view in ) {
     string out( in );
     replace( begin( out ), end( out ), '\\', '/' );
     return move( out );
+}
+
+// Flip any backslashes to forward slashes.
+vector<string> fwd_slashes( vector<string>& v ) {
+    vector<string> res( v.size() );
+    auto resolve = []( string_view sv ) {
+        return fwd_slashes( sv );
+    };
+    transform( begin( v ), end( v ), begin( res ), resolve );
+    return move( res );
 }
 
 }
