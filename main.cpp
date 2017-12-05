@@ -22,9 +22,8 @@ int main()
     try {
 
         // path may be relative to bin folder
-        auto p( pr::read( project_file, "Debug|Win32" ) );
-
-        cout << p << endl;
+        cout << pr::read( project_file, "Debug|Win32" ) << endl;
+        cout << pr::read( project_file, "Debug|x64"   ) << endl;
 
         return 0;
 

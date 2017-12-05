@@ -18,10 +18,13 @@ namespace xpaths {
 char const* cl_compiles = "/Project/ItemGroup/ClCompile/@Include";
 char const* cl_includes = "/Project/ItemGroup/ClInclude/@Include";
 
-char const* search_paths = "/Project[contains(@Condition,$platform) or not(@Condition)]"
-                           "/ItemDefinitionGroup[contains(@Condition,$platform) or not(@Condition)]"
-                           "/ClCompile[contains(@Condition,$platform) or not(@Condition)]"
-                           "/AdditionalIncludeDirectories[contains(@Condition,$platform) or not(@Condition)]";
+char const* search_paths =
+    " /descendant-or-self::node()[              "
+    "     contains(@Condition,$platform)        "
+    " ]                                         "
+    " /descendant-or-self::node()[              "
+    "     name()='AdditionalIncludeDirectories' "
+    " ]                                         " ;
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {

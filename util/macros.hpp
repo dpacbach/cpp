@@ -13,9 +13,8 @@
 #define STRING_JO1N(arg1, arg2) arg1 ## arg2
 #define STRING_JOIN(arg1, arg2) STRING_JO1N(arg1, arg2)
 
-// FAIL is the converse of assert. It will throw if the condition
-// passed to it evaluates to true.
-#define FAIL( a, b ) if( a ) {                                 \
+// ASSERT will fail if the argument is false.
+#define ASSERT( a, b ) if( !(a) ) {                            \
     std::ostringstream out;                                    \
     out << "error:" __FILE__ ":";                              \
     out << TO_STRING(__LINE__) ": " << #a;                     \
@@ -26,10 +25,7 @@
     throw std::logic_error( out.str() );                       \
 }
 
-#define FAIL_( a ) FAIL( a, "" )
-
-#define ASSERT_( a ) FAIL_( (!(a)) )
-#define ASSERT( a, b ) FAIL( (!(a)), b )
+#define ASSERT_( a ) ASSERT( a, "" )
 
 #define TRY try {
 
