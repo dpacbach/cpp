@@ -44,6 +44,7 @@ char const* out_dir =
     " ]                                         ";
 
 char const* project_name = "//ProjectName";
+char const* project_guid = "//ProjectGuid";
 
 char const* target_name =
     " /descendant-or-self::node()[              "
@@ -136,6 +137,18 @@ optional<string> target_ext( pugi::xml_document const& doc,
                 doc, xpaths::target_ext, vars, true, true );
 }
 
+string uuid( pugi::xml_document const& doc ) {
+    auto res( xml::text(
+                doc, xpaths::project_guid, {}, false, true ) );
+    ASSERT( res, "failed to find precisely one value for "
+                 "ProjectGuid. There may be zero, or too many." );
+    string_view sv( *res );
+    ASSERT( sv[0] == '{' && sv[sv.size()-1] == '}',
+                 "failed to find uuid surrounded in { }." );
+    // Remove { } from around the UUID.
+    return string( sv.substr( 1, sv.size()-2 ) );
+}
+
 Project::Project( vector<fs::path>&& cl_includes,
                   vector<fs::path>&& cl_compiles,
                   vector<fs::path>&& search_paths,
@@ -143,7 +156,9 @@ Project::Project( vector<fs::path>&& cl_includes,
                   fs::path&&         out_dir,
                   string&&           project_name,
                   optional<string>&& target_name,
-                  optional<string>&& target_ext )
+                  optional<string>&& target_ext,
+                  string&&           uuid )
+
   : cl_includes  ( move( cl_includes  ) ),
     cl_compiles  ( move( cl_compiles  ) ),
     search_paths ( move( search_paths ) ),
@@ -151,7 +166,8 @@ Project::Project( vector<fs::path>&& cl_includes,
     out_dir      ( move( out_dir      ) ),
     project_name ( move( project_name ) ),
     target_name  ( move( target_name  ) ),
-    target_ext   ( move( target_ext   ) )
+    target_ext   ( move( target_ext   ) ),
+    uuid         ( move( uuid         ) )
 { }
 
 auto read( fs::path file, string_view platform ) -> Project {
@@ -169,7 +185,8 @@ auto read( fs::path file, string_view platform ) -> Project {
         out_dir      ( doc, platform ),
         project_name ( doc           ),
         target_name  ( doc, platform ),
-        target_ext   ( doc, platform )
+        target_ext   ( doc, platform ),
+        uuid         ( doc           )
     );
 }
 
@@ -202,6 +219,8 @@ string Project::to_string() const {
     print( target_name );
     oss << "TargetExt: " << endl;
     print( target_ext );
+    oss << "UUID: " << endl;
+    print( uuid );
 
     return oss.str();
 }

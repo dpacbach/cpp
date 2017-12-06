@@ -25,7 +25,8 @@ struct Project {
              fs::path&&                   out_dir,
              std::string&&                project_name,
              std::optional<std::string>&& target_name,
-             std::optional<std::string>&& target_ext );
+             std::optional<std::string>&& target_ext,
+             std::string&&                uuid );
 
     Project( Project&& )      = default;
     Project( Project const& ) = delete;
@@ -41,6 +42,7 @@ struct Project {
     std::string                const project_name;
     std::optional<std::string> const target_name;
     std::optional<std::string> const target_ext;
+    std::string                const uuid;
 
 };
 

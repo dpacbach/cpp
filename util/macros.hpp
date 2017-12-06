@@ -17,7 +17,7 @@
 #define ASSERT( a, b ) if( !(a) ) {                            \
     std::ostringstream out;                                    \
     out << "error:" __FILE__ ":";                              \
-    out << TO_STRING(__LINE__) ": " << #a;                     \
+    out << TO_STRING(__LINE__) ": ASSERT( " << #a << " )";     \
     std::ostringstream out_msg;                                \
     out_msg << b;                                              \
     if( !out_msg.str().empty() )                               \
