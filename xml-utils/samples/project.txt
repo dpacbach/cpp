@@ -13,23 +13,24 @@ done:
 
 data:
   uuid - PGG -> ProjectGuid
-  tlogfolder
-     if projectname > 16 chars then: take 8 name + "." + take 8 UUID + .tlog
-     else projectname + .tlog
   project file path (abs?)
 
-property group debug: PropertyGroup -> Condition=Debug|Win32 -> name
+property group debug:   PropertyGroup -> Condition=Debug|Win32 -> name
 property group globals: PropertyGroup -> Label=Globals -> name
 
 convenience:
+
+    tlogfolder
+       if projectname > 16 chars then: take 8 name + "." + take 8 UUID + .tlog
+       else projectname + .tlog
+
+    tlogfolderpath
 
     dllpath - flipslashes outdir + targetname + targetext
 
     from-file
 
     lbsFile
-
-    tlogfolderpath
 
     unsuccessfulbuild file
 
