@@ -2,6 +2,7 @@
 * Project & Solution File Parsers
 ****************************************************************/
 #include "macros.hpp"
+#include "opt-util.hpp"
 #include "project.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
@@ -35,6 +36,22 @@ char const* int_dir =
     " ]                                         ";
 
 char const* project_name = "//ProjectName";
+
+char const* target_name =
+    " /descendant-or-self::node()[              "
+    "     contains(@Condition,$platform)        "
+    " ]                                         "
+    " /descendant-or-self::node()[              "
+    "     name()='TargetName'                   "
+    " ]                                         ";
+
+char const* target_ext =
+    " /descendant-or-self::node()[              "
+    "     contains(@Condition,$platform)        "
+    " ]                                         "
+    " /descendant-or-self::node()[              "
+    "     name()='TargetExt'                    "
+    " ]                                         ";
 
 }
 
@@ -76,16 +93,34 @@ string project_name( pugi::xml_document const& doc ) {
         xml::text( doc, xpaths::project_name, {}, false, true ) );
 }
 
+optional<string> target_name( pugi::xml_document const& doc,
+                              string_view               platform ) {
+    xml::XPathVars vars{ { "platform", string( platform ) } };
+    return xml::text_opt(
+                doc, xpaths::target_name, vars, true, true );
+}
+
+optional<string> target_ext( pugi::xml_document const& doc,
+                             string_view               platform ) {
+    xml::XPathVars vars{ { "platform", string( platform ) } };
+    return xml::text_opt(
+                doc, xpaths::target_ext, vars, true, true );
+}
+
 Project::Project( vector<fs::path>&& cl_includes,
                   vector<fs::path>&& cl_compiles,
                   vector<fs::path>&& search_paths,
                   fs::path&&         int_dir,
-                  string&&           project_name )
+                  string&&           project_name,
+                  optional<string>&& target_name,
+                  optional<string>&& target_ext )
   : cl_includes  ( move( cl_includes  ) ),
     cl_compiles  ( move( cl_compiles  ) ),
     search_paths ( move( search_paths ) ),
     int_dir      ( move( int_dir      ) ),
-    project_name ( move( project_name ) )
+    project_name ( move( project_name ) ),
+    target_name  ( move( target_name  ) ),
+    target_ext   ( move( target_ext   ) )
 { }
 
 auto read( fs::path file, string_view platform ) -> Project {
@@ -96,11 +131,13 @@ auto read( fs::path file, string_view platform ) -> Project {
     xml::parse( doc, file );
 
     return Project(
-        cl_includes( doc ),
-        cl_compiles( doc ),
-        search_paths( doc, platform ),
-        int_dir( doc, platform ),
-        project_name( doc )
+        cl_includes  ( doc           ),
+        cl_compiles  ( doc           ),
+        search_paths ( doc, platform ),
+        int_dir      ( doc, platform ),
+        project_name ( doc           ),
+        target_name  ( doc, platform ),
+        target_ext   ( doc, platform )
     );
 }
 
@@ -109,7 +146,7 @@ string Project::to_string() const {
     ostringstream oss;
 
     auto print = [&oss]( auto const& s ) {
-            oss << "  | " <<  quoted( string( s ) ) << endl;
+            oss << "  | \"" << util::to_string( s ) << "\"" << endl;
     };
 
     auto print_list = [&]( auto const& v ) {
@@ -127,6 +164,10 @@ string Project::to_string() const {
     print( string( int_dir ) );
     oss << "ProjectName: " << endl;
     print( project_name );
+    oss << "TargetName: " << endl;
+    print( target_name );
+    oss << "TargetExt: " << endl;
+    print( target_ext );
 
     return oss.str();
 }

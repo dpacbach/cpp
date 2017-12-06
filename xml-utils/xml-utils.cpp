@@ -104,6 +104,25 @@ texts( pugi::xml_document const& doc,
     return move( res );
 }
 
+// Just likes texts() but will  return  nullopt  if the number of
+// results is zero and will throw  if number of results is larger
+// than one.
+optional<string>
+text_opt( pugi::xml_document const& doc,
+          const char*               x_path,
+          xml::XPathVars const&     vars,
+          bool                      allow_empty,
+          bool                      strip ) {
+    auto res( texts( doc, x_path, vars, allow_empty, strip ) );
+    ASSERT( res.size() <= 1, "number of results for xpath:"
+                          << endl << quoted( x_path ) << endl
+                          << "is " << res.size()
+                          << ", but must be <= 1." );
+    if( res.size() == 0 )
+        return {};
+    return move( res[0] );
+}
+
 // Just likes texts() but will assert that there is precisely one
 // result (no more no less) and throw otherwise.
 string

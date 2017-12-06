@@ -74,7 +74,8 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pugixmld</TargetName>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">vs2013\x64\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">vs2013\x64\Debug\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pugixmld</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pugixmld64</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">vs2013\x32\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">vs2013\x32\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pugixml</TargetName>

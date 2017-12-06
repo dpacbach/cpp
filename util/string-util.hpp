@@ -3,6 +3,8 @@
 ****************************************************************/
 #pragma once
 
+#include "util.hpp"
+
 #include <experimental/filesystem>
 #include <string>
 #include <string_view>
@@ -28,6 +30,14 @@ split_strip( std::string_view sv, char c );
 // Convert element type.
 std::vector<std::string>
 to_strings( std::vector<std::string_view> const& svs );
+
+// Trivial
+template<>
+std::string to_string<std::string>( std::string const& s );
+
+// Trivial; extract string from path.
+template<>
+std::string to_string<fs::path>( fs::path const& p );
 
 // Convert string to path
 fs::path to_path( std::string_view sv );

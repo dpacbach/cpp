@@ -65,6 +65,16 @@ texts( pugi::xml_document const& doc,
        bool                      allow_empty = true,
        bool                      strip = true );
 
+// Just likes texts() but will  return  nullopt  if the number of
+// results is zero and will throw  if number of results is larger
+// than one.
+std::optional<std::string>
+text_opt( pugi::xml_document const& doc,
+          const char*               x_path,
+          xml::XPathVars const&     vars,
+          bool                      allow_empty = true,
+          bool                      strip = true );
+
 // Just likes texts() but will assert that there is precisely one
 // result (no more no less) and throw otherwise.
 std::string
