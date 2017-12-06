@@ -11,6 +11,7 @@
 #include <string>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <tuple>
 #include <vector>
@@ -24,7 +25,7 @@ namespace xml {
 using XPKeyVal  = std::tuple<std::string, std::string>;
 using XPathVars = std::vector<XPKeyVal>;
 
-pugi::xpath_node_set xpath( std::string           cmd,
+pugi::xpath_node_set xpath( std::string_view      cmd,
                             pugi::xml_node const& node,
                             XPathVars             vars = {} );
 

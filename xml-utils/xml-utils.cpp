@@ -13,14 +13,14 @@ namespace xml {
 
 // Run  an  xpath  command with a list of key/val pairs to substi-
 // tute into the query.
-pugi::xpath_node_set xpath( string                cmd,
+pugi::xpath_node_set xpath( string_view           cmd,
                             pugi::xml_node const& node,
                             XPathVars             vars ) {
     pugi::xpath_variable_set xvars;
     for( auto& [k,v] : vars )
         ASSERT_( xvars.set( k.c_str(), v.c_str() ) );
     
-    pugi::xpath_query query( cmd.c_str(), &xvars );
+    pugi::xpath_query query( string( cmd ).c_str(), &xvars );
     return query.evaluate_node_set( node );
 }
 
@@ -74,9 +74,8 @@ StrVec attr( pugi::xml_document const& doc,
              XPathVars const&          vars,
              bool                      allow_empty ) {
 
-    string path( x_path );
     vector<string> res;
-    for( auto n : xpath( path, doc, vars ) ) {
+    for( auto n : xpath( x_path, doc, vars ) ) {
         ASSERT_( n.attribute() );
         string value( n.attribute().value() );
         if( !allow_empty ) { ASSERT_( !value.empty() ); }
@@ -91,14 +90,13 @@ StrVec texts( pugi::xml_document const& doc,
               bool                      allow_empty,
               bool                      strip ) {
 
-    string path( x_path );
     vector<string> res;
-    for( auto n : xml::xpath( path, doc, vars ) ) {
+    for( auto n : xml::xpath( x_path, doc, vars ) ) {
         ASSERT_( n.node() );
         string_view sv( n.node().text().get() );
         if( !allow_empty ) ASSERT_( !sv.empty() );
         if( strip) sv = util::strip( sv );
-        res.push_back( string( sv ) );
+        res.emplace_back( sv );
     }
     return move( res );
 }
@@ -112,8 +110,9 @@ OptStr text( pugi::xml_document const& doc,
              bool                      strip ) {
 
     auto res( texts( doc, x_path, vars, allow_empty, strip ) );
-    return res.size() == 1 ? make_optional<string>( res[0] )
-                           : nullopt;
+    if( res.size() != 1 )
+        return nullopt;
+    return OptStr( move( res[0] ) );
 }
 
 } // namespace xml
