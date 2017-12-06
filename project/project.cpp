@@ -64,13 +64,13 @@ char const* target_ext =
 }
 
 vector<fs::path> cl_compiles( pugi::xml_document const& doc ) {
-    auto res( xml::attributes(
+    auto res( xml::attr(
                     doc, xpaths::cl_compiles, {}, false ) );
     return util::to_paths( res );
 }
 
 vector<fs::path> cl_includes( pugi::xml_document const& doc ) {
-    auto res( xml::attributes(
+    auto res( xml::attr(
                     doc, xpaths::cl_includes, {}, false ) );
     return util::to_paths( res );
 }
@@ -82,7 +82,10 @@ vector<fs::path> search_paths( pugi::xml_document const& doc,
     // (possibly  semicolon  separated)  list  of  search   paths.
     auto path = xml::text(
             doc, xpaths::search_paths, vars, true, true );
-    auto res_win = util::split_strip( path, ';' );
+    ASSERT( path, "failed to find precisely one value for "
+                  "search paths for the " << platform << " "
+                  "platform.  There may be zero, or too many." );
+    auto res_win = util::split_strip( *path, ';' );
     vector<fs::path> res( res_win.size() );
     transform( begin( res_win ), end( res_win ), begin( res ),
                util::to_path );
@@ -92,33 +95,44 @@ vector<fs::path> search_paths( pugi::xml_document const& doc,
 fs::path int_dir( pugi::xml_document const& doc,
                   string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return fs::path(
-        xml::text( doc, xpaths::int_dir, vars, false, true ) );
+    auto dir( xml::text(
+                doc, xpaths::int_dir, vars, false, true ) );
+    ASSERT( dir, "failed to find precisely one value for "
+                 "IntDir for the " << platform << " platform. "
+                 "There may be zero, or too many." );
+    return fs::path( *dir );
 }
 
 fs::path out_dir( pugi::xml_document const& doc,
                   string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return fs::path(
-        xml::text( doc, xpaths::out_dir, vars, false, true ) );
+    auto dir( xml::text(
+                doc, xpaths::out_dir, vars, false, true ) );
+    ASSERT( dir, "failed to find precisely one value for "
+                 "OutDir for the " << platform << " platform. "
+                 "There may be zero, or too many." );
+    return fs::path( *dir );
 }
 
 string project_name( pugi::xml_document const& doc ) {
-    return fs::path(
-        xml::text( doc, xpaths::project_name, {}, false, true ) );
+    auto name( xml::text(
+                doc, xpaths::project_name, {}, false, true ) );
+    ASSERT( name, "failed to find precisely one value for "
+                  "ProjectName. There may be zero, or too many." );
+    return fs::path( *name );
 }
 
 optional<string> target_name( pugi::xml_document const& doc,
                               string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return xml::text_opt(
-                doc, xpaths::target_name, vars, true, true );
+    return xml::text(
+            doc, xpaths::target_name, vars, true, true );
 }
 
 optional<string> target_ext( pugi::xml_document const& doc,
                              string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
-    return xml::text_opt(
+    return xml::text(
                 doc, xpaths::target_ext, vars, true, true );
 }
 

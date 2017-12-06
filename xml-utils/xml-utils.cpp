@@ -13,9 +13,9 @@ namespace xml {
 
 // Run  an  xpath  command with a list of key/val pairs to substi-
 // tute into the query.
-pugi::xpath_node_set xpath( std::string           cmd,
+pugi::xpath_node_set xpath( string                cmd,
                             pugi::xml_node const& node,
-                            std::vector<KeyVal>   vars ) {
+                            XPathVars             vars ) {
     pugi::xpath_variable_set xvars;
     for( auto& [k,v] : vars )
         ASSERT_( xvars.set( k.c_str(), v.c_str() ) );
@@ -27,6 +27,7 @@ pugi::xpath_node_set xpath( std::string           cmd,
 // Convert a character offset in the file to a line number
 // and line-offset pair.
 err_location offset_to_line( int offset, fs::path file ) {
+
     ifstream in( file );
     int line = 1, accum = 0;
     do {
@@ -68,11 +69,10 @@ void parse( pugi::xml_document& doc, fs::path file ) {
 /****************************************************************
 * XPath Wrappers
 ****************************************************************/
-vector<string>
-attributes( pugi::xml_document const& doc,
-            char const*               x_path,
-            XPathVars const&          vars,
-            bool                      allow_empty ) {
+StrVec attr( pugi::xml_document const& doc,
+             char const*               x_path,
+             XPathVars const&          vars,
+             bool                      allow_empty ) {
 
     string path( x_path );
     vector<string> res;
@@ -85,12 +85,11 @@ attributes( pugi::xml_document const& doc,
     return move( res );
 }
 
-vector<string>
-texts( pugi::xml_document const& doc,
-       const char*               x_path,
-       xml::XPathVars const&     vars,
-       bool                      allow_empty,
-       bool                      strip ) {
+StrVec texts( pugi::xml_document const& doc,
+              const char*               x_path,
+              xml::XPathVars const&     vars,
+              bool                      allow_empty,
+              bool                      strip ) {
 
     string path( x_path );
     vector<string> res;
@@ -105,39 +104,16 @@ texts( pugi::xml_document const& doc,
 }
 
 // Just likes texts() but will  return  nullopt  if the number of
-// results is zero and will throw  if number of results is larger
-// than one.
-optional<string>
-text_opt( pugi::xml_document const& doc,
-          const char*               x_path,
-          xml::XPathVars const&     vars,
-          bool                      allow_empty,
-          bool                      strip ) {
-    auto res( texts( doc, x_path, vars, allow_empty, strip ) );
-    ASSERT( res.size() <= 1, "number of results for xpath:"
-                          << endl << quoted( x_path ) << endl
-                          << "is " << res.size()
-                          << ", but must be <= 1." );
-    if( res.size() == 0 )
-        return {};
-    return move( res[0] );
-}
-
-// Just likes texts() but will assert that there is precisely one
-// result (no more no less) and throw otherwise.
-string
-text( pugi::xml_document const& doc,
-      const char*               x_path,
-      xml::XPathVars const&     vars,
-      bool                      allow_empty,
-      bool                      strip ) {
+// results is not precisely one.
+OptStr text( pugi::xml_document const& doc,
+             const char*               x_path,
+             xml::XPathVars const&     vars,
+             bool                      allow_empty,
+             bool                      strip ) {
 
     auto res( texts( doc, x_path, vars, allow_empty, strip ) );
-    ASSERT( res.size() == 1, "number of results for xpath:"
-                          << endl << quoted( x_path ) << endl
-                          << "is " << res.size()
-                          << ", but must be 1." );
-    return move( res[0] );
+    return res.size() == 1 ? make_optional<string>( res[0] )
+                           : nullopt;
 }
 
 } // namespace xml
