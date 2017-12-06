@@ -35,6 +35,14 @@ char const* int_dir =
     "     name()='IntDir'                       "
     " ]                                         ";
 
+char const* out_dir =
+    " /descendant-or-self::node()[              "
+    "     contains(@Condition,$platform)        "
+    " ]                                         "
+    " /descendant-or-self::node()[              "
+    "     name()='OutDir'                       "
+    " ]                                         ";
+
 char const* project_name = "//ProjectName";
 
 char const* target_name =
@@ -88,6 +96,13 @@ fs::path int_dir( pugi::xml_document const& doc,
         xml::text( doc, xpaths::int_dir, vars, false, true ) );
 }
 
+fs::path out_dir( pugi::xml_document const& doc,
+                  string_view               platform ) {
+    xml::XPathVars vars{ { "platform", string( platform ) } };
+    return fs::path(
+        xml::text( doc, xpaths::out_dir, vars, false, true ) );
+}
+
 string project_name( pugi::xml_document const& doc ) {
     return fs::path(
         xml::text( doc, xpaths::project_name, {}, false, true ) );
@@ -111,6 +126,7 @@ Project::Project( vector<fs::path>&& cl_includes,
                   vector<fs::path>&& cl_compiles,
                   vector<fs::path>&& search_paths,
                   fs::path&&         int_dir,
+                  fs::path&&         out_dir,
                   string&&           project_name,
                   optional<string>&& target_name,
                   optional<string>&& target_ext )
@@ -118,6 +134,7 @@ Project::Project( vector<fs::path>&& cl_includes,
     cl_compiles  ( move( cl_compiles  ) ),
     search_paths ( move( search_paths ) ),
     int_dir      ( move( int_dir      ) ),
+    out_dir      ( move( out_dir      ) ),
     project_name ( move( project_name ) ),
     target_name  ( move( target_name  ) ),
     target_ext   ( move( target_ext   ) )
@@ -135,6 +152,7 @@ auto read( fs::path file, string_view platform ) -> Project {
         cl_compiles  ( doc           ),
         search_paths ( doc, platform ),
         int_dir      ( doc, platform ),
+        out_dir      ( doc, platform ),
         project_name ( doc           ),
         target_name  ( doc, platform ),
         target_ext   ( doc, platform )
@@ -162,6 +180,8 @@ string Project::to_string() const {
     print_list( cl_includes );
     oss << "IntDir: " << endl;
     print( string( int_dir ) );
+    oss << "OutDir: " << endl;
+    print( string( out_dir ) );
     oss << "ProjectName: " << endl;
     print( project_name );
     oss << "TargetName: " << endl;

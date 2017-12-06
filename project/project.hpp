@@ -22,6 +22,7 @@ struct Project {
              std::vector<fs::path>&&      cl_compiles,
              std::vector<fs::path>&&      search_paths,
              fs::path&&                   int_dir,
+             fs::path&&                   out_dir,
              std::string&&                project_name,
              std::optional<std::string>&& target_name,
              std::optional<std::string>&& target_ext );
@@ -36,6 +37,7 @@ struct Project {
     std::vector<fs::path>      const cl_compiles;
     std::vector<fs::path>      const search_paths;
     fs::path                   const int_dir;
+    fs::path                   const out_dir;
     std::string                const project_name;
     std::optional<std::string> const target_name;
     std::optional<std::string> const target_ext;
