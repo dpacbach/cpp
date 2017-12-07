@@ -32,7 +32,11 @@ struct Project {
     Project( Project const& ) = delete;
     Project()                 = delete;
 
+    Project& operator=( Project const& ) = delete;
+
     std::string to_string() const;
+
+    std::string tlog_name() const;
 
     std::vector<fs::path>      const cl_includes;
     std::vector<fs::path>      const cl_compiles;

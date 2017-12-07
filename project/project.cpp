@@ -221,8 +221,20 @@ string Project::to_string() const {
     print( target_ext );
     oss << "UUID: " << endl;
     print( uuid );
+    oss << "tlog name: " << endl;
+    print( tlog_name() );
 
     return oss.str();
+}
+
+string Project::tlog_name() const {
+    string res;
+    if( project_name.size() <= 16 )
+        res = project_name;
+    else
+        res = project_name.substr( 0, 8 ) + "." +
+              uuid.substr( 0, 8 );
+    return res + ".tlog";
 }
 
 ostream& operator<<( ostream& out, Project const& p ) {
