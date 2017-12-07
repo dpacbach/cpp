@@ -170,7 +170,8 @@ Project::Project( vector<fs::path>&& cl_includes,
     uuid         ( move( uuid         ) )
 { }
 
-auto read( fs::path file, string_view platform ) -> Project {
+Project read( fs::path const& file,
+              string_view     platform ) {
 
     pugi::xml_document doc;
 

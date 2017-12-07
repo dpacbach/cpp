@@ -1,6 +1,7 @@
 /****************************************************************
 * Test driver for cpp libraries
 ****************************************************************/
+#include "normpath.hpp"
 #include "project.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
@@ -17,21 +18,18 @@ namespace pr = project;
 
 auto project_file = "xml-utils/samples/pugixml_vs2013.vcxproj";
 
-int main()
-{
-    try {
+int main() try {
 
-        cout << endl;
-        // path may be relative to bin folder
-        cout << pr::read( project_file, "Debug|Win32" ) << endl;
-        cout << pr::read( project_file, "Debug|x64"   ) << endl;
+    cout << endl;
+    // path may be relative to bin folder
+    cout << pr::read_norm( project_file, "Debug|Win32" ) << endl;
+    cout << pr::read_norm( project_file, "Debug|x64"   ) << endl;
 
-        return 0;
+    return 0;
 
-    } catch( exception const& e ) {
-        cerr << "exception: " << e.what() << endl;
-        return 1;
-    }
+} catch( exception const& e ) {
+    cerr << "exception: " << e.what() << endl;
+    return 1;
 }
 
 /*

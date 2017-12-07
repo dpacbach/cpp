@@ -50,13 +50,8 @@ struct Project {
 
 };
 
-struct ProjectNormPath : Project {
-
-};
-
-auto norm_paths( Project const& p ) -> ProjectNormPath;
-
-auto read( fs::path file, std::string_view platform ) -> Project;
+Project read( fs::path const&  file,
+              std::string_view platform );
 
 std::ostream& operator<<( std::ostream& out, Project const& p );
 
