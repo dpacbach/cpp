@@ -20,8 +20,6 @@ struct ProjectNorm : Project {
                  std::optional<std::string>&& target_ext,
                  std::string&&                uuid );
 
-    ProjectNorm( ProjectNorm&& ) = default;
-
 };
 
 auto norm_paths( Project const& p ) -> ProjectNorm;

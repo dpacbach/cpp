@@ -28,11 +28,11 @@ struct Project {
              std::optional<std::string>&& target_ext,
              std::string&&                uuid );
 
-    Project( Project&& )      = default;
     Project( Project const& ) = delete;
-    Project()                 = delete;
+    Project( Project&& )      = delete; // to verify RVO
 
-    Project& operator=( Project const& ) = delete;
+    Project& operator=( Project const&  ) = delete;
+    Project& operator=( Project const&& ) = delete;
 
     std::string to_string() const;
 
