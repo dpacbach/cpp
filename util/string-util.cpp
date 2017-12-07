@@ -19,7 +19,6 @@ string_view strip( string_view sv ) {
     auto last  = sv.find_last_not_of( " \t\n\r" )+1;
     sv.remove_suffix( sv.size() - min( last, sv.size() ) );
     return sv;
-
 }
 
 // Split a string on a character.
@@ -34,7 +33,7 @@ vector<string_view> split( string_view sv, char c ) {
         sv.remove_prefix( next+1 );
     }
     res.push_back( sv );
-    return move( res );
+    return res;
 }
 
 // Split  a  string, strip all elements, and remove empty strings
@@ -46,7 +45,7 @@ vector<string_view> split_strip( string_view sv, char c ) {
     auto new_end = remove_if(
             begin( res ), end( res ), std::empty<string_view> );
     res.erase( new_end, end( res ) );
-    return move( res );
+    return res;
 }
 
 // Trivial
@@ -67,7 +66,7 @@ vector<string> to_strings( vector<string_view> const& svs ) {
     vector<string> res;
     for( auto sv : svs )
         res.emplace_back( sv );
-    return move( res );
+    return res;
 }
 
 // Convert string to path
@@ -81,14 +80,14 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
     vector<fs::path> res;
     for( auto s : ss )
         res.emplace_back( s );
-    return move( res );
+    return res;
 }
 
 // Flip any backslashes to foward slashes.
 string fwd_slashes( string_view in ) {
     string out( in );
     replace( begin( out ), end( out ), '\\', '/' );
-    return move( out );
+    return out;
 }
 
 // Flip any backslashes to forward slashes.
@@ -98,7 +97,7 @@ vector<string> fwd_slashes( vector<string>& v ) {
         return fwd_slashes( sv );
     };
     transform( begin( v ), end( v ), begin( res ), resolve );
-    return move( res );
+    return res;
 }
 
 }

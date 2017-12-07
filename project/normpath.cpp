@@ -53,8 +53,7 @@ auto norm_paths( Project const& p ) -> ProjectNorm {
 
 ProjectNorm read_norm( fs::path const& file,
                        string_view     platform ) {
-    auto p( read( file, platform ) );
-    return norm_paths( p );
+    return norm_paths( read( file, platform ) );
 }
 
 ostream& operator<<( ostream&           out,

@@ -19,7 +19,7 @@ pugi::xpath_node_set xpath( string_view           cmd,
     pugi::xpath_variable_set xvars;
     for( auto& [k,v] : vars )
         ASSERT_( xvars.set( k.c_str(), v.c_str() ) );
-    
+
     pugi::xpath_query query( string( cmd ).c_str(), &xvars );
     return query.evaluate_node_set( node );
 }
@@ -60,7 +60,7 @@ void parse( pugi::xml_document& doc, fs::path file ) {
 		auto [line, pos] = offset_to_line( res.offset, file );
 		out << " on line " << line << ", position " << pos;
 	}
-        
+
 	out << ": " << res.description();
 
     throw runtime_error( out.str() );
@@ -81,7 +81,7 @@ StrVec attr( pugi::xml_document const& doc,
         if( !allow_empty ) { ASSERT_( !value.empty() ); }
         res.push_back( value );
     }
-    return move( res );
+    return res;
 }
 
 StrVec texts( pugi::xml_document const& doc,
@@ -98,7 +98,7 @@ StrVec texts( pugi::xml_document const& doc,
         if( strip) sv = util::strip( sv );
         res.emplace_back( sv );
     }
-    return move( res );
+    return res;
 }
 
 // Just likes texts() but will  return  nullopt  if the number of

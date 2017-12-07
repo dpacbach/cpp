@@ -17,6 +17,7 @@ using namespace std;
 namespace pr = project;
 
 auto project_file = "xml-utils/samples/pugixml_vs2013.vcxproj";
+//auto project_file = "/Users/dsicilia/dev/libmemcached-win/win32/libmemcached.vcxproj";
 
 int main() try {
 
