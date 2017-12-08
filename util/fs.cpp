@@ -4,7 +4,7 @@
 #include "macros.hpp"
 #include "fs.hpp"
 
-#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -75,6 +75,23 @@ fs::path lexically_normal( fs::path const& p ) {
         res /= c;
     }
     return res.empty() ? "." : res;
+}
+
+// Flip any backslashes to foward slashes.
+string fwd_slashes( string_view in ) {
+    string out( in );
+    replace( begin( out ), end( out ), '\\', '/' );
+    return out;
+}
+
+// Flip any backslashes to forward slashes.
+StrVec fwd_slashes( StrVec const& v ) {
+    vector<string> res( v.size() );
+    auto resolve = []( string_view sv ) {
+        return fwd_slashes( sv );
+    };
+    transform( begin( v ), end( v ), begin( res ), resolve );
+    return res;
 }
 
 } // util

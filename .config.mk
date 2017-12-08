@@ -2,8 +2,6 @@ CXXFLAGS += -std=c++1z
 
 LDFLAGS += -lstdc++fs
 
-no_top_bin_folder = 1
-
 main.deps      = xml-utils project
 project.deps   = xml-utils
 xml-utils.deps = pugixml util

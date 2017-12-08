@@ -46,7 +46,7 @@ err_location offset_to_line( int offset, fs::path file ) {
 void parse( pugi::xml_document& doc, fs::path file ) {
 
     ifstream in( file );
-    ASSERT_( in.good() );
+    ASSERT( in.good(), "failed to read file " << file );
 
     pugi::xml_parse_result res = doc.load( in );
 

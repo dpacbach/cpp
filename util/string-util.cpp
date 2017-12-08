@@ -9,6 +9,11 @@ using namespace std;
 
 namespace util {
 
+// Returns true if s contains what.
+bool contains( string_view s, string_view what ) {
+    return s.find( what ) != string_view::npos;
+}
+
 // Strip all blank space off of  a  string  view and return a new
 // one.
 string_view strip( string_view sv ) {
@@ -80,23 +85,6 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
     vector<fs::path> res;
     for( auto s : ss )
         res.emplace_back( s );
-    return res;
-}
-
-// Flip any backslashes to foward slashes.
-string fwd_slashes( string_view in ) {
-    string out( in );
-    replace( begin( out ), end( out ), '\\', '/' );
-    return out;
-}
-
-// Flip any backslashes to forward slashes.
-vector<string> fwd_slashes( vector<string>& v ) {
-    vector<string> res( v.size() );
-    auto resolve = []( string_view sv ) {
-        return fwd_slashes( sv );
-    };
-    transform( begin( v ), end( v ), begin( res ), resolve );
     return res;
 }
 

@@ -1,22 +1,14 @@
 /****************************************************************
-* Project & Solution File Parsers
+* Project with adjusted file/folder paths
 ****************************************************************/
 #pragma once
 
-#include "pugixml.hpp"
-
-#include <experimental/filesystem>
-#include <iostream>
-#include <optional>
-#include <string_view>
-#include <string>
-#include <vector>
-
-namespace fs = std::experimental::filesystem;
+#include "fs.hpp"
+#include "project_raw.hpp"
 
 namespace project {
 
-struct Project {
+struct Project : ProjectRaw {
 
     Project( std::vector<fs::path>&&      cl_includes,
              std::vector<fs::path>&&      cl_compiles,
@@ -28,31 +20,13 @@ struct Project {
              std::optional<std::string>&& target_ext,
              std::string&&                uuid );
 
-    Project( Project const& ) = delete;
-    Project( Project&& )      = delete; // to verify RVO
+    static Project read( fs::path const&  file,
+                         std::string_view platform );
 
-    Project& operator=( Project const&  ) = delete;
-    Project& operator=( Project const&& ) = delete;
-
-    std::string to_string() const;
-
-    std::string tlog_name() const;
-
-    std::vector<fs::path>      const cl_includes;
-    std::vector<fs::path>      const cl_compiles;
-    std::vector<fs::path>      const search_paths;
-    fs::path                   const int_dir;
-    fs::path                   const out_dir;
-    std::string                const project_name;
-    std::optional<std::string> const target_name;
-    std::optional<std::string> const target_ext;
-    std::string                const uuid;
-
+    std::string const project_file_path;
 };
 
-Project read( fs::path const&  file,
-              std::string_view platform );
-
-std::ostream& operator<<( std::ostream& out, Project const& p );
+std::ostream& operator<<( std::ostream&  out,
+                          Project const& p );
 
 } // namespace project

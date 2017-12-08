@@ -14,6 +14,9 @@ namespace fs = std::experimental::filesystem;
 
 namespace util {
 
+// Returns true if s contains what.
+bool contains( std::string_view s, std::string_view what );
+
 // Strip all blank space off of a string view and return
 // a new one.
 std::string_view strip( std::string_view sv );
@@ -45,12 +48,5 @@ fs::path to_path( std::string_view sv );
 // Convert element type.
 std::vector<fs::path>
 to_paths( std::vector<std::string> const& ss );
-
-// Flip any backslashes to forward slashes.
-std::string fwd_slashes( std::string_view in );
-
-// Flip any backslashes to forward slashes.
-std::vector<std::string>
-fwd_slashes( std::vector<std::string>& v );
 
 }

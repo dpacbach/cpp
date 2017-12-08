@@ -1,8 +1,8 @@
 /****************************************************************
 * Test driver for cpp libraries
 ****************************************************************/
-#include "normpath.hpp"
 #include "project.hpp"
+#include "stopwatch.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
 
@@ -16,15 +16,16 @@ using namespace std;
 
 namespace pr = project;
 
-auto project_file = "xml-utils/samples/pugixml_vs2013.vcxproj";
+auto project_file = "../xml-utils/samples/pugixml_vs2013.vcxproj";
 //auto project_file = "/Users/dsicilia/dev/libmemcached-win/win32/libmemcached.vcxproj";
 
 int main() try {
 
     cout << endl;
+
     // path may be relative to bin folder
-    cout << pr::read_norm( project_file, "Debug|Win32" ) << endl;
-    cout << pr::read_norm( project_file, "Debug|x64"   ) << endl;
+    cout << pr::Project::read( project_file, "Debug|Win32" ) << endl;
+    //cout << pr::ProjectNorm::read( project_file, "Debug|x64"   ) << endl;
 
     return 0;
 

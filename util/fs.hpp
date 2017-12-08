@@ -3,6 +3,8 @@
 ****************************************************************/
 #pragma once
 
+#include "types.hpp"
+
 #include <experimental/filesystem>
 
 namespace fs = std::experimental::filesystem;
@@ -30,5 +32,11 @@ fs::path absnormpath( fs::path const& p );
  * this  function  can  be  deleted and the usage of it can be re-
  * placed with p.lexicaly_normal(). */
 fs::path lexically_normal( fs::path const& p );
+
+// Flip any backslashes to forward slashes.
+std::string fwd_slashes( std::string_view in );
+
+// Flip any backslashes to forward slashes.
+StrVec fwd_slashes( StrVec const& v );
 
 } // namespace util
