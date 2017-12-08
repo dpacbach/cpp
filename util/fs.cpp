@@ -29,19 +29,20 @@ fs::path absnormpath( fs::path const& p ) {
     return util::lexically_normal( fs::absolute( p ) );
 }
 
-/* Put  a  path into normal form without regard to whether or not
- * it  exists  (and  do so without touching the filesystem at all.
- * The C++17 filesystem library has this  method as a member func-
- * tion of the path class, but it has not yet been implemented in
- * gcc at the time of this writing.  Once gcc 8 is released, then
- * this function can probably be deleted and the usage of it  can
- * be replaced with p.lexicaly_normal(). However, note  that  the
- * implementation of this function will likely  be  slightly  dif-
- * ferent from the one in the standard library. In particular, at
- * the moment, it does  not  convert slashes using make_preferred.
- * Note  that  the code doesn't perform these actions in the same
- * order as the steps below, but the overall effect should be the
- * same.
+/* Implementation of lexically_normal.  Put  a  path  into normal
+ * form without regard to whether  or  not  it  exists (and do so
+ * without touching the filesystem  at  all;  hence we also don't
+ * follow symlinks). The C++17 filesystem library has this method
+ * as a member function of  the  path  class,  but it has not yet
+ * been implemented in gcc at the time of this writing. Once  gcc
+ * 8 is released, then this function can probably be deleted  and
+ * the  usage of it can be replaced with p.lexicaly_normal(). How-
+ * ever, note that  the  implementation  of  this  function  will
+ * likely be slightly different from  the  one in the standard li-
+ * brary.  In  particular,  at  the  moment,  it does not convert
+ * slashes  using  make_preferred. Note that the code doesn't per-
+ * form these actions in the same  order  as the steps below, but
+ * the overall effect should be the same.
  *
  * From http://en.cppreference.com/w/cpp/filesystem/path, a  path
  * can be normalized by following this algorithm:
@@ -116,6 +117,130 @@ fs::path lexically_normal( fs::path const& p ) {
     return res.empty() ? "." : res;
 }
 
+/* Implemenation of the  lexically_relative  function.  Find  the
+ * relative  path between the given path and base path without re-
+ * gard  to  whether or not it exists (and do so without touching
+ * the  filesystem  at  all; hence we also don't follow symlinks).
+ * The C++17 filesystem library has this  method as a member func-
+ * tion of the path class, but it has not yet been implemented in
+ * gcc at the time of this writing.  Once gcc 8 is released, then
+ * this function can probably be deleted and the usage of it  can
+ * be replaced with p.lexicaly_relative(). However, note that the
+ * implementation of this function will likely  be  slightly  dif-
+ * ferent from the one in the standard library.
+ *
+ * Return value: empty path on error, result otherwise.
+ *
+ * NOTE: this function implementation does  not  normalize  paths
+ * and will generally not return them in normal form, even if the
+ * inputs are both in normal form.
+ *
+ * NOTE:  this function doesn't always work right in certain edge
+ * cases involving the presence of dot-dot's in the base path and
+ * dot-dot's immediately proceeding  a  root  folder...  it is ad-
+ * vised to avoid supplying these  kinds  of arguments to be safe.
+ * In  some  cases it tries to detect these scenarios and will re-
+ * turn an error (empty  path),  but  it's  probably not reliable.
+ *
+ * From en.cppreference.com/w/cpp/filesystem/path/lexically_normal
+ * the algorithm is as follows:
+ *
+ *   if (root_name()   != base.root_name() ) ||
+ *      (is_absolute() != base.is_absolute() ||
+ *      (!has_root_directory() && base.has_root_directory())
+ *        returns a default-constructed path.
+ *
+ *   Otherwise,  determines the first mismatched element of *this
+ *   and base as if by:
+ *
+ *      auto [a, b] = mismatch(begin(), end(),
+ *                             base.begin(), base.end())
+ *
+ *      if  a  ==  end()  and b == base.end(), returns path(".");
+ *
+ *   Otherwise,  if the number of dot-dot filename elements in [b,
+ *   base.end())  is greater than the number of filename elements
+ *   that are neither dot nor  dot-dot,  returns  a  default  con-
+ *   structed path. otherwise returns an object composed from:  a
+ *   default-constructed path() followed by as many  applications
+ *   of operator/=(path("..")) as there were filename elements in
+ *   [b,  base.end())  that  are  neither  dot  nor dot-dot minus
+ *   number  of  dot-dot  elements in that range, followed by one
+ *   application of operator/= for each element in the  half-open
+ *   range [a, end())
+ */
+fs::path lexically_relative( fs::path const& p,
+                             fs::path const& base ) {
+    if( (p.root_name()   != base.root_name())   ||
+        (p.is_absolute() != base.is_absolute()) ||
+        (!p.has_root_directory() && base.has_root_directory()) )
+         return {};
+
+    auto [a, b] = mismatch( begin( p ), end( p ),
+                            begin( base ), end( base ) );
+
+    if( a == end( p ) && b == end( base ) )
+        return { "." };
+
+    auto n_dd = count( b, end( base ), ".." );
+    auto n_d  = count( b, end( base ), "."  );
+    auto dist = distance( b, end( base ) );
+    auto n_f  = dist - n_dd - n_d;
+    auto n_r  = n_f - n_dd;
+
+    ASSERT_( dist >= (n_d + n_dd) );
+
+    // The next test is to be sure that we return an empty path
+    // (meaning error I suppose) in situations like the following,
+    // where, given that we can't query the filesystem, we cannot
+    // be sure of the correct answer:
+    //   lexically_relative( ".", "a/.." ) == "."; // ok
+    //   lexically_relative( ".", "../a" ) == ???; // bad
+    // Though this only arises with relative paths.
+    if( n_dd > 0 ) {
+        auto norm = lexically_normal( path_( b, end( base ) ) );
+        if( count( begin( norm ), end( norm ), ".." ) > 0 )
+            return {};
+    }
+
+    fs::path res;
+    while( n_r-- > 0 )
+        res /= fs::path( ".." );
+
+    for( auto i = a; i != end( p ); ++i )
+        res /= *i;
+
+    // Result, which at this  point  is  interpreted as "correct"
+    // will be changed to normal form if it is empty, that way we
+    // can use "empty" to mean "couldn't find solution".
+    return res.empty() ? "." : res;
+}
+
+// This  is  a  simplified version of lexically_relative which as-
+// sumes (assumptions are not verified for efficiency!) that both
+// input  paths  are  either  absolute or both are relative, that
+// both are in normal form, and that the base path has no  double
+// dots. If you call this function  with  those  assumptions  vio-
+// lated then it's not certain what you will get.
+fs::path lexically_relative_fast( fs::path const& p,
+                                  fs::path const& base ) {
+
+    auto [a, b] = mismatch( begin( p ), end( p ),
+                            begin( base ), end( base ) );
+
+    fs::path res;
+    for( auto i = b; i != end( base ); ++i )
+        res /= fs::path( ".." );
+
+    for( auto i = a; i != end( p ); ++i )
+        res /= *i;
+
+    // Result, which at this  point  is  interpreted as "correct"
+    // will be changed to normal form if it is empty, that way we
+    // can use "empty" to mean "couldn't find solution".
+    return res.empty() ? "." : res;
+}
+
 // Flip any backslashes to foward slashes.
 string fwd_slashes( string_view in ) {
     string out( in );
@@ -130,6 +255,17 @@ StrVec fwd_slashes( StrVec const& v ) {
         return fwd_slashes( sv );
     };
     transform( begin( v ), end( v ), begin( res ), resolve );
+    return res;
+}
+
+// Constructs  a path from a pair of iterators to path components.
+// Didn't see this available in  the  standard,  but  could  have
+// missed it.
+fs::path path_( fs::path::const_iterator b,
+				fs::path::const_iterator e ) {
+    fs::path res;
+    for( auto i = b; i != e; ++i )
+        res /= *i;
     return res;
 }
 
