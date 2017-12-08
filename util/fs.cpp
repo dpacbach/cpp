@@ -39,6 +39,7 @@ fs::path absnormpath( fs::path const& p ) {
  * implementation of this function will likely  be  slightly  dif-
  * ferent from the one in the standard library. In particular, at
  * the moment, it does  not  convert slashes using make_preferred.
+ * Also, at the moment, it only works for absolute paths.
  *
  * From http://en.cppreference.com/w/cpp/filesystem/path, a  path
  * can be normalized by following this algorithm:
@@ -63,6 +64,7 @@ fs::path absnormpath( fs::path const& p ) {
 fs::path lexically_normal( fs::path const& p ) {
     ASSERT( !p.has_root_name(), "path " << p << " has a root"
                                 "name which is not supported." );
+    ASSERT( p.is_absolute(), "path " << p << " isn't absolute." );
     fs::path res;
     for( auto c : p ) {
         if( c == "." )
