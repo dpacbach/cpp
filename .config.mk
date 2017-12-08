@@ -5,10 +5,16 @@ LDFLAGS += -lstdc++fs
 main.deps      = xml-utils project
 project.deps   = xml-utils
 xml-utils.deps = pugixml util
-test.deps      = util
 
 main_is = main
-test_is = test
 
-$(call enter_all,util xml-utils project test)
-$(call make_exe,main,main$(opt-suffix))
+top-level-folders = util xml-utils project
+
+ifeq (undefined,$(origin OPT))
+    top-level-folders += test
+    test.deps          = util
+    test_is            = test
+endif
+
+$(call enter_all,$(top-level-folders))
+$(call make_exe,main,main)
