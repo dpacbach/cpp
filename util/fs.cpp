@@ -39,7 +39,9 @@ fs::path absnormpath( fs::path const& p ) {
  * implementation of this function will likely  be  slightly  dif-
  * ferent from the one in the standard library. In particular, at
  * the moment, it does  not  convert slashes using make_preferred.
- * Also, at the moment, it only works for absolute paths.
+ * Note  that  the code doesn't perform these actions in the same
+ * order as the steps below, but the overall effect should be the
+ * same.
  *
  * From http://en.cppreference.com/w/cpp/filesystem/path, a  path
  * can be normalized by following this algorithm:
@@ -64,18 +66,53 @@ fs::path absnormpath( fs::path const& p ) {
 fs::path lexically_normal( fs::path const& p ) {
     ASSERT( !p.has_root_name(), "path " << p << " has a root"
                                 "name which is not supported." );
-    ASSERT( p.is_absolute(), "path " << p << " isn't absolute." );
+    bool is_abs = p.is_absolute(), is_rel = p.is_relative();
     fs::path res;
     for( auto c : p ) {
         if( c == "." )
+            // The single dot we can always skip  at  this  stage.
+            // The only time we need  one  is  when we are normal-
+            // izing an empty path, which must  be  converted  to
+            // single dot, however we will do  that  at  the  end.
             continue;
         if( c == ".." ) {
-            if( res.has_parent_path() )
-                res = res.parent_path();
-            continue;
+            // If we have encountered  a  ..  and  if  we have at
+            // least one component in the  result  so far then we
+            // can  eliminate  it. We need to guard this with one
+            // additional  check  (has_parent_path)  in  the case
+            // that we have an absolute  path because an absolute
+            // path can consist just  of  the  root  (/) but will
+            // still report having a file name (/) which we don't
+            // want to remove.
+            if( res.has_filename() &&
+               (res.has_parent_path() || is_rel) ) {
+                // If we are  a  relative  path  then  there is a
+                // chance that the  filename  could  be .. (since
+                // those are allowed to accumulate at  the  start
+                // of  a  relative path), but which we don't want
+                // to remove.
+                if( res.filename() != ".." ) {
+                    res = res.parent_path();
+                    continue;
+                }
+            }
+            if( is_abs )
+                // On an abs path we can ignore .. at  the  begin-
+                // ning of paths. We  know  that  we're at the be-
+                // ginning because, if we we  not  at  the  begin-
+                // ning,  the above block would have continued be-
+                // cause a) we'd have a  parent path, and b) that
+                // parent path would not be a .. because previous
+                // ..'s  get  filtered  out  on abs paths (due to
+                // this very piece of logic).
+                continue;
+            // It's a relative path, so that  means  we  need  to
+            // keep ..'s at the beginning of paths,  so  we  fall
+            // through.
         }
         res /= c;
     }
+    // Result will never be empty.
     return res.empty() ? "." : res;
 }
 
