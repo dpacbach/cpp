@@ -18,9 +18,6 @@ struct SolutionFile {
 
     static SolutionFile read( fs::path const& file );
 
-    static SolutionFile read( fs::path const& file,
-                              fs::path const& base );
-
     PathVec projects;
 };
 
