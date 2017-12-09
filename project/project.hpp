@@ -23,6 +23,10 @@ struct Project : ProjectRaw {
     static Project read( fs::path const&  file,
                          std::string_view platform );
 
+    static Project read( fs::path const&  file,
+                         fs::path const&  base,
+                         std::string_view platform );
+
     std::string const project_file_path;
 };
 

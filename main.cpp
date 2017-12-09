@@ -23,9 +23,11 @@ int main() try {
 
     cout << endl;
 
+    fs::path rel = fs::current_path();
+
     // path may be relative to bin folder
-    cout << pr::Project::read( project_file, "Debug|Win32" ) << endl;
-    cout << pr::Project::read( project_file, "Debug|x64"   ) << endl;
+    cout << pr::Project::read( project_file, rel, "Debug|Win32" ) << endl;
+    cout << pr::Project::read( project_file, rel, "Debug|x64"   ) << endl;
 
     return 0;
 

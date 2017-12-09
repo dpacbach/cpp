@@ -33,12 +33,25 @@ Project::Project( vector<fs::path>&& cl_includes,
 
 Project Project::read( fs::path const& file,
                        string_view     platform ) {
+    return Project::read( file, "", platform );
+}
+
+Project Project::read( fs::path const& file,
+                       fs::path const& base,
+                       string_view     platform ) {
 
     auto p = ProjectRaw::read( file, platform );
 
     auto abs_dir = util::absnormpath( file ).parent_path();
 
-    auto abs = LC( util::normpath( abs_dir / _ ) );
+    auto use_rel = !base.empty();
+
+    auto abs = [&]( auto const& p ) {
+        auto res = util::normpath( abs_dir / p );
+        if( use_rel )
+            res = util::lexically_relative( res, base );
+        return res;
+    };
 
     auto abs_vec = [&]( auto& v ) {
         transform( begin( v ), end( v ), begin( v ), abs );
