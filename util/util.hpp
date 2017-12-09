@@ -4,7 +4,10 @@
 #pragma once
 
 #include <algorithm>
+#include <iostream>
 #include <string>
+#include <string_view>
+#include <vector>
 
 // This is intended to lessen  typing  for the simplest of lambda
 // functions, namely, those  which  have  no  captures,  take one
@@ -18,6 +21,19 @@ namespace util {
 
 template<typename T>
 std::string to_string( T const& arg );
+
+// Loop through the elements in a vector and output them.
+template<typename T>
+void print_vec( std::vector<T> const& v,
+                std::ostream&         out,
+                bool                  indent = false,
+                std::string_view      name = std::string_view() ) {
+    if( !name.empty() )
+        out << name << std::endl;
+    std::string padding = indent ? "    " : "";
+    for( auto const& e : v )
+        out << padding << e << std::endl;
+}
 
 // Does the set contain the given key.
 template<typename ContainerT, typename KeyT>
