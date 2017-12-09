@@ -26,9 +26,9 @@ int main() try {
 
     cout << endl;
 
-    //fs::path rel = fs::current_path();
+    fs::path rel = fs::canonical( fs::absolute( ".." ) ); //fs::current_path();
 
-    cout << pr::SolutionFile::read( solution_file ) << endl;
+    cout << pr::Solution::read( solution_file, rel, "Debug|Win32" ) << endl;
 
     // path may be relative to bin folder
     //cout << pr::Project::read( project_file, rel, "Debug|Win32" ) << endl;

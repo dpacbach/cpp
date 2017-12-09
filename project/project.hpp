@@ -20,6 +20,8 @@ struct Project : ProjectRaw {
              std::optional<std::string>&& target_ext,
              std::string&&                uuid );
 
+    Project( Project&& ) = default;
+
     static Project read( fs::path const&  file,
                          std::string_view platform );
 

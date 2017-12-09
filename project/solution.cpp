@@ -57,4 +57,55 @@ std::ostream& operator<<( std::ostream&       out,
     return out;
 }
 
+Solution::Solution( map<fs::path, Project>&& projects )
+    : projects( move( projects ) )
+{ }
+
+Solution Solution::read( fs::path const& file,
+                         string_view     platform ) {
+    return Solution::read( file, "", platform );
+}
+
+Solution Solution::read( fs::path const& file,
+                         fs::path const& base,
+                         string_view     platform ) {
+
+    SolutionFile sf = SolutionFile::read( file );
+
+    auto abs_dir = util::absnormpath( file ).parent_path();
+
+    auto use_rel = !base.empty();
+
+    auto abs = [&]( auto const& p ) {
+        return util::normpath( abs_dir / p );
+    };
+
+    auto abs_rel = [&]( auto const& p ) {
+        auto res = abs( p );
+        if( use_rel )
+            res = util::lexically_relative( res, base );
+        return res;
+    };
+
+    map<fs::path, Project> m;
+
+    for( auto const& path : sf.projects ) {
+        Project project = Project::read(
+                              abs( path ), base, platform );
+        m.emplace( make_pair(
+                    abs_rel( path ), move( project ) ) );
+    }
+
+    return Solution( move( m ) );
+}
+
+std::ostream& operator<<( std::ostream&   out,
+                          Solution const& s ) {
+    for( auto const& [path, project] : s.projects ) {
+        out << path << ":" << endl << endl;
+        out << project << endl;
+    }
+    return out;
+}
+
 } // namespace project

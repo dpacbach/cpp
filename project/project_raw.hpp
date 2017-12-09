@@ -29,7 +29,7 @@ struct ProjectRaw {
                 std::string&&                uuid );
 
     ProjectRaw( ProjectRaw const& ) = delete;
-    ProjectRaw( ProjectRaw&& )      = delete; // to verify RVO
+    ProjectRaw( ProjectRaw&& )      = default;
 
     ProjectRaw& operator=( ProjectRaw const&  ) = delete;
     ProjectRaw& operator=( ProjectRaw const&& ) = delete;
