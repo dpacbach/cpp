@@ -27,7 +27,6 @@ struct Project : ProjectRaw {
                          fs::path const&  base,
                          std::string_view platform );
 
-    std::string const project_file_path;
 };
 
 std::ostream& operator<<( std::ostream&  out,
