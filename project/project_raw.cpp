@@ -82,9 +82,8 @@ vector<string> search_paths( pugi::xml_document const& doc,
     // (possibly  semicolon  separated)  list  of  search   paths.
     auto path = xml::text(
             doc, xpaths::search_paths, vars, true, true );
-    ASSERT( path, "failed to find precisely one value for "
-                  "search paths for the " << platform << " "
-                  "platform.  There may be zero, or too many." );
+    if( !path )
+        return {};
     auto res = util::split_strip( *path, ';' );
     return util::to_strings( res );
 }

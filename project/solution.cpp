@@ -4,6 +4,7 @@
 #include "fs.hpp"
 #include "macros.hpp"
 #include "solution.hpp"
+#include "string-util.hpp"
 #include "util.hpp"
 
 #include <fstream>
@@ -44,6 +45,10 @@ SolutionFile SolutionFile::read( fs::path const&  file ) {
     PathVec ps;
 
     for( string line; getline( in, line ); ) {
+        // Strip the line to eliminate any windows  line  endings
+        // which getline may leave  (though  it should remove the
+        // linux line endings.
+        line = util::strip( line );
         if( regex_match( line, m, p_regex ) ) {
             // size == 1 (total match) + 1 (subgroup)
             ASSERT_( m.size() == 2 );
