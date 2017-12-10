@@ -199,26 +199,30 @@ string ProjectRaw::to_string() const {
 
     ostringstream oss;
 
-    auto print = [&oss]( auto const& s ) {
+    auto print = [&]( auto const& s ) {
             oss << "  | \"" << util::to_string( s )
                 << "\"" << endl;
     };
 
-    auto print_list = [&]( auto const& v ) {
+    auto print_path = [&]( auto const& p ) {
+            oss << "  | \"" << p << "\"" << endl;
+    };
+
+    auto print_path_list = [&]( auto const& v ) {
         for( auto const& s : v )
-            print( s );
+            print_path( s );
     };
 
     oss << "AdditionaIncludeDirectories: " << endl;
-    print_list( search_paths );
+    print_path_list( search_paths );
     oss << "ClCompile: " << endl;
-    print_list( cl_compiles );
+    print_path_list( cl_compiles );
     oss << "ClInclude: " << endl;
-    print_list( cl_includes );
+    print_path_list( cl_includes );
     oss << "IntDir: " << endl;
-    print( string( int_dir ) );
+    print_path( int_dir );
     oss << "OutDir: " << endl;
-    print( string( out_dir ) );
+    print_path( out_dir );
     oss << "ProjectName: " << endl;
     print( project_name );
     oss << "TargetName: " << endl;

@@ -59,12 +59,6 @@ std::string to_string<std::string>( std::string const& s ) {
     return s;
 }
 
-// Trivial; extract string from path.
-template<>
-string to_string<fs::path>( fs::path const& p ) {
-    return string( p );
-}
-
 // Convert element type.
 vector<string> to_strings( vector<string_view> const& svs ) {
 

@@ -37,7 +37,7 @@ SolutionFile::SolutionFile( PathVec&& projects )
 // (vcxproj) for each project.
 SolutionFile SolutionFile::read( fs::path const&  file ) {
 
-    ifstream in( file );
+    ifstream in( file.string() );
     ASSERT( in.good(), "failed to open solution file " << file );
 
     regex p_regex( project_line );

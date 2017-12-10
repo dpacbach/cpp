@@ -28,7 +28,7 @@ pugi::xpath_node_set xpath( string_view           cmd,
 // and line-offset pair.
 err_location offset_to_line( int offset, fs::path file ) {
 
-    ifstream in( file );
+    ifstream in( file.string() );
     int line = 1, accum = 0;
     do {
         string s;
@@ -45,7 +45,7 @@ err_location offset_to_line( int offset, fs::path file ) {
 
 void parse( pugi::xml_document& doc, fs::path file ) {
 
-    ifstream in( file );
+    ifstream in( file.string() );
     ASSERT( in.good(), "failed to read file " << file );
 
     pugi::xml_parse_result res = doc.load( in );
