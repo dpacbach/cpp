@@ -11,17 +11,14 @@ namespace fs = std::experimental::filesystem;
 
 namespace util {
 
-// Attempts to mimic the general behavior of the linux `realpath`
-// function, but in a cross platform  way. Note that this will re-
-// solve symlinks as well as make the path absolute.
-fs::path realpath( fs::path const& p );
-
 // This will put the path (which  may not exist) into normal form
-// and preserving absolute/relative nature.
+// and preserving absolute/relative nature.  Path must exist, and
+// will resolve symlinks.
 fs::path normpath( fs::path const& p );
 
 // This  is  like normpath except that it makes the path absolute
-// (relative to cwd) if it is not already).
+// (relative to cwd) if it is not already). Path must  exist  and
+// will resolve symlinks.
 fs::path absnormpath( fs::path const& p );
 
 /* Put  a  path into normal form without regard to whether or not
@@ -50,7 +47,9 @@ fs::path lexically_relative( fs::path const& p,
 // input  paths  are  either  absolute or both are relative, that
 // both are in normal form, and that the base path has no  double
 // dots. If you call this function  with  those  assumptions  vio-
-// lated then it's not certain what you will get.
+// lated then it's not certain what you will  get.  NOTE:  perfor-
+// mance of this has  not  actually  been  measured,  so it's not
+// clear if it's really faster (it may well not be).
 fs::path lexically_relative_fast( fs::path const& p,
                                   fs::path const& base );
 

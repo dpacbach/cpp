@@ -47,7 +47,7 @@ Project Project::read( fs::path const& file,
     auto use_rel = !base.empty();
 
     auto abs = [&]( auto const& p ) {
-        auto res = util::normpath( abs_dir / p );
+        auto res = util::lexically_normal( abs_dir / p );
         if( use_rel )
             res = util::lexically_relative( res, base );
         return res;
