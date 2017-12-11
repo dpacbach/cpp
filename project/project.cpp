@@ -16,13 +16,8 @@ Project::Project( ProjectAttr&& pa )
 {}
 
 Project Project::read( fs::path const& file,
-                       string_view     platform ) {
-    return Project::read( file, "", platform );
-}
-
-Project Project::read( fs::path const& file,
-                       fs::path const& base,
-                       string_view     platform ) {
+                       string_view     platform,
+                       fs::path const& base ) {
 
     auto p = ProjectRaw::read( file, platform );
 

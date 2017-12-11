@@ -93,7 +93,7 @@ Solution Solution::read( fs::path const& file,
         auto rel = base.empty()
                  ? abs : util::lexically_relative( abs, base );
 
-        m.insert( pair( rel, Project::read( abs, base, plat ) ) );
+        m.insert( pair( rel, Project::read( abs, plat, base ) ) );
     }
 
     return Solution( move( m ) );

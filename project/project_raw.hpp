@@ -27,14 +27,14 @@ namespace project {
 // manipulation.
 struct ProjectRaw : public util::non_copyable {
 
-    ProjectRaw( ProjectAttr&& );
-
     ProjectAttr const& attr() const { return m_attr; }
 
     static ProjectRaw read( fs::path const&  file,
                             std::string_view platform );
 
 private:
+    ProjectRaw( ProjectAttr&& );
+
     ProjectAttr m_attr;
 };
 
