@@ -146,7 +146,7 @@ string uuid( pugi::xml_document const& doc ) {
 } // impl
 
 ProjectRaw::ProjectRaw( ProjectAttr&& pa )
-  : attr( move( pa ) )
+  : m_attr( move( pa ) )
 { }
 
 ProjectRaw ProjectRaw::read( fs::path const& file,
@@ -165,6 +165,7 @@ ProjectRaw ProjectRaw::read( fs::path const& file,
     util::remove_if( search_paths, is_var );
 
     return ProjectRaw( {
+        {}, // ProjectAttr base
         move( fwd_vec( impl::cl_includes ( doc           ) ) ),
         move( fwd_vec( impl::cl_compiles ( doc           ) ) ),
         move( fwd_vec( search_paths                        ) ),
@@ -178,7 +179,7 @@ ProjectRaw ProjectRaw::read( fs::path const& file,
 }
 
 ostream& operator<<( ostream& out, ProjectRaw const& p ) {
-    return (out << p.attr);
+    return (out << p.attr());
 }
 
 } // namespace project

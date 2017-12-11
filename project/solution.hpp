@@ -5,6 +5,7 @@
 
 #include "project.hpp"
 #include "types.hpp"
+#include "non-copyable.hpp"
 
 #include <experimental/filesystem>
 #include <map>
@@ -17,7 +18,7 @@ namespace project {
 /****************************************************************
 * SolutionFile
 ****************************************************************/
-struct SolutionFile {
+struct SolutionFile : public util::non_copyable {
 
     SolutionFile( PathVec&& projects );
 
@@ -26,9 +27,12 @@ struct SolutionFile {
     // location (vcxproj) for each project.
     static SolutionFile read( fs::path const& file );
 
+    PathVec const& projects() const { return m_projects; }
+
+private:
     // Holds only paths to projects, and those paths will be  rel-
     // ative to the folder containing the solutiont file.
-    PathVec projects;
+    PathVec m_projects;
 };
 
 // Mainly for debugging.
@@ -38,9 +42,11 @@ std::ostream& operator<<( std::ostream&       out,
 /****************************************************************
 * Solution
 ****************************************************************/
-struct Solution {
+struct Solution : public util::non_copyable {
 
-    Solution( std::map<fs::path, Project>&& projects );
+    using map_type = std::map<fs::path, Project>;
+
+    Solution( map_type&& projects );
 
     // Read in a solution file, parse  it  to  get  the  list  of
     // projects that it contains, then  read in each project file
@@ -49,8 +55,11 @@ struct Solution {
                           std::string_view platform,
                           fs::path const&  base = "" );
 
+    map_type const& projects() const { return m_projects; }
+
+private:
     // Holds path to vcxproj file and full project data.
-    std::map<fs::path, Project> projects;
+    map_type m_projects;
 };
 
 // Mainly for debugging.

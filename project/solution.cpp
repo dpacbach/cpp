@@ -28,8 +28,8 @@ namespace project {
 // excluding the surrounding quotes.
 auto project_line = "^ *Project[^,]+, *\"([^\"]+)\".*";
 
-SolutionFile::SolutionFile( PathVec&& projects )
-    : projects( move( projects ) )
+SolutionFile::SolutionFile( PathVec&& ps )
+    : m_projects( move( ps ) )
 { }
 
 // Reads in the solution file and parses it for  any  lines  that
@@ -63,7 +63,7 @@ SolutionFile SolutionFile::read( fs::path const&  file ) {
 // tion file.
 std::ostream& operator<<( std::ostream&       out,
                           SolutionFile const& s ) {
-    util::print_vec( s.projects, out, true,
+    util::print_vec( s.projects(), out, true,
                      "Projects in Solution:" );
     return out;
 }
@@ -71,8 +71,8 @@ std::ostream& operator<<( std::ostream&       out,
 /****************************************************************
 * Solution
 ****************************************************************/
-Solution::Solution( map<fs::path, Project>&& projects )
-    : projects( move( projects ) )
+Solution::Solution( map<fs::path, Project>&& ps )
+    : m_projects( move( ps ) )
 { }
 
 // Read in a solution file, parse it  to get the list of projects
@@ -88,7 +88,7 @@ Solution Solution::read( fs::path const& file,
 
     map<fs::path, Project> m;
 
-    for( auto const& path : sf.projects ) {
+    for( auto const& path : sf.projects() ) {
         auto abs = util::normpath( abs_dir / path );
         auto rel = base.empty()
                  ? abs : util::lexically_relative( abs, base );
@@ -104,7 +104,7 @@ Solution Solution::read( fs::path const& file,
 // results in a lot of output.
 std::ostream& operator<<( std::ostream&   out,
                           Solution const& s ) {
-    for( auto const& [path, project] : s.projects ) {
+    for( auto const& [path, project] : s.projects() ) {
         out << path << ":" << endl << endl;
         out << project << endl;
     }

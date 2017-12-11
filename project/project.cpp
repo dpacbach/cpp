@@ -12,7 +12,7 @@ using namespace std;
 namespace project {
 
 Project::Project( ProjectAttr&& pa )
-  : attr( move( pa ) )
+  : m_attr( move( pa ) )
 {}
 
 Project Project::read( fs::path const& file,
@@ -41,15 +41,15 @@ Project Project::read( fs::path const& file,
         transform( begin( v ), end( v ), begin( v ), abs );
     };
 
-    auto cl_includes  ( p.attr.cl_includes  );
-    auto cl_compiles  ( p.attr.cl_compiles  );
-    auto search_paths ( p.attr.search_paths );
-    auto int_dir      ( p.attr.int_dir      );
-    auto out_dir      ( p.attr.out_dir      );
-    auto project_name ( p.attr.project_name );
-    auto target_name  ( p.attr.target_name  );
-    auto target_ext   ( p.attr.target_ext   );
-    auto uuid         ( p.attr.uuid         );
+    auto cl_includes  ( p.attr().cl_includes  );
+    auto cl_compiles  ( p.attr().cl_compiles  );
+    auto search_paths ( p.attr().search_paths );
+    auto int_dir      ( p.attr().int_dir      );
+    auto out_dir      ( p.attr().out_dir      );
+    auto project_name ( p.attr().project_name );
+    auto target_name  ( p.attr().target_name  );
+    auto target_ext   ( p.attr().target_ext   );
+    auto uuid         ( p.attr().uuid         );
 
     abs_vec( cl_includes  );
     abs_vec( cl_compiles  );
@@ -58,6 +58,7 @@ Project Project::read( fs::path const& file,
     out_dir = abs( out_dir );
 
     return Project{ {
+        {}, // ProjectAttr base
         move( cl_includes  ),
         move( cl_compiles  ),
         move( search_paths ),
@@ -71,7 +72,7 @@ Project Project::read( fs::path const& file,
 }
 
 ostream& operator<<( ostream& out, Project const& p ) {
-    return (out << p.attr);
+    return (out << p.attr());
 }
 
 } // namespace project

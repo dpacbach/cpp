@@ -4,6 +4,7 @@
 #pragma once
 
 #include "types.hpp"
+#include "non-copyable.hpp"
 
 #include <experimental/filesystem>
 #include <optional>
@@ -21,13 +22,7 @@ namespace project {
 // ones  (and the only ones) that will be extracted when we parse
 // the project files.
 
-struct ProjectAttr {
-
-    ProjectAttr( ProjectAttr&& )                  = default;
-    ProjectAttr& operator=( ProjectAttr&& )       = default;
-
-    ProjectAttr( ProjectAttr const& )             = delete;
-    ProjectAttr& operator=( ProjectAttr const&  ) = delete;
+struct ProjectAttr : public util::non_copyable {
 
     PathVec     cl_includes;
     PathVec     cl_compiles;

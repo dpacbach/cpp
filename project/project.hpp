@@ -5,21 +5,18 @@
 
 #include "fs.hpp"
 #include "project_attr.hpp"
+#include "non-copyable.hpp"
 
 #include <iostream>
 #include <string_view>
 
 namespace project {
 
-struct Project {
+struct Project : public util::non_copyable {
 
     Project( ProjectAttr&& );
 
-    Project( Project&& )                  =  default;
-    Project& operator=( Project&& )       =  default;
-
-    Project( Project const& )             =  delete;
-    Project& operator=( Project const&  ) =  delete;
+    ProjectAttr const& attr() const { return m_attr; }
 
     static Project read( fs::path const&  file,
                          std::string_view platform );
@@ -28,7 +25,8 @@ struct Project {
                          fs::path const&  base,
                          std::string_view platform );
 
-    ProjectAttr attr;
+private:
+    ProjectAttr m_attr;
 };
 
 std::ostream& operator<<( std::ostream&  out,
