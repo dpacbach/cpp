@@ -2,6 +2,7 @@
 * Project with adjusted file/folder paths
 ****************************************************************/
 #include "project.hpp"
+#include "project_raw.hpp"
 #include "util.hpp"
 
 #include <algorithm>
@@ -10,8 +11,8 @@ using namespace std;
 
 namespace project {
 
-Project::Project( ProjectAttributes&& pa )
-  : ProjectRaw( move( pa ) )
+Project::Project( ProjectAttr&& pa )
+  : attr( move( pa ) )
 {}
 
 Project Project::read( fs::path const& file,
@@ -69,9 +70,8 @@ Project Project::read( fs::path const& file,
     } };
 }
 
-ostream& operator<<( ostream&       out,
-                     Project const& p ) {
-    return (out << static_cast<ProjectRaw const&>( p ));
+ostream& operator<<( ostream& out, Project const& p ) {
+    return (out << p.attr);
 }
 
 } // namespace project

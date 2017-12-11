@@ -3,7 +3,6 @@
 ****************************************************************/
 #include "fs.hpp"
 #include "macros.hpp"
-#include "opt-util.hpp"
 #include "project_raw.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
@@ -146,7 +145,7 @@ string uuid( pugi::xml_document const& doc ) {
 
 } // impl
 
-ProjectRaw::ProjectRaw( ProjectAttributes&& pa )
+ProjectRaw::ProjectRaw( ProjectAttr&& pa )
   : attr( move( pa ) )
 { }
 
@@ -178,60 +177,8 @@ ProjectRaw ProjectRaw::read( fs::path const& file,
     } );
 }
 
-string ProjectRaw::to_string() const {
-
-    ostringstream oss;
-
-    auto print = [&]( auto const& s ) {
-            oss << "  | \"" << util::to_string( s )
-                << "\"" << endl;
-    };
-
-    auto print_path = [&]( auto const& p ) {
-            oss << "  | " << p << endl;
-    };
-
-    auto print_path_list = [&]( auto const& v ) {
-        for( auto const& s : v )
-            print_path( s );
-    };
-
-    oss << "AdditionaIncludeDirectories: " << endl;
-    print_path_list( attr.search_paths );
-    oss << "ClCompile: " << endl;
-    print_path_list( attr.cl_compiles );
-    oss << "ClInclude: " << endl;
-    print_path_list( attr.cl_includes );
-    oss << "IntDir: " << endl;
-    print_path( attr.int_dir );
-    oss << "OutDir: " << endl;
-    print_path( attr.out_dir );
-    oss << "ProjectName: " << endl;
-    print( attr.project_name );
-    oss << "TargetName: " << endl;
-    print( attr.target_name );
-    oss << "TargetExt: " << endl;
-    print( attr.target_ext );
-    oss << "UUID: " << endl;
-    print( attr.uuid );
-    oss << "tlog name: " << endl;
-    print( tlog_name() );
-
-    return oss.str();
-}
-
-string ProjectRaw::tlog_name() const {
-    string res;
-    if( attr.project_name.size() <= 16 )
-        res = attr.project_name;
-    else
-        res = attr.project_name.substr( 0, 8 ) + "." +
-              attr.uuid.substr( 0, 8 );
-    return res + ".tlog";
-}
-
 ostream& operator<<( ostream& out, ProjectRaw const& p ) {
-    return (out << p.to_string());
+    return (out << p.attr);
 }
 
 } // namespace project

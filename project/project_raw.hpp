@@ -3,7 +3,8 @@
 ****************************************************************/
 #pragma once
 
-#include "pugixml.hpp"
+#include "project_attr.hpp"
+#include "types.hpp"
 
 #include <experimental/filesystem>
 #include <iostream>
@@ -16,40 +17,30 @@ namespace fs = std::experimental::filesystem;
 
 namespace project {
 
-struct ProjectAttributes {
-
-    std::vector<fs::path>      cl_includes;
-    std::vector<fs::path>      cl_compiles;
-    std::vector<fs::path>      search_paths;
-    fs::path                   int_dir;
-    fs::path                   out_dir;
-    std::string                project_name;
-    std::optional<std::string> target_name;
-    std::optional<std::string> target_ext;
-    std::string                uuid;
-
-};
-
+/****************************************************************
+* ProjectRaw
+****************************************************************/
+// Will  hold  the  raw, unprocessed contents of the project file,
+// where "contents" mean anything in the ProjectAttr
+// struct. Unprocessed means basically that there will be no path
+// manipulation.
 struct ProjectRaw {
 
-    ProjectRaw( ProjectAttributes&& );
+    ProjectRaw( ProjectAttr&& );
 
-    ProjectRaw( ProjectRaw const& )             =  delete;
-    ProjectRaw( ProjectRaw&& )                  =  default;
-    ProjectRaw& operator=( ProjectRaw const&  ) =  delete;
-    ProjectRaw& operator=( ProjectRaw const&& ) =  delete;
+    ProjectRaw( ProjectRaw&& )                  = default;
+    ProjectRaw& operator=( ProjectRaw&& )       = default;
 
-    std::string to_string() const;
-
-    std::string tlog_name() const;
+    ProjectRaw( ProjectRaw const& )             = delete;
+    ProjectRaw& operator=( ProjectRaw const&  ) = delete;
 
     static ProjectRaw read( fs::path const&  file,
                             std::string_view platform );
 
-    ProjectAttributes const attr;
+    ProjectAttr attr;
 };
 
-std::ostream& operator<<( std::ostream&     out,
-                          ProjectRaw const& p );
+std::ostream& operator<<( std::ostream& out,
+                          ProjectRaw    const& p );
 
 } // namespace project

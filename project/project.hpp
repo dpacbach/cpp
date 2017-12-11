@@ -4,15 +4,22 @@
 #pragma once
 
 #include "fs.hpp"
-#include "project_raw.hpp"
+#include "project_attr.hpp"
+
+#include <iostream>
+#include <string_view>
 
 namespace project {
 
-struct Project : ProjectRaw {
+struct Project {
 
-    Project( ProjectAttributes&& );
+    Project( ProjectAttr&& );
 
-    Project( Project&& ) = default;
+    Project( Project&& )                  =  default;
+    Project& operator=( Project&& )       =  default;
+
+    Project( Project const& )             =  delete;
+    Project& operator=( Project const&  ) =  delete;
 
     static Project read( fs::path const&  file,
                          std::string_view platform );
@@ -21,6 +28,7 @@ struct Project : ProjectRaw {
                          fs::path const&  base,
                          std::string_view platform );
 
+    ProjectAttr attr;
 };
 
 std::ostream& operator<<( std::ostream&  out,
