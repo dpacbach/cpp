@@ -146,25 +146,8 @@ string uuid( pugi::xml_document const& doc ) {
 
 } // impl
 
-ProjectRaw::ProjectRaw( vector<fs::path>&& cl_includes,
-                        vector<fs::path>&& cl_compiles,
-                        vector<fs::path>&& search_paths,
-                        fs::path&&         int_dir,
-                        fs::path&&         out_dir,
-                        string&&           project_name,
-                        optional<string>&& target_name,
-                        optional<string>&& target_ext,
-                        string&&           uuid )
-
-  : cl_includes  ( move( cl_includes  ) ),
-    cl_compiles  ( move( cl_compiles  ) ),
-    search_paths ( move( search_paths ) ),
-    int_dir      ( move( int_dir      ) ),
-    out_dir      ( move( out_dir      ) ),
-    project_name ( move( project_name ) ),
-    target_name  ( move( target_name  ) ),
-    target_ext   ( move( target_ext   ) ),
-    uuid         ( move( uuid         ) )
+ProjectRaw::ProjectRaw( ProjectAttributes&& pa )
+  : attr( move( pa ) )
 { }
 
 ProjectRaw ProjectRaw::read( fs::path const& file,
@@ -182,17 +165,17 @@ ProjectRaw ProjectRaw::read( fs::path const& file,
     auto search_paths = impl::search_paths( doc, platform );
     util::remove_if( search_paths, is_var );
 
-    return ProjectRaw(
-        fwd_vec( impl::cl_includes( doc ) ),
-        fwd_vec( impl::cl_compiles( doc ) ),
-        fwd_vec( search_paths ),
-        fwd( impl::int_dir ( doc, platform ) ),
-        fwd( impl::out_dir ( doc, platform ) ),
-        impl::project_name ( doc           ),
-        impl::target_name  ( doc, platform ),
-        impl::target_ext   ( doc, platform ),
-        impl::uuid         ( doc           )
-    );
+    return ProjectRaw( {
+        move( fwd_vec( impl::cl_includes ( doc           ) ) ),
+        move( fwd_vec( impl::cl_compiles ( doc           ) ) ),
+        move( fwd_vec( search_paths                        ) ),
+        move(     fwd( impl::int_dir     ( doc, platform ) ) ),
+        move(     fwd( impl::out_dir     ( doc, platform ) ) ),
+        move(          impl::project_name( doc           ) ),
+        move(          impl::target_name ( doc, platform ) ),
+        move(          impl::target_ext  ( doc, platform ) ),
+        move(          impl::uuid        ( doc           ) )
+    } );
 }
 
 string ProjectRaw::to_string() const {
@@ -214,23 +197,23 @@ string ProjectRaw::to_string() const {
     };
 
     oss << "AdditionaIncludeDirectories: " << endl;
-    print_path_list( search_paths );
+    print_path_list( attr.search_paths );
     oss << "ClCompile: " << endl;
-    print_path_list( cl_compiles );
+    print_path_list( attr.cl_compiles );
     oss << "ClInclude: " << endl;
-    print_path_list( cl_includes );
+    print_path_list( attr.cl_includes );
     oss << "IntDir: " << endl;
-    print_path( int_dir );
+    print_path( attr.int_dir );
     oss << "OutDir: " << endl;
-    print_path( out_dir );
+    print_path( attr.out_dir );
     oss << "ProjectName: " << endl;
-    print( project_name );
+    print( attr.project_name );
     oss << "TargetName: " << endl;
-    print( target_name );
+    print( attr.target_name );
     oss << "TargetExt: " << endl;
-    print( target_ext );
+    print( attr.target_ext );
     oss << "UUID: " << endl;
-    print( uuid );
+    print( attr.uuid );
     oss << "tlog name: " << endl;
     print( tlog_name() );
 
@@ -239,11 +222,11 @@ string ProjectRaw::to_string() const {
 
 string ProjectRaw::tlog_name() const {
     string res;
-    if( project_name.size() <= 16 )
-        res = project_name;
+    if( attr.project_name.size() <= 16 )
+        res = attr.project_name;
     else
-        res = project_name.substr( 0, 8 ) + "." +
-              uuid.substr( 0, 8 );
+        res = attr.project_name.substr( 0, 8 ) + "." +
+              attr.uuid.substr( 0, 8 );
     return res + ".tlog";
 }
 

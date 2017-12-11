@@ -10,15 +10,7 @@ namespace project {
 
 struct Project : ProjectRaw {
 
-    Project( std::vector<fs::path>&&      cl_includes,
-             std::vector<fs::path>&&      cl_compiles,
-             std::vector<fs::path>&&      search_paths,
-             fs::path&&                   int_dir,
-             fs::path&&                   out_dir,
-             std::string&&                project_name,
-             std::optional<std::string>&& target_name,
-             std::optional<std::string>&& target_ext,
-             std::string&&                uuid );
+    Project( ProjectAttributes&& );
 
     Project( Project&& ) = default;
 
