@@ -205,7 +205,7 @@ string ProjectRaw::to_string() const {
     };
 
     auto print_path = [&]( auto const& p ) {
-            oss << "  | \"" << p << "\"" << endl;
+            oss << "  | " << p << endl;
     };
 
     auto print_path_list = [&]( auto const& v ) {
