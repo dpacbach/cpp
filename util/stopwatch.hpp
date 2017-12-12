@@ -19,7 +19,7 @@ class StopWatch {
 public:
     // For convenience: will start, run, stop.
     template<typename FuncT>
-    void run( std::string_view name, FuncT func ) {
+    void timeit( std::string_view name, FuncT func ) {
         start( name ); func(); stop( name );
     }
 
@@ -77,5 +77,20 @@ private:
     StopWatch   watch;
     std::string name;
 };
+
+// For convenience: will start, run,  stop, and return the result
+// of the function. Seems to work also for functions that  return
+// void.
+template<typename FuncT>
+auto timeit( std::string_view name, FuncT func )
+        -> decltype( func() ) {
+    ScopedWatch watch( name );
+    return func();
+}
+
+// Example usage:
+// auto res = TIMER( "my function", f( 1, 2, 3 ) );
+#define TIMER( name, code ) \
+    util::timeit( name, [&]() { return code; } );
 
 } // namespace util
