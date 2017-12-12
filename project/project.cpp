@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "project.hpp"
 #include "parser.hpp"
+#include "string-util.hpp"
 #include "util.hpp"
 
 #include <algorithm>
@@ -36,33 +37,23 @@ Project Project::read( fs::path const& file,
         transform( begin( v ), end( v ), begin( v ), abs );
     };
 
-    auto cl_includes  ( p.cl_includes  );
-    auto cl_compiles  ( p.cl_compiles  );
-    auto search_paths ( p.search_paths );
-    auto int_dir      ( p.int_dir      );
-    auto out_dir      ( p.out_dir      );
-    auto project_name ( p.project_name );
-    auto target_name  ( p.target_name  );
-    auto target_ext   ( p.target_ext   );
-    auto uuid         ( p.uuid         );
-
-    abs_vec( cl_includes  );
-    abs_vec( cl_compiles  );
-    abs_vec( search_paths );
-    int_dir = abs( int_dir );
-    out_dir = abs( out_dir );
+    abs_vec( p.cl_includes  );
+    abs_vec( p.cl_compiles  );
+    abs_vec( p.search_paths );
+    p.int_dir = abs( p.int_dir );
+    p.out_dir = abs( p.out_dir );
 
     return Project{ {
         {},   // ProjectAttr base
-        move( cl_includes  ),
-        move( cl_compiles  ),
-        move( search_paths ),
-        move( int_dir      ),
-        move( out_dir      ),
-        move( project_name ),
-        move( target_name  ),
-        move( target_ext   ),
-        move( uuid         )
+        move( p.cl_includes  ),
+        move( p.cl_compiles  ),
+        move( p.search_paths ),
+        move( p.int_dir      ),
+        move( p.out_dir      ),
+        move( p.project_name ),
+        move( p.target_name  ),
+        move( p.target_ext   ),
+        move( p.uuid         )
     } };
 }
 

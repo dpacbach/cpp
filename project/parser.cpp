@@ -84,6 +84,8 @@ vector<string> search_paths( pugi::xml_document const& doc,
     if( !path )
         return {};
     auto res = util::split_strip( *path, ';' );
+    auto is_var = L( util::contains( _, "%(" ) );
+    util::remove_if( res, is_var );
     return util::to_strings( res );
 }
 
@@ -153,23 +155,22 @@ ProjectAttr parse( fs::path const& file,
     // path may be relative to bin folder
     xml::parse( doc, file );
 
-    auto fwd     = L( fs::path( util::fwd_slashes( _ ) ) );
-    auto fwd_vec = L( util::to_paths( util::fwd_slashes( _ ) ) );
-    auto is_var  = L( util::contains( _, "%(" ) );
-
-    auto sp = search_paths( doc, platform );
-    util::remove_if( sp, is_var );
+    // Need to flip slashes  here  while  they  are still strings,
+    // since  once they are converted to paths there doesn't seem
+    // to be a way to do it.
+    auto fwd  = L(       fs::path( util::fwd_slashes( _ ) ) );
+    auto fwds = L( util::to_paths( util::fwd_slashes( _ ) ) );
 
     return { {}, // ProjectAttr base
-        move( fwd_vec( cl_includes ( doc           ) ) ),
-        move( fwd_vec( cl_compiles ( doc           ) ) ),
-        move( fwd_vec( sp                            ) ),
-        move(     fwd( int_dir     ( doc, platform ) ) ),
-        move(     fwd( out_dir     ( doc, platform ) ) ),
-        move(          project_name( doc           ) ),
-        move(          target_name ( doc, platform ) ),
-        move(          target_ext  ( doc, platform ) ),
-        move(          uuid        ( doc           ) )
+        move( fwds( cl_includes ( doc           ) ) ),
+        move( fwds( cl_compiles ( doc           ) ) ),
+        move( fwds( search_paths( doc, platform ) ) ),
+        move( fwd ( int_dir     ( doc, platform ) ) ),
+        move( fwd ( out_dir     ( doc, platform ) ) ),
+        move(       project_name( doc           ) ),
+        move(       target_name ( doc, platform ) ),
+        move(       target_ext  ( doc, platform ) ),
+        move(       uuid        ( doc           ) )
     };
 }
 
