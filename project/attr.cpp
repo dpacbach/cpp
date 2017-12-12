@@ -1,7 +1,7 @@
 /****************************************************************
 * Project Attributes
 ****************************************************************/
-#include "project_attr.hpp"
+#include "attr.hpp"
 #include "opt-util.hpp"
 #include "util.hpp"
 

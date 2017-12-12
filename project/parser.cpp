@@ -3,7 +3,7 @@
 ****************************************************************/
 #include "fs.hpp"
 #include "macros.hpp"
-#include "project_raw.hpp"
+#include "parser.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
 
@@ -14,7 +14,7 @@ using namespace std;
 
 namespace project {
 
-namespace impl {
+namespace {
 
 namespace xpaths {
 
@@ -143,14 +143,10 @@ string uuid( pugi::xml_document const& doc ) {
     return string( sv.substr( 1, sv.size()-2 ) );
 }
 
-} // impl
+} // namespace
 
-ProjectRaw::ProjectRaw( ProjectAttr&& pa )
-  : m_attr( move( pa ) )
-{ }
-
-ProjectRaw ProjectRaw::read( fs::path const& file,
-                             string_view     platform ) {
+ProjectAttr parse( fs::path const& file,
+                   string_view     platform ) {
 
     pugi::xml_document doc;
 
@@ -161,25 +157,20 @@ ProjectRaw ProjectRaw::read( fs::path const& file,
     auto fwd_vec = L( util::to_paths( util::fwd_slashes( _ ) ) );
     auto is_var  = L( util::contains( _, "%(" ) );
 
-    auto search_paths = impl::search_paths( doc, platform );
-    util::remove_if( search_paths, is_var );
+    auto sp = search_paths( doc, platform );
+    util::remove_if( sp, is_var );
 
-    return ProjectRaw( {
-        {}, // ProjectAttr base
-        move( fwd_vec( impl::cl_includes ( doc           ) ) ),
-        move( fwd_vec( impl::cl_compiles ( doc           ) ) ),
-        move( fwd_vec( search_paths                        ) ),
-        move(     fwd( impl::int_dir     ( doc, platform ) ) ),
-        move(     fwd( impl::out_dir     ( doc, platform ) ) ),
-        move(          impl::project_name( doc           ) ),
-        move(          impl::target_name ( doc, platform ) ),
-        move(          impl::target_ext  ( doc, platform ) ),
-        move(          impl::uuid        ( doc           ) )
-    } );
-}
-
-ostream& operator<<( ostream& out, ProjectRaw const& p ) {
-    return (out << p.attr());
+    return { {}, // ProjectAttr base
+        move( fwd_vec( cl_includes ( doc           ) ) ),
+        move( fwd_vec( cl_compiles ( doc           ) ) ),
+        move( fwd_vec( sp                            ) ),
+        move(     fwd( int_dir     ( doc, platform ) ) ),
+        move(     fwd( out_dir     ( doc, platform ) ) ),
+        move(          project_name( doc           ) ),
+        move(          target_name ( doc, platform ) ),
+        move(          target_ext  ( doc, platform ) ),
+        move(          uuid        ( doc           ) )
+    };
 }
 
 } // namespace project
