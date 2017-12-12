@@ -29,7 +29,11 @@ int main() try {
     //fs::path rel = fs::current_path();
     fs::path rel = fs::canonical( fs::absolute( ".." ) );
 
-    cout << pr::Solution::read( solution_file, "Debug|Win32", rel ) << endl;
+    auto s = TIMEIT( "parse solution",
+        pr::Solution::read( solution_file, "Debug|Win32", rel )
+    );
+
+    //cout << s << endl;
 
     // path may be relative to bin folder
     //cout << pr::Project::read( project_file, rel, "Debug|Win32" ) << endl;

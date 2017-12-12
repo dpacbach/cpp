@@ -90,7 +90,7 @@ auto timeit( std::string_view name, FuncT func )
 
 // Example usage:
 // auto res = TIMER( "my function", f( 1, 2, 3 ) );
-#define TIMER( name, code ) \
+#define TIMEIT( name, code ) \
     util::timeit( name, [&]() { return code; } );
 
 } // namespace util
