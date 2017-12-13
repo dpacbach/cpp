@@ -1,41 +1,33 @@
-done:
-  search paths - ItemDefinitionGroup -> Condition=Debug|Win32 -> AdditionalIncludeDirectories
-     split on ; and drop last component
-  clcompiles - ItemGroup -> ClCompile
-     attr Include
-  clincludes - ItemGroup -> ClInclude
-     attr Include
   debuglibfolder - IntDir
      TODO: filter slashes?
-  projectname - PGG -> ProjectName
-  targetname - optional string - PGD -> {TargetName, TargetExt}
-  OutDir
-  uuid - PGG -> ProjectGuid
+
+============================================
+
+ProjectAttr derived quantities:
 
     tlogfolder
        if projectname > 16 chars then: take 8 name + "." + take 8 UUID + .tlog
        else projectname + .tlog
 
-============================================
-
-    project file path (abs?)
-
-    tlogfolderpath
-
-    dllpath - flipslashes outdir + targetname + targetext
-
-    from-file
-
-    lbsFile
-
-    unsuccessfulbuild file
-
+    dll_name, pdb_name, lib_name, exp_name
+    lbs filename
     is-unit-test
-
     sourceFolderName (src/test)
-
-    projects for file
-
     folders for project
 
-    abs paths of all relevant files
+============================================
+
+Project derived quantities:
+
+    project file path
+    tlogfolderpath
+    dllpath - flipslashes outdir + targetname + targetext
+    from-file
+    lbsFile
+    unsuccessfulbuild file
+    folders for project
+
+============================================
+
+Solution derived quantities:
+    projects for file

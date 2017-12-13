@@ -42,6 +42,12 @@ std::ostream& operator<<( std::ostream&      out,
 /****************************************************************
 * Derived Quantities
 ****************************************************************/
-auto tlog_name( ProjectAttr const& attr ) -> std::string;
+auto tlog_name   ( ProjectAttr const& attr ) -> fs::path;
+auto target_name ( ProjectAttr const& attr ) -> OptPath;
+auto lib_name    ( ProjectAttr const& attr ) -> OptPath;
+auto pdb_name    ( ProjectAttr const& attr ) -> OptPath;
+auto exp_name    ( ProjectAttr const& attr ) -> OptPath;
+
+auto src_folders ( ProjectAttr const& attr ) -> PathVec;
 
 } // namespace project

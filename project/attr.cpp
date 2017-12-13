@@ -11,7 +11,7 @@ using namespace std;
 
 namespace project {
 
-auto tlog_name( ProjectAttr const& attr ) -> string {
+auto tlog_name( ProjectAttr const& attr ) -> fs::path {
     string res;
     if( attr.project_name.size() <= 16 )
         res = attr.project_name;
@@ -21,42 +21,50 @@ auto tlog_name( ProjectAttr const& attr ) -> string {
     return res + ".tlog";
 }
 
+auto target_name( ProjectAttr const& attr ) -> OptPath {
+    return {};
+}
+
+auto lib_name( ProjectAttr const& attr ) -> OptPath {
+    return {};
+}
+
+auto pdb_name( ProjectAttr const& attr ) -> OptPath {
+    return {};
+}
+
+auto exp_name( ProjectAttr const& attr ) -> OptPath {
+    return {};
+}
+
+auto src_folders( ProjectAttr const& attr ) -> PathVec {
+    return {};
+}
+
 ostream& operator<<( ostream& out, ProjectAttr const& attr ) {
 
-    auto print = [&]( auto const& s ) {
-            out << "  | \"" << util::to_string( s )
-                << "\"" << endl;
+    auto p = [&]( auto const& p ) {
+        out << "    | " << p << endl;
     };
 
-    auto print_path = [&]( auto const& p ) {
-            out << "  | " << p << endl;
+    auto p_ = [&]( auto const& s ) {
+        print( util::to_string( s ) );
     };
 
-    auto print_path_list = [&]( auto const& v ) {
-        for( auto const& s : v )
-            print_path( s );
+    auto print_v = [&]( auto const& v ) {
+        for( auto const& s : v ) p( s );
     };
 
-    out << "AdditionaIncludeDirectories: " << endl;
-    print_path_list( attr.search_paths );
-    out << "ClCompile: " << endl;
-    print_path_list( attr.cl_compiles );
-    out << "ClInclude: " << endl;
-    print_path_list( attr.cl_includes );
-    out << "IntDir: " << endl;
-    print_path( attr.int_dir );
-    out << "OutDir: " << endl;
-    print_path( attr.out_dir );
-    out << "ProjectName: " << endl;
-    print( attr.project_name );
-    out << "TargetName: " << endl;
-    print( attr.target_name );
-    out << "TargetExt: " << endl;
-    print( attr.target_ext );
-    out << "UUID: " << endl;
-    print( attr.uuid );
-    out << "tlog name: " << endl;
-    print( tlog_name( attr ) );
+    out << "Search Paths : " << endl; p_v( attr.search_paths );
+    out << "ClCompile    : " << endl; p_v( attr.cl_compiles );
+    out << "ClInclude    : " << endl; p_v( attr.cl_includes );
+    out << "IntDir       : " << endl; p  ( attr.int_dir );
+    out << "OutDir       : " << endl; p  ( attr.out_dir );
+    out << "ProjectName  : " << endl; p_ ( attr.project_name );
+    out << "TargetName   : " << endl; p_ ( attr.target_name );
+    out << "TargetExt    : " << endl; p_ ( attr.target_ext );
+    out << "UUID         : " << endl; p_ ( attr.uuid );
+    out << "tlog name    : " << endl; p  ( tlog_name(  attr ) );
 
     return out;
 }

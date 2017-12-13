@@ -19,6 +19,7 @@
 namespace fs = std::experimental::filesystem;
 
 using OptStr  = std::optional<std::string>;
+using OptPath = std::optional<fs::path>;
 using StrVec  = std::vector<std::string>;
 using SVVec   = std::vector<std::string_view>;
 using PathVec = std::vector<fs::path>;
