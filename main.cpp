@@ -17,10 +17,9 @@ using namespace std;
 
 namespace pr = project;
 
-//auto project_file = "../xml-utils/samples/pugixml_vs2013.vcxproj";
-auto project_file = "/home/dsicilia/dev/cpp/sln-demo/C++/Calculator/Calculator.vcxproj";
-//auto project_file = "/Users/dsicilia/dev/libmemcached-win/win32/libmemcached.vcxproj";
-auto solution_file = "/home/dsicilia/dev/cpp/sln-demo/C++/Calculator.sln";
+//auto project_file  = "../sln-demo/samples/pugixml_vs2013.vcxproj";
+//auto solution_file = "../sln-demo/libmemcached-win/win32/libmemcached.sln";
+auto solution_file = "../sln-demo/C++/Calculator.sln";
 
 int main() try {
 
@@ -33,11 +32,7 @@ int main() try {
         pr::Solution::read( solution_file, "Debug|Win32", rel )
     );
 
-    //cout << s << endl;
-
-    // path may be relative to bin folder
-    //cout << pr::Project::read( project_file, rel, "Debug|Win32" ) << endl;
-    //cout << pr::Project::read( project_file, rel, "Debug|x64"   ) << endl;
+    cout << s << endl;
 
     return 0;
 
