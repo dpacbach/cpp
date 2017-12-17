@@ -1,6 +1,7 @@
 /****************************************************************
 * Project with adjusted file/folder paths
 ****************************************************************/
+#include "opt-util.hpp"
 #include "project.hpp"
 #include "xml-utils.hpp"
 #include "string-util.hpp"
@@ -176,8 +177,8 @@ ProjectAttr parse( fs::path const& file,
 
 } // anonymous namespace
 
-Project::Project( ProjectAttr&& pa )
-  : m_attr( move( pa ) )
+Project::Project( fs::path const& p, ProjectAttr&& pa )
+  : m_path( p ), m_attr( move( pa ) )
 {}
 
 Project Project::read( fs::path const& file,
@@ -207,22 +208,85 @@ Project Project::read( fs::path const& file,
     p.int_dir = abs( p.int_dir );
     p.out_dir = abs( p.out_dir );
 
-    return Project{ {
-        {},   // ProjectAttr base
-        move( p.cl_includes  ),
-        move( p.cl_compiles  ),
-        move( p.search_paths ),
-        move( p.int_dir      ),
-        move( p.out_dir      ),
-        move( p.project_name ),
-        move( p.target_stem  ),
-        move( p.target_ext   ),
-        move( p.uuid         )
-    } };
+    return Project(
+        util::lexically_relative( file, base ),
+        ProjectAttr{
+            {}, // ProjectAttr base
+            move( p.cl_includes  ),
+            move( p.cl_compiles  ),
+            move( p.search_paths ),
+            move( p.int_dir      ),
+            move( p.out_dir      ),
+            move( p.project_name ),
+            move( p.target_stem  ),
+            move( p.target_ext   ),
+            move( p.uuid         )
+        }
+    );
 }
 
 ostream& operator<<( ostream& out, Project const& p ) {
-    return (out << p.attr());
+    using ::operator<<;
+
+    out << p.attr();
+
+    out << "Target Path  | " << trg_path( p ) << endl;
+    out << "LBS Path     | " << lbs_path( p ) << endl;
+    out << "UBS Path     | " << ubs_path( p ) << endl;
+    return out;
+}
+
+// This functino will take a project and a function for  deriving
+// an  output  filename from the project (i.e., one of the output
+// files that will appear in the project's output folder, such as
+// DLL, LIB, EXE, etc.) and  will  give  the  absolute path to it,
+// where  "absolute" is absolute insofar as the project's out_dir
+// is an absolute path.
+template<typename Func>
+auto trg_variant( Project const& p, Func f ) -> OptPath {
+    auto t = f( p.attr() );
+    auto out = p.attr().out_dir;
+    return t ? OptPath( util::lexically_normal( out / *t ) )
+             : nullopt;
+}
+
+auto trg_path( Project const& p ) -> OptPath {
+    return trg_variant( p, trg_name );
+}
+
+auto lib_path( Project const& p ) -> OptPath {
+    return trg_variant( p, lib_name );
+}
+
+auto pdb_path( Project const& p ) -> OptPath {
+    return trg_variant( p, pdb_name );
+}
+
+auto exp_path( Project const& p ) -> OptPath {
+    return trg_variant( p, exp_name );
+}
+
+auto tlog_path( Project const& p ) -> fs::path {
+    return p.attr().int_dir / tlog_name( p.attr() );
+}
+
+auto lbs_path( Project const& p ) -> fs::path {
+    return tlog_path( p ) / lbs_name( p.attr() );
+}
+
+auto ubs_path( Project const& p ) -> fs::path {
+    return tlog_path( p ) / ubs_name( p.attr() );
+}
+
+// Get a list of all compiled  files  in project, get the folders
+// in  which  they reside, and return a unique list of them (i.e.,
+// most projects should  return  just  a  small  handful of items
+// here).
+auto src_folder_paths( Project const& p ) -> PathVec {
+    auto v = src_folders( p.attr() );
+    for( auto& i : v )
+        i = util::lexically_normal( p.path() / i );
+    return v;
 }
 
 } // namespace project

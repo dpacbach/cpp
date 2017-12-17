@@ -22,7 +22,7 @@ struct Project : public util::non_copyable {
                          fs::path const&  base = "" );
 
 private:
-    Project( ProjectAttr&& );
+    Project( fs::path const& p, ProjectAttr&& );
 
     fs::path    m_path;
     ProjectAttr m_attr;
@@ -34,15 +34,21 @@ std::ostream& operator<<( std::ostream&  out,
 /****************************************************************
 * Derived Quantities
 ****************************************************************/
-auto tlog_path   ( Project const& attr ) -> fs::path;
-auto target_path ( Project const& attr ) -> OptPath;
-auto lib_path    ( Project const& attr ) -> OptPath;
-auto pdb_path    ( Project const& attr ) -> OptPath;
-auto exp_path    ( Project const& attr ) -> OptPath;
-
-auto lbs_path    ( Project const& attr ) -> fs::path;
-auto ubs_path    ( Project const& attr ) -> fs::path;
-
-auto srcs_paths  ( Project const& attr ) -> PathVec;
+auto tlog_path( Project const& p ) -> fs::path;
+// These four are the exe/dll/lib/exp/pdb  files that will appear
+// in  the  main  output folder. They will all have the same name,
+// just different extension. They have optional as return because
+// not all projects have a target binary.
+auto trg_path ( Project const& p ) -> OptPath;
+auto lib_path ( Project const& p ) -> OptPath;
+auto pdb_path ( Project const& p ) -> OptPath;
+auto exp_path ( Project const& p ) -> OptPath;
+// lasbuildstate & unsuccessfulbuild are in the tlog folder.
+auto lbs_path ( Project const& p ) -> fs::path;
+auto ubs_path ( Project const& p ) -> fs::path;
+// Unique list of paths of folders containing at least one  compi-
+// lable source file in this project (i.e.,  not  including  head-
+// ers).
+auto src_folder_paths( Project const& p ) -> PathVec;
 
 } // namespace project

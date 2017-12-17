@@ -47,6 +47,8 @@ auto trg_name    ( ProjectAttr const& attr ) -> OptPath;
 auto lib_name    ( ProjectAttr const& attr ) -> OptPath;
 auto pdb_name    ( ProjectAttr const& attr ) -> OptPath;
 auto exp_name    ( ProjectAttr const& attr ) -> OptPath;
+auto lbs_name    ( ProjectAttr const& attr ) -> fs::path;
+auto ubs_name    ( ProjectAttr const& attr ) -> fs::path;
 auto src_folders ( ProjectAttr const& attr ) -> PathVec;
 
 } // namespace project

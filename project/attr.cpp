@@ -42,6 +42,14 @@ auto exp_name( ProjectAttr const& attr ) -> OptPath {
                             : nullopt;
 }
 
+auto lbs_name( ProjectAttr const& attr ) -> fs::path {
+    return attr.project_name + ".lastbuildstate";
+}
+
+auto ubs_name( ProjectAttr const& ) -> fs::path {
+    return "unsuccessfulbuild";
+}
+
 // Get a list of all compiled  files  in project, get the folders
 // in  which  they reside, and return a unique list of them (i.e.,
 // most projects should  return  just  a  small  handful of items
@@ -97,9 +105,8 @@ ostream& operator<<( ostream& out, ProjectAttr const& attr ) {
     out << "UUID         | "; p  ( attr.uuid );
     out << "tlog name    | "; p  ( tlog_name(  attr ) );
     out << "Target Name  | "; p  ( trg_name( attr ) );
-    out << "Lib Name     | "; p  ( lib_name( attr ) );
+    out << "lib Name     | "; p  ( lib_name( attr ) );
     out << "PDB Name     | "; p  ( pdb_name( attr ) );
-    out << "exp Name     | "; p  ( exp_name( attr ) );
 
     return out;
 }
