@@ -1,14 +1,73 @@
 /****************************************************************
 * Unit tests
 ****************************************************************/
+#include "bimap.hpp"
 #include "fs.hpp"
+#include "opt-util.hpp"
 #include "test.hpp"
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 TEST( always_succeeds ) { }
+
+TEST( bimap )
+{
+    using BM = util::BDIndexMap<fs::path>;
+
+    BM bm0( {} );
+    EQUALS( bm0.size(), size_t( 0 ) );
+
+    auto data = vector<fs::path>{
+        "A/B/C/D/E",
+        "A",
+        "A",
+        "A",
+        "A/B/C",
+        "A/B",
+        "A",
+        "A/B/C/D",
+        "A",
+        "",
+        "ABBB",
+        "AAAA",
+    };
+
+    BM bm( move( data ) );
+
+    EQUALS( bm.size(), size_t( 8 ) );
+
+    fs::path s;
+
+    for( size_t i = 0; i < bm.size(); ++i )
+        { TRUE( bm.val( i ) ); }
+
+    s = *bm.val( 0 ); EQUALS( s, ""          );
+    s = *bm.val( 1 ); EQUALS( s, "A"         );
+    s = *bm.val( 2 ); EQUALS( s, "A/B"       );
+    s = *bm.val( 3 ); EQUALS( s, "A/B/C"     );
+    s = *bm.val( 4 ); EQUALS( s, "A/B/C/D"   );
+    s = *bm.val( 5 ); EQUALS( s, "A/B/C/D/E" );
+    s = *bm.val( 6 ); EQUALS( s, "AAAA"      );
+    s = *bm.val( 7 ); EQUALS( s, "ABBB"      );
+
+    TRUE( !(bm.val( 8 )) );
+    TRUE( !(bm.val( 8000 )) );
+
+    EQUALS( bm.key( ""          ), 0 );
+    EQUALS( bm.key( "A"         ), 1 );
+    EQUALS( bm.key( "A/B"       ), 2 );
+    EQUALS( bm.key( "A/B/C"     ), 3 );
+    EQUALS( bm.key( "A/B/C/D"   ), 4 );
+    EQUALS( bm.key( "A/B/C/D/E" ), 5 );
+    EQUALS( bm.key( "AAAA"      ), 6 );
+    EQUALS( bm.key( "ABBB"      ), 7 );
+
+    EQUALS( bm.key( "XXXX" ), nullopt );
+    EQUALS( bm.key( "AAA"  ), nullopt );
+}
 
 TEST( lexically_normal )
 {
@@ -185,6 +244,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_bimap,
                    test_lexically_normal,
                    test_lexically_relative,
                    test_lexically_relative_fast };

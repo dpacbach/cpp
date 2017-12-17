@@ -5,6 +5,14 @@
 
 #include "macros.hpp"
 
+#define TRUE( a )                                                       \
+    if( !(a) ) {                                                        \
+        cerr << "--------------------------------------------" << endl; \
+        cerr << "FAILED: assert " << #a << endl;                        \
+        cerr << "--------------------------------------------" << endl; \
+        throw logic_error( "test failed." );                            \
+    }
+
 #define EQUALS( a, b )                                                  \
     auto STRING_JOIN( a_, __LINE__ ) = a;                               \
     auto STRING_JOIN( b_, __LINE__ ) = b;                               \
