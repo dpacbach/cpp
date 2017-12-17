@@ -43,6 +43,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>calc3</TargetName>
     <ClCompile>
         <AdditionalIncludeDirectories>hello-debug</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>

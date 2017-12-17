@@ -43,6 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>calc1</TargetName>
+    <TargetExt>.dll</TargetExt>
     <ClCompile>
         <AdditionalIncludeDirectories>hello-debug</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
@@ -68,6 +70,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="..\Source-back.cpp" />
+    <ClCompile Include=".\forward\Source-fwd.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

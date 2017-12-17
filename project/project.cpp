@@ -46,7 +46,7 @@ char const* out_dir =
 char const* project_name = "//ProjectName";
 char const* project_guid = "//ProjectGuid";
 
-char const* target_name =
+char const* target_stem =
     " /descendant-or-self::node()[              "
     "     contains(@Condition,$platform)        "
     " ]                                         "
@@ -117,11 +117,11 @@ string project_name( pugi::xml_document const& doc ) {
     return move( *name );
 }
 
-optional<string> target_name( pugi::xml_document const& doc,
+optional<string> target_stem( pugi::xml_document const& doc,
                               string_view               platform ) {
     xml::XPathVars vars{ { "platform", string( platform ) } };
     return xml::text(
-                doc, xpaths::target_name, vars, true, true );
+                doc, xpaths::target_stem, vars, true, true );
 }
 
 optional<string> target_ext( pugi::xml_document const& doc,
@@ -168,7 +168,7 @@ ProjectAttr parse( fs::path const& file,
         move( fwd ( int_dir     ( doc, platform ) ) ),
         move( fwd ( out_dir     ( doc, platform ) ) ),
         move(       project_name( doc           ) ),
-        move(       target_name ( doc, platform ) ),
+        move(       target_stem ( doc, platform ) ),
         move(       target_ext  ( doc, platform ) ),
         move(       uuid        ( doc           ) )
     };
@@ -215,7 +215,7 @@ Project Project::read( fs::path const& file,
         move( p.int_dir      ),
         move( p.out_dir      ),
         move( p.project_name ),
-        move( p.target_name  ),
+        move( p.target_stem  ),
         move( p.target_ext   ),
         move( p.uuid         )
     } };

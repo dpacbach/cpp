@@ -30,7 +30,7 @@ struct ProjectAttr : public util::non_copyable {
     fs::path    int_dir;
     fs::path    out_dir;
     std::string project_name;
-    OptStr      target_name;
+    OptStr      target_stem;
     OptStr      target_ext;
     std::string uuid;
 
