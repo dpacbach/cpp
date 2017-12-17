@@ -21,7 +21,7 @@ auto tlog_name( ProjectAttr const& attr ) -> fs::path {
     return res + ".tlog";
 }
 
-auto target_name( ProjectAttr const& attr ) -> OptPath {
+auto trg_name( ProjectAttr const& attr ) -> OptPath {
     fs::path res = attr.target_stem.value_or( "" )
                  + attr.target_ext .value_or( "" );
     return res.empty() ? nullopt : OptPath( move( res ) );
@@ -59,11 +59,11 @@ auto src_folders( ProjectAttr const& attr ) -> PathVec {
 ostream& operator<<( ostream& out, ProjectAttr const& attr ) {
 
     auto p = [&]( auto const& p ) {
+        // Need this so that the compile is willing to search the
+        // global namespace for this function, which we need, for
+        // e.g. output the std::optional types.
+        using ::operator<<;
         out << p << endl;
-    };
-
-    auto ps = [&]( auto const& s ) {
-        out << util::to_string( s ) << endl;
     };
 
     // Logic in this function is just for some nice
@@ -91,15 +91,15 @@ ostream& operator<<( ostream& out, ProjectAttr const& attr ) {
     out << "Src Folders  | "; p_v( src_folders( attr ) );
     out << "IntDir       | "; p  ( attr.int_dir );
     out << "OutDir       | "; p  ( attr.out_dir );
-    out << "ProjectName  | "; ps ( attr.project_name );
-    out << "TargetName   | "; ps ( attr.target_stem );
-    out << "TargetExt    | "; ps ( attr.target_ext );
-    out << "UUID         | "; ps ( attr.uuid );
+    out << "ProjectName  | "; p  ( attr.project_name );
+    out << "TargetName   | "; p  ( attr.target_stem );
+    out << "TargetExt    | "; p  ( attr.target_ext );
+    out << "UUID         | "; p  ( attr.uuid );
     out << "tlog name    | "; p  ( tlog_name(  attr ) );
-    out << "Target Name  | "; ps ( target_name( attr ) );
-    out << "Lib Name     | "; ps ( lib_name( attr ) );
-    out << "PDB Name     | "; ps ( pdb_name( attr ) );
-    out << "exp Name     | "; ps ( exp_name( attr ) );
+    out << "Target Name  | "; p  ( trg_name( attr ) );
+    out << "Lib Name     | "; p  ( lib_name( attr ) );
+    out << "PDB Name     | "; p  ( pdb_name( attr ) );
+    out << "exp Name     | "; p  ( exp_name( attr ) );
 
     return out;
 }
