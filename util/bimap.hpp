@@ -14,7 +14,7 @@
 namespace util {
 
 /****************************************************************
-* BDIndexMap
+* BDIndexMap ("Bi-directional map with int as keys")
 *
 * This class will map a collection of unique items of  the  speci-
 * fied  type  to  a unique list of integers. Mapping from key (al-
