@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "bimap.hpp"
 #include "fs.hpp"
+#include "graph.hpp"
 #include "opt-util.hpp"
 #include "test.hpp"
 
@@ -12,6 +13,32 @@
 using namespace std;
 
 TEST( always_succeeds ) { }
+
+TEST( directed_graph )
+{
+    using DG = util::DirectedGraph<fs::path>;
+
+    DG::NamesMap nm( { "B", "F", "C", "D", "E", "A", "G" } );
+    DG::GraphVec gv{
+        { *nm.key( "B" ) },
+        { *nm.key( "C" ), *nm.key( "B" ) },
+        { *nm.key( "D" ), *nm.key( "E" ) },
+        { *nm.key( "E" ) },
+        { *nm.key( "F" ) },
+        { *nm.key( "G" ) },
+        { *nm.key( "C" ) }
+    };
+
+    util::DirectedGraph<fs::path> g( move( gv ), move( nm ) );
+
+    vector<fs::path> v;
+
+    v = g.accessible( "A" );
+    EQUALS( v, (vector<fs::path>{ "A","B","C","E","F","G","D" }) );
+
+    v = g.accessible( "E" );
+    EQUALS( v, (vector<fs::path>{ "E","F","G","C","D" }) );
+}
 
 TEST( bimap )
 {
@@ -244,6 +271,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_directed_graph,
                    test_bimap,
                    test_lexically_normal,
                    test_lexically_relative,
