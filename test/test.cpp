@@ -8,6 +8,7 @@
 #include "test.hpp"
 
 #include <iostream>
+#include <map>
 #include <vector>
 
 using namespace std;
@@ -18,26 +19,36 @@ TEST( directed_graph )
 {
     using DG = util::DirectedGraph<fs::path>;
 
-    DG::NamesMap nm( { "B", "F", "C", "D", "E", "A", "G" } );
-    DG::GraphVec gv{
-        { *nm.key( "B" ) },
-        { *nm.key( "C" ), *nm.key( "B" ) },
-        { *nm.key( "D" ), *nm.key( "E" ) },
-        { *nm.key( "E" ) },
-        { *nm.key( "F" ) },
-        { *nm.key( "G" ) },
-        { *nm.key( "C" ) }
+    map<fs::path, vector<fs::path>> m{
+        { "B", { "B"      } },
+        { "F", { "C", "B" } },
+        { "C", { "D", "E" } },
+        { "D", { "E"      } },
+        { "E", { "F"      } },
+        { "A", { "G"      } },
+        { "G", { "C"      } },
+        { "H", { "C", "D" } }
     };
 
-    util::DirectedGraph<fs::path> g( move( gv ), move( nm ) );
+    DG g( m );
 
     vector<fs::path> v;
 
     v = g.accessible( "A" );
-    EQUALS( v, (vector<fs::path>{ "A","B","C","E","F","G","D" }) );
+    sort( begin( v ), end( v ) );
+    EQUALS( v, (vector<fs::path>{ "A","B","C","D","E","F","G" }) );
 
     v = g.accessible( "E" );
-    EQUALS( v, (vector<fs::path>{ "E","F","G","C","D" }) );
+    sort( begin( v ), end( v ) );
+    EQUALS( v, (vector<fs::path>{ "B", "C", "D", "E", "F" }) );
+
+    v = g.accessible( "H" );
+    sort( begin( v ), end( v ) );
+    EQUALS( v, (vector<fs::path>{ "B","C","D","E","F","H" }) );
+
+    v = g.accessible( "G" );
+    sort( begin( v ), end( v ) );
+    EQUALS( v, (vector<fs::path>{ "B", "C", "D", "E", "F", "G" }) );
 }
 
 TEST( bimap )

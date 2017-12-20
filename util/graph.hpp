@@ -7,6 +7,8 @@
 #include "non-copyable.hpp"
 #include "bimap.hpp"
 
+#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace util {
@@ -23,6 +25,16 @@ public:
     using Edges    = std::vector<Id>;
     using GraphVec = std::vector<Edges>;
     using NamesMap = BDIndexMap<NameT>;
+
+    DirectedGraph( std::map<
+                       NameT,
+                       std::vector<NameT>
+                   > const& m );
+
+    DirectedGraph( std::unordered_map<
+                       NameT,
+                       std::vector<NameT>
+                   > const& m );
 
     DirectedGraph( GraphVec&& edges,
                    NamesMap&& names );
@@ -46,6 +58,33 @@ DirectedGraph<NameT>::DirectedGraph( GraphVec&& edges,
 }
 
 template<typename NameT>
+DirectedGraph<NameT>::DirectedGraph( std::map<
+                                         NameT,
+                                         std::vector<NameT>
+                                     > const& m )
+      : m_names( {} ),
+        m_edges( {} ) {
+
+    std::vector<NameT> names; names.reserve( m.size() );
+    for( auto const& p : m )
+        names.push_back( p.first );
+    // true == items are sorted, because we are using a map.
+    m_names = BDIndexMap( std::move( names ), true );
+
+    GraphVec edges; edges.reserve( m.size() );
+    for( auto const& p : m ) {
+        Edges ids; ids.reserve( p.second.size() );
+        for( auto const& v : p.second ) {
+            auto key = m_names.key( v );
+            ASSERT_( key );
+            ids.push_back( *key );
+        }
+        edges.emplace_back( std::move( ids ) );
+    }
+    m_edges = std::move( edges );
+}
+
+template<typename NameT>
 std::vector<NameT>
 DirectedGraph<NameT>::accessible( NameT const& name ) const {
     std::vector<NameT> res;
@@ -58,7 +97,11 @@ DirectedGraph<NameT>::accessible( NameT const& name ) const {
      
     while( to_visit.size() ) {
         Id i = to_visit.back(); to_visit.pop_back();
-        ASSERT_( !visited[i] );
+        if( visited[i] )
+            // We  may have duplicates in the stack if we include
+            // some  thing  a  second  time  before the first one
+            // (which is already in the stack) is visited.
+            continue;
         visited[i] = 1;
         auto name = m_names.val( i );
         ASSERT_( name );
