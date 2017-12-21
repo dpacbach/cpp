@@ -50,6 +50,43 @@ TEST( directed_graph )
     v = g.accessible( "G" );
     sort( begin( v ), end( v ) );
     EQUALS( v, (vector<fs::path>{ "B", "C", "D", "E", "F", "G" }) );
+
+    /*************************************************************
+    * reference_wrapper test
+    *************************************************************/
+    using RWP  = reference_wrapper<fs::path const>;
+    using VRWP = vector<RWP>;
+
+    unordered_map<RWP, vector<RWP>> m2;
+
+    fs::path p1 = "A/B/1", p2 = "A/B/2", p3 = "A/B/3", p4 = "A/B/4";
+
+    m2[p1] = { p1, p2 };
+    m2[p2] = { p1, p4 };
+    m2[p3] = { p1     };
+    m2[p4] = { p4     };
+
+    using DG2 = util::DirectedGraph<RWP>;
+    DG2 g2 = util::make_graph<RWP>( m2 );
+
+    VRWP v2;
+
+    v2 = g2.accessible( p4 );
+    sort( begin( v2 ), end( v2 ) );
+    EQUALS( v2, (VRWP{ p4 }) );
+
+    v2 = g2.accessible( p3 );
+    sort( begin( v2 ), end( v2 ) );
+    EQUALS( v2, (VRWP{ p1, p2, p3, p4 }) );
+
+    v2 = g2.accessible( p2 );
+    sort( begin( v2 ), end( v2 ) );
+    EQUALS( v2, (VRWP{ p1, p2, p4 }) );
+
+    v2 = g2.accessible( p1 );
+    sort( begin( v2 ), end( v2 ) );
+    EQUALS( v2, (VRWP{ p1, p2, p4 }) );
+
 }
 
 TEST( bimap )
@@ -81,31 +118,31 @@ TEST( bimap )
     fs::path s;
 
     for( size_t i = 0; i < bm.size(); ++i )
-        { TRUE( bm.val( i ) ); }
+        { TRUE( bm.val_safe( i ) ); }
 
-    s = *bm.val( 0 ); EQUALS( s, ""          );
-    s = *bm.val( 1 ); EQUALS( s, "A"         );
-    s = *bm.val( 2 ); EQUALS( s, "A/B"       );
-    s = *bm.val( 3 ); EQUALS( s, "A/B/C"     );
-    s = *bm.val( 4 ); EQUALS( s, "A/B/C/D"   );
-    s = *bm.val( 5 ); EQUALS( s, "A/B/C/D/E" );
-    s = *bm.val( 6 ); EQUALS( s, "AAAA"      );
-    s = *bm.val( 7 ); EQUALS( s, "ABBB"      );
+    s = *bm.val_safe( 0 ); EQUALS( s, ""          );
+    s = *bm.val_safe( 1 ); EQUALS( s, "A"         );
+    s = *bm.val_safe( 2 ); EQUALS( s, "A/B"       );
+    s = *bm.val_safe( 3 ); EQUALS( s, "A/B/C"     );
+    s = *bm.val_safe( 4 ); EQUALS( s, "A/B/C/D"   );
+    s = *bm.val_safe( 5 ); EQUALS( s, "A/B/C/D/E" );
+    s = *bm.val_safe( 6 ); EQUALS( s, "AAAA"      );
+    s = *bm.val_safe( 7 ); EQUALS( s, "ABBB"      );
 
-    TRUE( !(bm.val( 8 )) );
-    TRUE( !(bm.val( 8000 )) );
+    TRUE( !(bm.val_safe( 8 )) );
+    TRUE( !(bm.val_safe( 8000 )) );
 
-    EQUALS( bm.key( ""          ), 0 );
-    EQUALS( bm.key( "A"         ), 1 );
-    EQUALS( bm.key( "A/B"       ), 2 );
-    EQUALS( bm.key( "A/B/C"     ), 3 );
-    EQUALS( bm.key( "A/B/C/D"   ), 4 );
-    EQUALS( bm.key( "A/B/C/D/E" ), 5 );
-    EQUALS( bm.key( "AAAA"      ), 6 );
-    EQUALS( bm.key( "ABBB"      ), 7 );
+    EQUALS( bm.key_safe( ""          ), 0 );
+    EQUALS( bm.key_safe( "A"         ), 1 );
+    EQUALS( bm.key_safe( "A/B"       ), 2 );
+    EQUALS( bm.key_safe( "A/B/C"     ), 3 );
+    EQUALS( bm.key_safe( "A/B/C/D"   ), 4 );
+    EQUALS( bm.key_safe( "A/B/C/D/E" ), 5 );
+    EQUALS( bm.key_safe( "AAAA"      ), 6 );
+    EQUALS( bm.key_safe( "ABBB"      ), 7 );
 
-    EQUALS( bm.key( "XXXX" ), nullopt );
-    EQUALS( bm.key( "AAA"  ), nullopt );
+    EQUALS( bm.key_safe( "XXXX" ), nullopt );
+    EQUALS( bm.key_safe( "AAA"  ), nullopt );
 }
 
 TEST( lexically_normal )

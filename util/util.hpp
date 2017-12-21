@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "macros.hpp"
 #include "types.hpp"
 
 #include <algorithm>
@@ -11,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 // This is intended to lessen  typing  for the simplest of lambda
@@ -57,11 +59,30 @@ template<
     template<typename KeyT_, typename ValT_>
     typename MapT
 >
-OptRef<ValT const> get_key( MapT<KeyT,ValT> const& m,
-                            KeyT            const& k ) {
+OptRef<ValT const> get_val_safe( MapT<KeyT,ValT> const& m,
+                                 KeyT            const& k ) {
     auto found = m.find( k );
     if( found == m.end() )
         return std::nullopt;
+    return found->second;
+}
+
+// Get value for key; if key does not exist it will throw. If  it
+// does exist it will return  a  reference  to  the object in the
+// container. ***NOTE that, for error reporting, we are  assuming
+// that the key type can be output via ostream, which seems  like
+// a reasonable assumption for most things that are normally used
+// as keys.
+template<
+    typename KeyT,
+    typename ValT,
+    template<typename KeyT_, typename ValT_>
+    typename MapT
+>
+ValT const& get_val( MapT<KeyT,ValT> const& m,
+                     KeyT            const& k ) {
+    auto found = m.find( k );
+    ASSERT( found != m.end(), k << " not found in map" );
     return found->second;
 }
 
@@ -100,3 +121,23 @@ std::ostream& operator<<( std::ostream&         out,
     out << "]";
     return out;
 }
+
+// Here  we  open up the std namespace to add a hash function spe-
+// cialization for a reference_wrapper. This  is  straightforward
+// because we can just delegate to the specialization of the type
+// inside the wrapper, if there is one. If there is not one, then
+// this  specialization  will not be used (which is what we want).
+namespace std {
+
+    // Specializing hash<>
+    template<>
+    // Adding template for contents of reference_wrapper
+    template<typename T>
+    struct hash<reference_wrapper<T>> {
+        auto operator()(
+                reference_wrapper<T> const& p ) const noexcept {
+            return hash<remove_const_t<T>>{}( p.get() );
+        }
+    };
+
+} // namespace std

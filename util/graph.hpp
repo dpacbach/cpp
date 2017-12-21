@@ -18,10 +18,6 @@ namespace util {
 * Directed Graph (not acyclic)
 ****************************************************************/
 
-using Id       = size_t;
-using Edges    = std::vector<Id>;
-using GraphVec = std::vector<Edges>;
-
 template<typename NameT>
 class DirectedGraph : util::non_copyable {
 
@@ -44,6 +40,8 @@ public:
 private:
 
     using NamesMap = BDIndexMap<NameT>;
+    using Id       = size_t;
+    using GraphVec = std::vector<std::vector<Id>>;
 
     DirectedGraph( GraphVec&& edges, NamesMap&& names );
 
@@ -76,27 +74,22 @@ DirectedGraph<NameT> make_graph( MapT<
     std::sort( std::begin( names ), std::end( names ) );
 
     // true == items are sorted, due to above.
-    auto names_map = BDIndexMap( std::move( names ), true );
+    auto bm = BDIndexMap( std::move( names ), true );
 
-    GraphVec edges; edges.reserve( m.size() );
+    typename DirectedGraph<NameT>::GraphVec edges;
+    edges.reserve( m.size() );
 
-    for( size_t i = 0; i < names_map.size(); ++i ) {
-        auto name_ = names_map.val( i );
-        ASSERT_( name_ );
-        auto vs = util::get_key( m, (*name_).get() );
-        ASSERT_( vs );
-        auto const& es = (*vs).get();
-        Edges ids; ids.reserve( es.size() );
-        for( auto const& e : es ) {
-            auto key = names_map.key( e );
-            ASSERT_( key );
-            ids.push_back( *key );
-        }
+    for( size_t i = 0; i < bm.size(); ++i ) {
+        auto const& vs = util::get_val( m, bm.val( i ) );
+        std::vector<typename DirectedGraph<NameT>::Id> ids;
+        ids.reserve( vs.size() );
+        for( auto const& v : vs )
+            ids.push_back( bm.key( v ) );
         edges.emplace_back( std::move( ids ) );
     }
 
     return DirectedGraph(
-            std::move( edges ), std::move( names_map ) );
+            std::move( edges ), std::move( bm ) );
 }
 
 template<typename NameT>
@@ -106,7 +99,7 @@ DirectedGraph<NameT>::accessible( NameT const& name ) const {
     std::vector<Id>    visited( m_names.size(), 0 );
     std::vector<Id>    to_visit;
 
-    auto start = m_names.key( name );
+    auto start = m_names.key_safe( name );
     if( start )
         to_visit.push_back( *start );
      
@@ -119,8 +112,7 @@ DirectedGraph<NameT>::accessible( NameT const& name ) const {
             continue;
         visited[i] = 1;
         auto name = m_names.val( i );
-        ASSERT_( name );
-        res.push_back( *name );
+        res.push_back( name );
         for( Id i : m_edges[i] )
             if( !visited[i] )
                 to_visit.push_back( i );
