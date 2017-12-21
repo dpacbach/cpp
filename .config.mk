@@ -12,7 +12,7 @@ top-level-folders = util xml-utils project
 
 ifeq (undefined,$(origin OPT))
     top-level-folders += test
-    test.deps          = util
+    test.deps          = util project
     test_is            = test
 endif
 

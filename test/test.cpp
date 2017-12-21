@@ -5,6 +5,7 @@
 #include "fs.hpp"
 #include "graph.hpp"
 #include "opt-util.hpp"
+#include "preprocessor.hpp"
 #include "test.hpp"
 
 #include <iostream>
@@ -14,7 +15,40 @@
 
 using namespace std;
 
+namespace pr = project;
+
 TEST( always_succeeds ) { }
+
+TEST( include_scan )
+{
+    vector<string> good{
+        "#include <A/B/C/D.hpp>",
+        "#include \"A/B/C/D.hpp\"",
+        "  #  include   \"A/B/C/D.hpp\"  ",
+        "#include<A/B/C/D.hpp\"",
+        "#include <A/B/C/D.hpp>",
+        "#include <A/B/C/D.hpp>"
+        "#include <A/B/C/D.hpp> // with a comment",
+        "#include <A/B/C/D.hpp> // with a comment with \"quotes\"",
+        "#include <A/B/C/D.hpp> // include <commented/out>",
+    };
+    vector<string> bad{
+        "#include A/B/C/D.hpp>",
+        " include A/B/C/D.hpp>",
+        "#include",
+        "# A/B/C/D.hpp>",
+        "#incude A/B/C/D.hpp>",
+        "#include <A/B/C/D.hpp   "
+        "#include <A/B/C/D.hpp   "
+    };
+
+    for( auto const& v : good ) {
+        EQUALS( pr::parse_include( v ), "A/B/C/D.hpp" );
+    }
+    for( auto const& v : bad ) {
+        EQUALS( pr::parse_include( v ), nullopt );
+    }
+}
 
 TEST( directed_graph )
 {
@@ -320,6 +354,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_include_scan,
                    test_directed_graph,
                    test_bimap,
                    test_lexically_normal,
