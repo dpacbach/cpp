@@ -3,7 +3,9 @@
 ****************************************************************/
 #include "preprocessor.hpp"
 #include "macros.hpp"
+#include "string-util.hpp"
 
+#include <fstream>
 #include <regex>
 
 using namespace std;
@@ -30,6 +32,28 @@ OptPath parse_include( string const& sv ) {
         return nullopt;
     ASSERT_( m.size() == 2 );
     return string( m[1] );
+}
+
+// Open a file and parse every line for an include statement  and
+// return a list of the inner contents (file/path).
+PathVec parse_includes( fs::path const& file ) {
+
+    ifstream in( file.string() );
+    ASSERT( in.good(), "failed to open file " << file );
+
+    PathVec res;
+
+    for( string line; getline( in, line ); ) {
+        // Strip the line to eliminate any windows  line  endings
+        // which getline may leave  (though  it should remove the
+        // linux line endings.
+        line = util::strip( line );
+        auto path = parse_include( line );
+        if( !path )
+            continue;
+        res.push_back( *path );
+    }
+    return res; // hoping for NRVO here
 }
 
 } // namespace project
