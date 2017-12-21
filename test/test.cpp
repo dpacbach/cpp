@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -19,7 +20,7 @@ TEST( directed_graph )
 {
     using DG = util::DirectedGraph<fs::path>;
 
-    map<fs::path, vector<fs::path>> m{
+    unordered_map<fs::path, vector<fs::path>> m{
         { "B", { "B"      } },
         { "F", { "C", "B" } },
         { "C", { "D", "E" } },
@@ -30,7 +31,7 @@ TEST( directed_graph )
         { "H", { "C", "D" } }
     };
 
-    DG g( m );
+    DG g = util::make_graph<fs::path>( m );
 
     vector<fs::path> v;
 

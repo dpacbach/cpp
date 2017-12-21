@@ -10,6 +10,7 @@
 // to save typing.
 
 #include <experimental/filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -23,3 +24,6 @@ using OptPath = std::optional<fs::path>;
 using StrVec  = std::vector<std::string>;
 using SVVec   = std::vector<std::string_view>;
 using PathVec = std::vector<fs::path>;
+
+template<typename T>
+using OptRef  = std::optional<std::reference_wrapper<T>>;

@@ -3,8 +3,12 @@
 ****************************************************************/
 #pragma once
 
+#include "types.hpp"
+
 #include <algorithm>
+#include <functional>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -39,6 +43,26 @@ void print_vec( std::vector<T> const& v,
 template<typename ContainerT, typename KeyT>
 bool has_key( ContainerT const& s, KeyT const& k ) {
     return s.find( k ) != s.end();
+}
+
+// Get  a reference to a value in a map. Since the key may not ex-
+// ist, we return an optional. But  since  we want a reference to
+// the  object,  we  return  an  optional  of a reference wrapper,
+// since  containers can't hold references. I think the reference
+// wrapper returned here should only allow const references to be
+// extracted.
+template<
+    typename KeyT,
+    typename ValT,
+    template<typename KeyT_, typename ValT_>
+    typename MapT
+>
+OptRef<ValT const> get_key( MapT<KeyT,ValT> const& m,
+                            KeyT            const& k ) {
+    auto found = m.find( k );
+    if( found == m.end() )
+        return std::nullopt;
+    return found->second;
 }
 
 // This  will  do  the remove/erase idiom automatically for conve-

@@ -26,9 +26,6 @@ namespace util {
 template<typename T> class BDIndexMap : util::non_copyable {
 
 public:
-    // Use reference_wrapper to hold a reference in a container.
-    using OptRef = std::optional<std::reference_wrapper<T const>>;
-
     // NOTE: the contained data must be a vector of unique items;
     // if what you are passing in does not meet that  requirement
     // then  set  the is_uniq_sorted flag to false and it will be
@@ -42,7 +39,7 @@ public:
 
     // Returns an optional  of  reference,  so  no copying/moving
     // should happen here.
-    OptRef val( size_t n ) const;
+    OptRef<T const> val( size_t n ) const;
 
     std::optional<size_t> key( T const& val ) const;
 
@@ -73,8 +70,7 @@ std::optional<size_t> BDIndexMap<T>::key( T const& val ) const {
 }
 
 template<typename T>
-typename BDIndexMap<T>::OptRef
-BDIndexMap<T>::val( size_t n ) const {
+OptRef<T const> BDIndexMap<T>::val( size_t n ) const {
 
     if( n >= m_data.size() )
         return std::nullopt;

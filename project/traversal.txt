@@ -1,29 +1,17 @@
 stack = [] // implemented with vector
-
-map = {} // holds file --> first-level dependencies
-
+map   = {} // holds file --> first-level dependencies
 put all cpps in project into stack
 
 while queue not empty:
-
     take next file out of stack
-
     if it is in the map
-
         continue // because there will be duplicates in the stack
-
     parse it for list of includes
-
     resolve the includes
-
     add (file, include-list) into map
-
     for each file in include-list:
-
         if it is not in the map, add it to the stack
 
 construct graph from map
-
 for each cpp in project:
-
     get list of accessible files, and write

@@ -6,6 +6,7 @@
 #include "macros.hpp"
 #include "non-copyable.hpp"
 #include "bimap.hpp"
+#include "util.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -16,32 +17,35 @@ namespace util {
 /****************************************************************
 * Directed Graph (not acyclic)
 ****************************************************************/
+
+using Id       = size_t;
+using Edges    = std::vector<Id>;
+using GraphVec = std::vector<Edges>;
+
 template<typename NameT>
 class DirectedGraph : util::non_copyable {
 
 public:
 
-    using Id       = size_t;
-    using Edges    = std::vector<Id>;
-    using GraphVec = std::vector<Edges>;
-    using NamesMap = BDIndexMap<NameT>;
-
-    DirectedGraph( std::map<
-                       NameT,
-                       std::vector<NameT>
-                   > const& m );
-
-    DirectedGraph( std::unordered_map<
-                       NameT,
-                       std::vector<NameT>
-                   > const& m );
-
-    DirectedGraph( GraphVec&& edges,
-                   NamesMap&& names );
+    template<
+        typename NameT_,
+        template<typename Key, typename Val> typename MapT
+    >
+    friend DirectedGraph<NameT_> make_graph(
+               MapT<
+                   NameT_,
+                   std::vector<NameT_>
+               >
+               const& m
+    );
 
     std::vector<NameT> accessible( NameT const& name ) const;
 
 private:
+
+    using NamesMap = BDIndexMap<NameT>;
+
+    DirectedGraph( GraphVec&& edges, NamesMap&& names );
 
     NamesMap m_names;
     GraphVec m_edges;
@@ -57,31 +61,42 @@ DirectedGraph<NameT>::DirectedGraph( GraphVec&& edges,
     ASSERT_( m_names.size() == m_edges.size() );
 }
 
-template<typename NameT>
-DirectedGraph<NameT>::DirectedGraph( std::map<
-                                         NameT,
-                                         std::vector<NameT>
-                                     > const& m )
-      : m_names( {} ),
-        m_edges( {} ) {
+template<
+    typename NameT,
+    template<typename Key, typename Val> typename MapT
+>
+DirectedGraph<NameT> make_graph( MapT<
+                                     NameT,
+                                     std::vector<NameT>
+                                 > const& m ) {
 
     std::vector<NameT> names; names.reserve( m.size() );
     for( auto const& p : m )
         names.push_back( p.first );
-    // true == items are sorted, because we are using a map.
-    m_names = BDIndexMap( std::move( names ), true );
+    std::sort( std::begin( names ), std::end( names ) );
+
+    // true == items are sorted, due to above.
+    auto names_map = BDIndexMap( std::move( names ), true );
 
     GraphVec edges; edges.reserve( m.size() );
-    for( auto const& p : m ) {
-        Edges ids; ids.reserve( p.second.size() );
-        for( auto const& v : p.second ) {
-            auto key = m_names.key( v );
+
+    for( size_t i = 0; i < names_map.size(); ++i ) {
+        auto name_ = names_map.val( i );
+        ASSERT_( name_ );
+        auto vs = util::get_key( m, (*name_).get() );
+        ASSERT_( vs );
+        auto const& es = (*vs).get();
+        Edges ids; ids.reserve( es.size() );
+        for( auto const& e : es ) {
+            auto key = names_map.key( e );
             ASSERT_( key );
             ids.push_back( *key );
         }
         edges.emplace_back( std::move( ids ) );
     }
-    m_edges = std::move( edges );
+
+    return DirectedGraph(
+            std::move( edges ), std::move( names_map ) );
 }
 
 template<typename NameT>
