@@ -56,4 +56,17 @@ PathVec parse_includes( fs::path const& file ) {
     return res; // hoping for NRVO here
 }
 
+// Find  all source files under the `from` path, open them up and
+// parse all the include statements  in  them,  then return a map
+// where key is the file path relative to base_path and the value
+// is a list of parsed (but not resolved) include files.
+GlobalIncludeMap build_sources( fs::path from,
+                                fs::path base_path ) {
+    // TODO: don't forget to pre-size the hashmap.
+    (void)from;
+    (void)base_path;
+    return {};
+}
+
+
 } // namespace project

@@ -47,6 +47,23 @@ bool has_key( ContainerT const& s, KeyT const& k ) {
     return s.find( k ) != s.end();
 }
 
+// The idea of this function is that it will test the given key's
+// membership (as a key) in the map and, if it is found, it  will
+// return  a  reference  (in  an optional) to that key inside the
+// container. Again, it guarantees to not only return a reference
+// to  the  key, but it will be a reference to the one in the con-
+// tainer, which will then only live as  long  as  the  map  does.
+template<typename ContainerT, typename KeyT>
+OptRef<KeyT const> get_key_safe( ContainerT const& m,
+                                 KeyT       const& k ) {
+    auto found = m.find( k );
+    if( found == m.end() )
+        return std::nullopt;
+    // Must return the one in the container, not the  one  passed
+    // in as an argument, that's the idea here.
+    return found->first;
+}
+
 // Get  a reference to a value in a map. Since the key may not ex-
 // ist, we return an optional. But  since  we want a reference to
 // the  object,  we  return  an  optional  of a reference wrapper,
