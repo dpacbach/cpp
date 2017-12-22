@@ -20,7 +20,69 @@ namespace pr = project;
 
 TEST( always_succeeds ) { }
 
-TEST( fs )
+TEST( resolve )
+{
+    // map values are not relevant to this test.
+    pr::GlobalIncludeMap m{
+        { "A/B/C/X.hpp",   {} },
+        { "A/B/X.hpp",     {} },
+        { "A/B/Y.hpp",     {} },
+        { "A/B/C/Z.hpp",   {} },
+        { "A/U.hpp",       {} },
+        { "A/B/C/U.hpp",   {} },
+        { "A/B/C/D/V.hpp", {} },
+    };
+
+    fs::path current = "A/B";
+
+    auto _resolve = [&]( auto const& sp, auto const& rel ) {
+        return pr::resolve( m, current, sp, rel );
+    };
+
+    OptCRef<fs::path> res;
+    PathVec search_paths;
+
+    search_paths = { };
+    res = _resolve( search_paths, ""      ); EQUALS( res, nullopt     );
+    res = _resolve( search_paths, "X"     ); EQUALS( res, nullopt     );
+    res = _resolve( search_paths, "U.hpp" ); EQUALS( res, nullopt     );
+    res = _resolve( search_paths, "Y.hpp" ); EQUALS( res, "A/B/Y.hpp" );
+
+    search_paths = { "A" };
+    res = _resolve( search_paths, "B/Y.hpp"   ); EQUALS( res, "A/B/Y.hpp" );
+    res = _resolve( search_paths, "A/B/Y.hpp" ); EQUALS( res, nullopt     );
+    res = _resolve( search_paths, "X.hpp"     ); EQUALS( res, "A/B/X.hpp" );
+    res = _resolve( search_paths, "B/X.hpp"   ); EQUALS( res, "A/B/X.hpp" );
+    res = _resolve( search_paths, "V.hpp"     ); EQUALS( res, nullopt     );
+
+    search_paths = { "A/B/C" };
+    res = _resolve( search_paths, "X.hpp"             ); EQUALS( res, "A/B/X.hpp"     );
+    res = _resolve( search_paths, "C/X.hpp"           ); EQUALS( res, "A/B/C/X.hpp"   );
+    res = _resolve( search_paths, "U.hpp"             ); EQUALS( res, "A/B/C/U.hpp"   );
+    res = _resolve( search_paths, "V.hpp"             ); EQUALS( res, nullopt         );
+    res = _resolve( search_paths, "A/B/C/X.hpp"       ); EQUALS( res, nullopt         );
+    res = _resolve( search_paths, "C/D/Vx.hpp"        ); EQUALS( res, nullopt         );
+    res = _resolve( search_paths, "C/D/V.hpp"         ); EQUALS( res, "A/B/C/D/V.hpp" );
+    res = _resolve( search_paths, "Y.hpp"             ); EQUALS( res, "A/B/Y.hpp"     );
+    res = _resolve( search_paths, "../C/X.hpp"        ); EQUALS( res, "A/B/C/X.hpp"   );
+    res = _resolve( search_paths, "../../U.hpp"       ); EQUALS( res, "A/U.hpp"       );
+    res = _resolve( search_paths, "../../../../U.hpp" ); EQUALS( res, nullopt         );
+
+    search_paths = { "A/B/C/D", "A" };
+    PathVec relatives{
+        "XYZ.hpp", "V.hpp", "../A/U.hpp", "../U.hpp", "C/U.hpp", "C/X.hpp"
+    };
+    PathCRefVec rs = pr::resolves( m, current, search_paths, relatives );
+
+    EQUALS( rs.size(), size_t( 5 )     );
+    EQUALS( rs[0],     "A/B/C/D/V.hpp" );
+    EQUALS( rs[1],     "A/U.hpp"       );
+    EQUALS( rs[2],     "A/U.hpp"       );
+    EQUALS( rs[3],     "A/B/C/U.hpp"   );
+    EQUALS( rs[4],     "A/B/C/X.hpp"   );
+}
+
+TEST( filesystem )
 {
     bool b;
 
@@ -441,8 +503,9 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_resolve,
                    test_string_util,
-                   test_fs,
+                   test_filesystem,
                    test_include_scan,
                    test_directed_graph,
                    test_bimap,

@@ -53,9 +53,17 @@ bool has_key( ContainerT const& s, KeyT const& k ) {
 // container. Again, it guarantees to not only return a reference
 // to  the  key, but it will be a reference to the one in the con-
 // tainer, which will then only live as  long  as  the  map  does.
+//
+// The reason for the return semantics is that 1) if  the  caller
+// eventually  wants  to  copy the returned key, they can do that
+// regardless  of which reference we return, but 2) if the caller
+// wants  to  hang on to a reference to the key (when found) then
+// it is more likely they will want a reference to the one in the
+// map,  for  reasons of managing lifetime of the object (key) re-
+// ferred to.
 template<typename ContainerT, typename KeyT>
-OptRef<KeyT const> get_key_safe( ContainerT const& m,
-                                 KeyT       const& k ) {
+OptCRef<KeyT> get_key_safe( ContainerT const& m,
+                            KeyT       const& k ) {
     auto found = m.find( k );
     if( found == m.end() )
         return std::nullopt;

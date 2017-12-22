@@ -97,4 +97,54 @@ GlobalIncludeMap build_sources( fs::path from,
     return res;
 }
 
+// Take  a  relative  path and a list of search paths and resolve
+// the path using (approximately) the algorithm that the compiler
+// would  use, which means to iterate through the search paths in
+// order, construct a candidate path  from  each,  and then to to
+// stop as soon as a match is  found, where a match is defined as
+// a file that is found  in  the  global  file map. Note that, as
+// some compilers do, we first  search  in the current_path which
+// is supposed to represent the  folder  containing the file that
+// included this file under examination.  Note  that the paths in-
+// volved are expected to all be in normal form.
+//
+// When a match is  found  it  will  be  returned  as a reference
+// (wrapper) to the path stored inside the global mapping,  other-
+// wise nullopt.
+OptCRef<fs::path> resolve( GlobalIncludeMap const& m,
+                           fs::path         const& current,
+                           PathVec          const& search_paths,
+                           fs::path         const& relative ) {
+
+    auto abs = [&relative]( auto const& p ) {
+        // The relative path may have double dots in it.
+        return util::lexically_normal( p / relative );
+    };
+
+    if( auto ref = util::get_key_safe( m, abs( current ) ); ref )
+        return ref;
+
+    for( auto const& s : search_paths )
+        if( auto ref = util::get_key_safe( m, abs( s ) ); ref )
+            return ref;
+
+    return nullopt;
+}
+
+// Runs  the  `resolve`  function  over  a list of relative paths.
+// paths that do not resolve are simply ignored.
+PathCRefVec resolves( GlobalIncludeMap const& m,
+                      fs::path         const& current,
+                      PathVec          const& search_paths,
+                      PathVec          const& relatives ) {
+    // Not all relative paths may  resolve, but usually they will,
+    // so it is worth reserving that much memory.
+    PathCRefVec res; res.reserve( relatives.size() );
+    for( auto const& r : relatives )
+        if( auto o = resolve( m, current, search_paths, r ); o )
+            res.push_back( *o );
+
+    return res;
+}
+
 } // namespace project
