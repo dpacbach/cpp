@@ -3,12 +3,14 @@
 ****************************************************************/
 #include "preprocessor.hpp"
 #include "macros.hpp"
+#include "stopwatch.hpp"
 #include "string-util.hpp"
 
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <thread>
 
 using namespace std;
 
@@ -208,6 +210,7 @@ fs::path preprocess_project( GlobalIncludeMap const& m,
 
     auto cl_read = util::lexically_normal(
             base / attr.int_dir / "CL.read.1.tlog" );
+    // TODO: may need to create parent folders
     ofstream out( cl_read );
     ASSERT( out.good(), "failed to open " << cl_read );
     for( auto s : sources ) {
@@ -226,12 +229,33 @@ fs::path preprocess_project( GlobalIncludeMap const& m,
 // therein, and then call preprocess on each project.
 void preprocess_solution( GlobalIncludeMap const& m,
                           fs::path         const& base,
-                          Solution         const& solution ) {
-    for( auto const& [f, p] : solution.projects() ) {
-        cout << "processing project " << f.string() << endl;
-        auto cl_read = preprocess_project( m, base, p );
-        cout << "wrote to " << cl_read.string() << endl;
-    }
+                          Solution         const& solution,
+                          int                     jobs ) {
+    ASSERT_( jobs > 0 && jobs < 60 );
+
+    vector<vector<fs::path>> job_paths( jobs );
+    int i = 0;
+    for( auto const& val : solution.projects() )
+        job_paths[(i++)%jobs].push_back( val.first );
+
+    auto chunk = [&]( PathVec const& ps ) {
+        for( auto const& p : ps ) {
+            auto const& proj = solution.projects().at( p );
+            auto cl_read = preprocess_project( m, base, proj );
+            // add mutex here
+            cout << "wrote to " << cl_read.string() << endl;
+        }
+    };
+
+    //vector<bool> outputs( jobs );
+    vector<thread> threads( jobs );
+
+    // TODO: need to add error capture here
+    for( int i = 0; i < jobs; ++i )
+        threads[i] = thread( chunk, cref( job_paths[i] ) );
+
+    for( auto& t : threads )
+        t.join();
 }
 
 // Will  open  the  solution,  parse  it, parse all project files
@@ -239,9 +263,12 @@ void preprocess_solution( GlobalIncludeMap const& m,
 void preprocess_solution( GlobalIncludeMap const& m,
                           fs::path         const& base,
                           fs::path         const& solution,
-                          string_view             platform ) {
-    auto s = Solution::read( solution, platform, base );
-    preprocess_solution( m, base, s );
+                          string_view             platform,
+                          int                     jobs ) {
+    auto s = TIMEIT( "read full solution",
+        Solution::read( solution, platform, base )
+    );
+    preprocess_solution( m, base, s, jobs );
 }
 
 } // namespace project
