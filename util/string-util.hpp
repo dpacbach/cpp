@@ -34,7 +34,7 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
 
     auto predicate = []( auto l, auto r ) {
         if constexpr( sizeof( StringT ) == 1 )
-            return (tolower( l ) == tolower( r ));
+            return (std::tolower( l ) == std::tolower( r ));
         else {
             int l_i( l ), r_i( r );
             if( l_i > 127 || r_i > 127 )
@@ -46,9 +46,9 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
         }
     };
 
-    return equal( begin( s1 ), end( s1 ),
-                  begin( s2 ), end( s2 ),
-                  predicate );
+    return std::equal( begin( s1 ), end( s1 ),
+                       begin( s2 ), end( s2 ),
+                       predicate );
 }
 
 // Strip all blank space off of a string view and return

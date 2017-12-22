@@ -5,6 +5,7 @@
 #include "macros.hpp"
 #include "string-util.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <regex>
 
@@ -20,6 +21,27 @@ namespace {
 // this will be compiled once (as  a  global variable) so that it
 // is faster to use multiple times.
 regex re_inc( "^[ \t]*#[ \t]*include[ \t]*[\"<]([^\"> ]*)[\">].*" );
+
+// These are a list of extensions marking files that are relevant
+// to this preprocessor.
+vector<fs::path> const exts{
+    ".cpp", ".hpp", ".c", ".h", ".inl", ".cu", ".cuh"
+};
+
+// Returns true if p has extension in the above list (with
+// case-insensitive comparison).
+bool is_interesting( fs::path const& p ) {
+
+    auto ext = p.extension();
+    util::CaseSensitive sens = util::CaseSensitive::NO;
+
+    auto pred = [&]( fs::path const& a ) {
+        return util::path_equals( ext, a, sens );
+    };
+
+    return find_if( begin( exts ), end( exts ), pred )
+           != end( exts );
+}
 
 }
 
@@ -62,11 +84,17 @@ PathVec parse_includes( fs::path const& file ) {
 // is a list of parsed (but not resolved) include files.
 GlobalIncludeMap build_sources( fs::path from,
                                 fs::path base_path ) {
-    // TODO: don't forget to pre-size the hashmap.
-    (void)from;
-    (void)base_path;
-    return {};
+    ASSERT_( from.is_absolute() && base_path.is_absolute() );
+    GlobalIncludeMap res;
+    for( auto& i : fs::recursive_directory_iterator( from ) ) {
+        if( is_interesting( i ) ) {
+            auto rel = util::lexically_relative( i, base_path );
+            // Use i here since we don't want to assume that  the
+            // CWD is equal to base_path.
+            res[rel] = parse_includes( i );
+        }
+    }
+    return res;
 }
-
 
 } // namespace project

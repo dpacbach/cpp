@@ -18,10 +18,7 @@ PathVec parse_includes( fs::path const& file );
 
 // Data structure we will used to hold a list of all  files  that
 // are considered relevant as well as  their  include  statements.
-using GlobalIncludeMap = std::unordered_map<
-    fs::path,
-    std::vector<fs::path>
->;
+using GlobalIncludeMap = std::unordered_map<fs::path, PathVec>;
 
 // Find  all source files under the `from` path, open them up and
 // parse all the include statements  in  them,  then return a map
