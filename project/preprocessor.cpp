@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <regex>
 
 using namespace std;
@@ -78,20 +79,24 @@ PathVec parse_includes( fs::path const& file ) {
     return res; // hoping for NRVO here
 }
 
-// Find  all source files under the `from` path, open them up and
+// Find all source files under the `from` paths, open them up and
 // parse all the include statements  in  them,  then return a map
 // where key is the file path relative to base_path and the value
 // is a list of parsed (but not resolved) include files.
-GlobalIncludeMap build_sources( fs::path from,
-                                fs::path base_path ) {
-    ASSERT_( from.is_absolute() && base_path.is_absolute() );
+GlobalIncludeMap build_sources( PathVec const& from,
+                                fs::path       base_path ) {
+    ASSERT_( base_path.is_absolute() );
     GlobalIncludeMap res;
-    for( auto& i : fs::recursive_directory_iterator( from ) ) {
-        if( is_interesting( i ) ) {
-            auto rel = util::lexically_relative( i, base_path );
-            // Use i here since we don't want to assume that  the
-            // CWD is equal to base_path.
-            res[rel] = parse_includes( i );
+    for( auto const& folder : from ) {
+        ASSERT( folder.is_absolute(),
+                folder << " is not an absolute path." );
+        for( auto& i : fs::recursive_directory_iterator( folder ) ) {
+            if( is_interesting( i ) ) {
+                auto rel = util::lexically_relative( i, base_path );
+                // Use i here since we don't want to assume that  the
+                // CWD is equal to base_path.
+                res[rel] = parse_includes( i );
+            }
         }
     }
     return res;
@@ -145,6 +150,98 @@ PathCRefVec resolves( GlobalIncludeMap const& m,
             res.push_back( *o );
 
     return res;
+}
+
+// Same as above but looks up the `current path` and list  of  in-
+// cluded relative paths from the global map.
+PathCRefVec resolves( GlobalIncludeMap const& m,
+                      PathVec          const& search_paths,
+                      fs::path         const& file ) {
+    auto current = file.parent_path();
+    // Throws if file not in map.
+    auto const& relatives = util::get_val( m, file );
+    return resolves( m, current, search_paths, relatives );
+}
+
+// This will essentially run the preprocessor on  a  project  and
+// produce the final directed graph. Note that the directed graph
+// will  contain  only  files encountered starting from the speci-
+// fied sources, and all references  to  files will be references
+// to  within  the  global  map. Note that sources are also refer-
+// ences to within the global map.
+util::DirectedGraph<PathCRef>
+preprocess( GlobalIncludeMap const& m,
+            PathVec          const& search_paths,
+            PathCRefVec      const& sources ) {
+
+    GlobalRefIncludeMap mres;
+
+    // Initialize stack with all source files.
+    PathCRefVec st = sources;
+
+    while( !st.empty() ) {
+        PathCRef p = st.back(); st.pop_back();
+        if( util::has_key( mres, p ) )
+            continue;
+        mres[p] = resolves( m, search_paths, p.get() );
+        for( auto p : mres[p] )
+            if( !util::has_key( mres, p ) )
+                st.push_back( p );
+    }
+    return util::make_graph<PathCRef>( mres );
+}
+
+// Same as above, but takes a project, and writes out the results
+// to the Cl.read.1.tlog file in the  intermediate  folder.  Will
+// return the file name that it wrote to.
+fs::path preprocess_project( GlobalIncludeMap const& m,
+                             fs::path         const& base,
+                             Project          const& project ) {
+    auto const& attr = project.attr();
+    PathCRefVec sources; sources.reserve( attr.cl_compiles.size() );
+    for( auto const& p : attr.cl_compiles ) {
+        auto o = util::get_key_safe( m, p );
+        ASSERT( o, "Source file " << p << " not found in global map." );
+        sources.push_back( *o );
+    }
+    auto graph = preprocess( m, attr.search_paths, sources );
+
+    auto cl_read = util::lexically_normal(
+            base / attr.int_dir / "CL.read.1.tlog" );
+    ofstream out( cl_read );
+    ASSERT( out.good(), "failed to open " << cl_read );
+    for( auto s : sources ) {
+        // Have to call the string() method so that it will
+        // output without quotes.
+        out << "^" << s.get().string() << "\n";
+        auto includes = graph.accessible( s );
+        for( auto n : includes )
+            if( n != s )
+                out << n.get().string() << "\n";
+    }
+    return cl_read;
+}
+
+// Will  open  the  solution,  parse  it, parse all project files
+// therein, and then call preprocess on each project.
+void preprocess_solution( GlobalIncludeMap const& m,
+                          fs::path         const& base,
+                          Solution         const& solution ) {
+    for( auto const& [f, p] : solution.projects() ) {
+        cout << "processing project " << f.string() << endl;
+        auto cl_read = preprocess_project( m, base, p );
+        cout << "wrote to " << cl_read.string() << endl;
+    }
+}
+
+// Will  open  the  solution,  parse  it, parse all project files
+// therein, and then call preprocess on each project.
+void preprocess_solution( GlobalIncludeMap const& m,
+                          fs::path         const& base,
+                          fs::path         const& solution,
+                          string_view             platform ) {
+    auto s = Solution::read( solution, platform, base );
+    preprocess_solution( m, base, s );
 }
 
 } // namespace project

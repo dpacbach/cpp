@@ -23,11 +23,10 @@ using OptStr      = std::optional<std::string>;
 using OptPath     = std::optional<fs::path>;
 using StrVec      = std::vector<std::string>;
 using SVVec       = std::vector<std::string_view>;
-using PathVec     = std::vector<fs::path>;
+using PathRef     = std::reference_wrapper<fs::path>;
 using PathCRef    = std::reference_wrapper<fs::path const>;
-using PathCRefVec = std::vector<
-                        std::reference_wrapper<fs::path const>
-                    >;
+using PathVec     = std::vector<fs::path>;
+using PathCRefVec = std::vector<PathCRef>;
 
 template<typename T>
 using OptRef  = std::optional<std::reference_wrapper<T>>;

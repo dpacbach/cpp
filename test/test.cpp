@@ -237,10 +237,7 @@ TEST( directed_graph )
     /*************************************************************
     * reference_wrapper test
     *************************************************************/
-    using RWP  = reference_wrapper<fs::path const>;
-    using VRWP = vector<RWP>;
-
-    unordered_map<RWP, vector<RWP>> m2;
+    pr::GlobalRefIncludeMap m2;
 
     fs::path p1 = "A/B/1", p2 = "A/B/2", p3 = "A/B/3", p4 = "A/B/4";
 
@@ -249,26 +246,26 @@ TEST( directed_graph )
     m2[p3] = { p1     };
     m2[p4] = { p4     };
 
-    using DG2 = util::DirectedGraph<RWP>;
-    DG2 g2 = util::make_graph<RWP>( m2 );
+    using DG2 = util::DirectedGraph<PathCRef>;
+    DG2 g2 = util::make_graph<PathCRef>( m2 );
 
-    VRWP v2;
+    PathCRefVec v2;
 
     v2 = g2.accessible( p4 );
     sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (VRWP{ p4 }) );
+    EQUALS( v2, (PathCRefVec{ p4 }) );
 
     v2 = g2.accessible( p3 );
     sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (VRWP{ p1, p2, p3, p4 }) );
+    EQUALS( v2, (PathCRefVec{ p1, p2, p3, p4 }) );
 
     v2 = g2.accessible( p2 );
     sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (VRWP{ p1, p2, p4 }) );
+    EQUALS( v2, (PathCRefVec{ p1, p2, p4 }) );
 
     v2 = g2.accessible( p1 );
     sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (VRWP{ p1, p2, p4 }) );
+    EQUALS( v2, (PathCRefVec{ p1, p2, p4 }) );
 
 }
 

@@ -4,6 +4,9 @@
 #pragma once
 
 #include "fs.hpp"
+#include "graph.hpp"
+#include "project.hpp"
+#include "solution.hpp"
 #include "types.hpp"
 
 namespace project {
@@ -17,15 +20,17 @@ OptPath parse_include( std::string const& sv );
 PathVec parse_includes( fs::path const& file );
 
 // Data structure we will used to hold a list of all  files  that
-// are considered relevant as well as  their  include  statements.
-using GlobalIncludeMap = std::unordered_map<fs::path, PathVec>;
-
-// Find  all source files under the `from` path, open them up and
+// are  considered  relevant  as well as their include statements
+// (which may  be  resolved  or  not  depending  on  the context).
+using GlobalIncludeMap    = std::unordered_map<fs::path, PathVec>;
+using GlobalRefIncludeMap = std::unordered_map<PathCRef,
+                                               PathCRefVec>;
+// Find all source files under the `from` paths, open them up and
 // parse all the include statements  in  them,  then return a map
 // where key is the file path relative to base_path and the value
 // is a list of parsed (but not resolved) include files.
-GlobalIncludeMap build_sources( fs::path from,
-                                fs::path base_path );
+GlobalIncludeMap build_sources( PathVec const& from,
+                                fs::path       base_path );
 
 // Take  a  relative  path and a list of search paths and resolve
 // the path using (approximately) the algorithm that the compiler
@@ -52,5 +57,42 @@ PathCRefVec resolves( GlobalIncludeMap const& global,
                       fs::path         const& current_path,
                       PathVec          const& search_paths,
                       PathVec          const& relatives );
+
+// Same as above but looks up the `current path` and list  of  in-
+// cluded relative paths from the global map.
+PathCRefVec resolves( GlobalIncludeMap const& global,
+                      PathVec          const& search_paths,
+                      fs::path         const& file );
+
+// This will essentially run the preprocessor on  a  project  and
+// produce the final directed graph. Note that the directed graph
+// will  contain  only  files encountered starting from the speci-
+// fied sources, and all references  to  files will be references
+// to  within  the  global  map. Note that sources are also refer-
+// ences to within the global map.
+util::DirectedGraph<PathCRef>
+preprocess( GlobalIncludeMap const& global,
+            PathVec          const& search_paths,
+            PathCRefVec      const& sources );
+
+// Same as above, but takes a project, and writes out the results
+// to the Cl.read.1.tlog file in the  intermediate  folder.  Will
+// return the file name that it wrote to.
+fs::path preprocess_project( GlobalIncludeMap const& global,
+                             fs::path         const& base,
+                             Project          const& project );
+
+// Will  open  the  solution,  parse  it, parse all project files
+// therein, and then call preprocess on each project.
+void preprocess_solution( GlobalIncludeMap const& global,
+                          fs::path         const& base,
+                          Solution         const& solution );
+
+// Will  open  the  solution,  parse  it, parse all project files
+// therein, and then call preprocess on each project.
+void preprocess_solution( GlobalIncludeMap const& global,
+                          fs::path         const& base,
+                          fs::path         const& solution,
+                          std::string_view        platform );
 
 } // namespace project
