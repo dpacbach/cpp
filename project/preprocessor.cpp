@@ -28,7 +28,7 @@ regex re_inc( "^[ \t]*#[ \t]*include[ \t]*[\"<]([^\"> ]*)[\">].*" );
 // These are a list of extensions marking files that are relevant
 // to this preprocessor.
 vector<fs::path> const exts{
-    ".cpp", ".hpp", ".c", ".h", ".inl", ".cu", ".cuh"
+    ".cpp", ".hpp", ".c", ".h", ".inl", ".cu", ".cuh", ".cc"
 };
 
 // Returns true if p has extension in the above list (with

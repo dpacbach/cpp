@@ -6,6 +6,8 @@
 #include "stopwatch.hpp"
 #include "string-util.hpp"
 #include "xml-utils.hpp"
+#include "preprocessor.hpp"
+#include "opt-util.hpp"
 
 #include <algorithm>
 #include <string>
@@ -18,21 +20,32 @@ using namespace std;
 namespace pr = project;
 
 //auto project_file  = "../sln-demo/samples/pugixml_vs2013.vcxproj";
-//auto solution_file = "../sln-demo/libmemcached-win/win32/libmemcached.sln";
-auto solution_file = "../sln-demo/C++/Calculator.sln";
+auto solution_file = "../sln-demo/libmemcached-win/win32/libmemcached.sln";
+//auto solution_file = "../sln-demo/C++/Calculator.sln";
 
 int main() try {
 
     cout << endl;
 
-    //fs::path rel = fs::current_path();
-    fs::path rel = fs::canonical( fs::absolute( ".." ) );
+    fs::path base = fs::canonical( fs::absolute( ".." ) );
 
-    auto s = TIMEIT( "parse solution",
-        pr::Solution::read( solution_file, "Debug|Win32", rel )
+    int jobs = 1;
+
+    PathVec source_folders{
+        base
+    };
+
+    auto global = TIMEIT( "build global map",
+        pr::build_sources( source_folders, base );
     );
 
-    cout << s << endl;
+    TIMEIT( "preprocess",
+        pr::preprocess_solution( global,
+                                 base,
+                                 solution_file,
+                                 "Debug|Win32",
+                                 jobs );
+    );
 
     return 0;
 
