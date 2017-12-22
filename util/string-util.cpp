@@ -14,6 +14,18 @@ bool contains( string_view s, string_view what ) {
     return s.find( what ) != string_view::npos;
 }
 
+// Returns true if s starts with w.
+bool starts_with( string_view s, string_view w ) {
+    return mismatch( begin( s ), end( s ),
+                     begin( w ), end( w) ).second == end( w );
+}
+
+// Returns true if s ends with what.
+bool ends_with( string_view s, string_view w ) {
+    return mismatch( rbegin( s ), rend( s ),
+                     rbegin( w ), rend( w ) ).second == rend( w );
+}
+
 // Strip all blank space off of  a  string  view and return a new
 // one.
 string_view strip( string_view sv ) {

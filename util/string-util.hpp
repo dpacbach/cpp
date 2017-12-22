@@ -17,6 +17,12 @@ namespace util {
 // Returns true if s contains what.
 bool contains( std::string_view s, std::string_view what );
 
+// Returns true if s starts with what.
+bool starts_with( std::string_view s, std::string_view what );
+
+// Returns true if s ends with what.
+bool ends_with( std::string_view s, std::string_view what );
+
 // Strip all blank space off of a string view and return
 // a new one.
 std::string_view strip( std::string_view sv );

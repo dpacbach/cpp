@@ -18,7 +18,8 @@
     auto STRING_JOIN( b_, __LINE__ ) = b;                               \
     if( STRING_JOIN( a_, __LINE__ ) != STRING_JOIN( b_, __LINE__) ) {   \
         cerr << "--------------------------------------------" << endl; \
-        cerr << "FAILED: " << #a << " != " << #b << endl;               \
+        cerr << "FAILED on line " TO_STRING( __LINE__ ) ": " << #a      \
+             << " != " << #b << endl;                                   \
         cerr << "instead got: " << STRING_JOIN( a_, __LINE__ );         \
         cerr << " ?= " << #b << endl;                                   \
         cerr << "--------------------------------------------" << endl; \

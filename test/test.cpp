@@ -6,6 +6,7 @@
 #include "graph.hpp"
 #include "opt-util.hpp"
 #include "preprocessor.hpp"
+#include "string-util.hpp"
 #include "test.hpp"
 
 #include <iostream>
@@ -18,6 +19,37 @@ using namespace std;
 namespace pr = project;
 
 TEST( always_succeeds ) { }
+
+TEST( string_util )
+{
+    bool b;
+
+    b = util::starts_with( ""      , ""      ); EQUALS( b, true  );
+    b = util::starts_with( "x"     , ""      ); EQUALS( b, true  );
+    b = util::starts_with( ""      , "x"     ); EQUALS( b, false );
+    b = util::starts_with( "xxx"   , ""      ); EQUALS( b, true  );
+    b = util::starts_with( ""      , "xxx"   ); EQUALS( b, false );
+    b = util::starts_with( "abcde" , "abcde" ); EQUALS( b, true  );
+    b = util::starts_with( "abcde" , "a"     ); EQUALS( b, true  );
+    b = util::starts_with( "abcde" , "ab"    ); EQUALS( b, true  );
+    b = util::starts_with( "abcde" , "abcd"  ); EQUALS( b, true  );
+    b = util::starts_with( "abcde" , "abfd"  ); EQUALS( b, false );
+    b = util::starts_with( "abcde" , "abfdx" ); EQUALS( b, false );
+    b = util::starts_with( "abcde ", "abcd"  ); EQUALS( b, true  );
+
+    b = util::ends_with( ""      , ""      ); EQUALS( b, true  );
+    b = util::ends_with( "x"     , ""      ); EQUALS( b, true  );
+    b = util::ends_with( ""      , "x"     ); EQUALS( b, false );
+    b = util::ends_with( "xxx"   , ""      ); EQUALS( b, true  );
+    b = util::ends_with( ""      , "xxx"   ); EQUALS( b, false );
+    b = util::ends_with( "abcde" , "abcde" ); EQUALS( b, true  );
+    b = util::ends_with( "abcde" , "e"     ); EQUALS( b, true  );
+    b = util::ends_with( "abcde" , "de"    ); EQUALS( b, true  );
+    b = util::ends_with( "abcde" , "bcde"  ); EQUALS( b, true  );
+    b = util::ends_with( "abcde" , "bcfe"  ); EQUALS( b, false );
+    b = util::ends_with( "abcde" , "xbcfe" ); EQUALS( b, false );
+    b = util::ends_with( " abcde", "bcde"  ); EQUALS( b, true  );
+}
 
 TEST( include_scan )
 {
@@ -354,6 +386,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_string_util,
                    test_include_scan,
                    test_directed_graph,
                    test_bimap,
