@@ -11,6 +11,10 @@ namespace fs = std::experimental::filesystem;
 
 namespace util {
 
+// This enum will be used to select options of  case  sensitivity
+// when comparing paths.
+enum class CaseSensitive { DEFAULT, YES, NO };
+
 // This will put the path (which  may not exist) into normal form
 // and preserving absolute/relative nature.  Path must exist, and
 // will resolve symlinks.
@@ -65,6 +69,15 @@ StrVec fwd_slashes( StrVec const& v );
 // tor, even though it isn't.
 fs::path path_( fs::path::const_iterator b,
                 fs::path::const_iterator e );
+
+// The purpose of this function  is  to  compare two paths lexico-
+// graphically  with the option of case insensitivity. On Windows,
+// the comparison will  default  to  being  case  insensitive. On
+// Linux it will default to case-sensitive, but  in  either  case,
+// this can be overridden.
+bool path_equals( fs::path const& a,
+                  fs::path const& b,
+                  CaseSensitive   sen = CaseSensitive::DEFAULT );
 
 } // namespace util
 

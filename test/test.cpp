@@ -20,10 +20,48 @@ namespace pr = project;
 
 TEST( always_succeeds ) { }
 
+TEST( fs )
+{
+    bool b;
+
+    util::CaseSensitive sens = util::CaseSensitive::YES;
+
+    b = util::path_equals( "", "",                sens ); EQUALS( b, true  );
+    b = util::path_equals( "A", "",               sens ); EQUALS( b, false );
+    b = util::path_equals( "", "A",               sens ); EQUALS( b, false );
+    b = util::path_equals( "A/B", "A",            sens ); EQUALS( b, false );
+    b = util::path_equals( "A", "A/B",            sens ); EQUALS( b, false );
+    b = util::path_equals( "A/B", "A/B",          sens ); EQUALS( b, true  );
+    b = util::path_equals( "A/B/C", "/A/B/C",     sens ); EQUALS( b, false );
+    b = util::path_equals( "A//B///C//", "A/B/C", sens ); EQUALS( b, true  );
+    b = util::path_equals( "a/b/c", "A/B/C",      sens ); EQUALS( b, false );
+    b = util::path_equals( "A", "a",              sens ); EQUALS( b, false );
+    b = util::path_equals( "/abc", "/abc",        sens ); EQUALS( b, true  );
+    b = util::path_equals( "/ABC", "/abc",        sens ); EQUALS( b, false );
+
+    sens = util::CaseSensitive::NO;
+
+    b = util::path_equals( "", "",                sens ); EQUALS( b, true  );
+    b = util::path_equals( "A", "",               sens ); EQUALS( b, false );
+    b = util::path_equals( "", "A",               sens ); EQUALS( b, false );
+    b = util::path_equals( "A/B", "A",            sens ); EQUALS( b, false );
+    b = util::path_equals( "A", "A/B",            sens ); EQUALS( b, false );
+    b = util::path_equals( "A/B", "A/B",          sens ); EQUALS( b, true  );
+    b = util::path_equals( "A/B/C", "/A/B/C",     sens ); EQUALS( b, false );
+    b = util::path_equals( "A//B///C//", "A/B/C", sens ); EQUALS( b, true  );
+    b = util::path_equals( "a/b/c", "A/B/C",      sens ); EQUALS( b, true  );
+    b = util::path_equals( "A", "a",              sens ); EQUALS( b, true  );
+    b = util::path_equals( "/abc", "/abc",        sens ); EQUALS( b, true  );
+    b = util::path_equals( "/ABC", "/abc",        sens ); EQUALS( b, true  );
+}
+
 TEST( string_util )
 {
     bool b;
 
+    /*************************************************************
+    * starts_with / ends_with
+    *************************************************************/
     b = util::starts_with( ""      , ""      ); EQUALS( b, true  );
     b = util::starts_with( "x"     , ""      ); EQUALS( b, true  );
     b = util::starts_with( ""      , "x"     ); EQUALS( b, false );
@@ -49,6 +87,23 @@ TEST( string_util )
     b = util::ends_with( "abcde" , "bcfe"  ); EQUALS( b, false );
     b = util::ends_with( "abcde" , "xbcfe" ); EQUALS( b, false );
     b = util::ends_with( " abcde", "bcde"  ); EQUALS( b, true  );
+
+    /*************************************************************
+    * string comparison
+    *************************************************************/
+    b = util::iequals<string>( ""      , ""       ); EQUALS( b, true  );
+    b = util::iequals<string>( "x"     , ""       ); EQUALS( b, false );
+    b = util::iequals<string>( ""      , "x"      ); EQUALS( b, false );
+    b = util::iequals<string>( "x"     , "x"      ); EQUALS( b, true  );
+    b = util::iequals<string>( "X"     , "x"      ); EQUALS( b, true  );
+    b = util::iequals<string>( "x"     , "X"      ); EQUALS( b, true  );
+    b = util::iequals<string>( "abcde" , "abcde"  ); EQUALS( b, true  );
+    b = util::iequals<string>( "aBCde" , "abcde"  ); EQUALS( b, true  );
+    b = util::iequals<string>( "abcde" , "abcdex" ); EQUALS( b, false );
+    b = util::iequals<string>( "abcdex", "abcde"  ); EQUALS( b, false );
+    b = util::iequals<string>( "abcde" , "xabcde" ); EQUALS( b, false );
+    b = util::iequals<string>( "xabcde", "abcde"  ); EQUALS( b, false );
+    b = util::iequals<string>( "ABCDE",  "abcde"  ); EQUALS( b, true  );
 }
 
 TEST( include_scan )
@@ -387,6 +442,7 @@ void run_tests() {
 
     auto tests = { test_always_succeeds,
                    test_string_util,
+                   test_fs,
                    test_include_scan,
                    test_directed_graph,
                    test_bimap,

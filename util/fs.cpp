@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "macros.hpp"
 #include "fs.hpp"
+#include "string-util.hpp"
 
 #include <algorithm>
 
@@ -261,6 +262,46 @@ fs::path path_( fs::path::const_iterator b,
     for( auto i = b; i != e; ++i )
         res /= *i;
     return res;
+}
+
+// The purpose of this function  is  to  compare two paths lexico-
+// graphically  with the option of case insensitivity. On Windows,
+// the comparison will  default  to  being  case  insensitive. On
+// Linux it will default to case-sensitive, but  in  either  case,
+// this can be overridden.
+bool path_equals( fs::path const& a,
+                  fs::path const& b,
+                  CaseSensitive   sen ) {
+
+    fs::path a_n = lexically_normal( a );
+    fs::path b_n = lexically_normal( b );
+
+    if( sen == CaseSensitive::DEFAULT )
+#ifdef __linux__
+        sen = CaseSensitive::NO;
+#else
+        sen = CaseSensitive::YES;
+#endif
+
+    // At this point we only have either YES or NO.
+    if( sen == CaseSensitive::YES )
+        return (a_n == b_n);
+
+    // Now we must do a case-insensitive comparison.  The  string
+    // type used by fs::path could  vary by platform, so whenever
+    // we convert path to string we need to do it like so.
+    using String = fs::path::string_type;
+
+    auto predicate = []( auto const& p1, auto const& p2) {
+        return iequals( String( p1 ), String( p2 ) );
+    };
+
+    // This will iterate through path components and compare each
+    // one,  so  that e.g. consecutive path separators will be ig-
+    // nored.
+    return equal( begin( a_n ), end( a_n ),
+                  begin( b_n ), end( b_n ),
+                  predicate );
 }
 
 } // util
