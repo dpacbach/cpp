@@ -210,7 +210,12 @@ fs::path preprocess_project( GlobalIncludeMap const& m,
 
     auto cl_read = util::lexically_normal(
             base / attr.int_dir / "CL.read.1.tlog" );
-    // TODO: may need to create parent folders
+    // Here we use create_directory  which  will create the inter-
+    // mediate  folder  if  it  does  not exist (and not throw an
+    // error if it already does)  but  will not create the parent
+    // folders; those are assumed to  exist  and  it should be an
+    // error if they don't, so we want it to throw in  that  case.
+    fs::create_directory( cl_read.parent_path() );
     ofstream out( cl_read );
     ASSERT( out.good(), "failed to open " << cl_read );
     for( auto s : sources ) {

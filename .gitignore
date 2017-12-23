@@ -40,3 +40,4 @@ a.out*
 /ranges-test/Makefile
 /main
 /main.opt
+/sln-demo/libmemcached-win/win32/debug
