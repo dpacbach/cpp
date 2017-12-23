@@ -223,6 +223,9 @@ fs::path preprocess_project( GlobalIncludeMap const& m,
         // output without quotes.
         out << "^" << s.get().string() << "\n";
         auto includes = graph.accessible( s );
+        // TODO: need to create  an  `accessible`  function  that
+        // does  not include the self so that we don't have to do
+        // these comparisons inside the  loop  which are wasteful.
         for( auto n : includes )
             if( n != s )
                 out << n.get().string() << "\n";
