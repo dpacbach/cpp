@@ -1,18 +1,8 @@
 /****************************************************************
 * Unit tests
 ****************************************************************/
-#include "bimap.hpp"
-#include "fs.hpp"
-#include "graph.hpp"
-#include "opt-util.hpp"
-#include "preprocessor.hpp"
-#include "string-util.hpp"
+#include "precomp.hpp"
 #include "test.hpp"
-
-#include <iostream>
-#include <map>
-#include <unordered_map>
-#include <vector>
 
 using namespace std;
 
