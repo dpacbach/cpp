@@ -10,6 +10,38 @@ namespace pr = project;
 
 TEST( always_succeeds ) { }
 
+TEST( map_par )
+{
+    auto inc = []( int x ){
+        return fs::path( std::to_string( x+1 ) );
+    };
+
+    vector<int> v1;
+    auto res_v1 = util::map_par( inc, v1 );
+    vector<util::Result<fs::path>> goal1;
+    EQUALS( res_v1, goal1 );
+
+    vector<int> v2{ 3 };
+    auto res_v2 = util::map_par( inc, v2 );
+    vector<util::Result<fs::path>> goal2{ "4" };
+    EQUALS( res_v2, goal2 );
+
+    vector<int> v3{ 5, 4, 3, 2, 1 };
+    auto res_v3 = util::map_par( inc, v3 );
+    vector<util::Result<fs::path>> goal3{ "6","5","4","3","2" };
+    EQUALS( res_v3, goal3 );
+
+    vector<int> v4;
+    vector<util::Result<fs::path>> goal4;
+    for( int i = 0; i < 1000; ++i ) {
+        v4.push_back( i );
+        goal4.push_back(
+                util::Result<fs::path>( to_string( i+1 ) ) );
+    }
+    auto res_v4 = util::map_par( inc, v4 );
+    EQUALS( res_v4, goal4 );
+}
+
 TEST( resolve )
 {
     // map values are not relevant to this test.
@@ -490,6 +522,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_map_par,
                    test_resolve,
                    test_string_util,
                    test_filesystem,

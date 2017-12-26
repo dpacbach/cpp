@@ -14,13 +14,11 @@
     }
 
 #define EQUALS( a, b )                                                  \
-    auto STRING_JOIN( a_, __LINE__ ) = a;                               \
-    auto STRING_JOIN( b_, __LINE__ ) = b;                               \
-    if( STRING_JOIN( a_, __LINE__ ) != STRING_JOIN( b_, __LINE__) ) {   \
+    if( (a) != (b) ) {                                                  \
         cerr << "--------------------------------------------" << endl; \
         cerr << "FAILED on line " TO_STRING( __LINE__ ) ": " << #a      \
              << " != " << #b << endl;                                   \
-        cerr << "instead got: " << STRING_JOIN( a_, __LINE__ );         \
+        cerr << "instead got: " << (a);                                 \
         cerr << " ?= " << #b << endl;                                   \
         cerr << "--------------------------------------------" << endl; \
         throw logic_error( "test failed." );                            \
