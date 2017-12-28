@@ -7,13 +7,12 @@
 
 using namespace std;
 
-namespace util {
+namespace util::par {
 
 // Will  return  the max number of simultaneous threads supported
 // on this system. Result will always be >= 1.
 int max_threads() {
-    auto ts = thread::hardware_concurrency();
-    if( ts >= 1 )
+    if( auto ts = thread::hardware_concurrency(); ts >= 1 )
         return int( ts );
     return 1;
 }
@@ -32,4 +31,4 @@ void in_parallel( vector<function<void()>> const& v ) {
     for( auto& t : ts ) t.join();
 }
 
-} // namespace util
+} // namespace util::par

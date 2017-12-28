@@ -10,6 +10,26 @@ namespace pr = project;
 
 TEST( always_succeeds ) { }
 
+TEST( for_each_par )
+{
+    vector<int> outputs{ 1, 2, 3, 4 };
+    auto inc = [&outputs]( int index ){
+        outputs[index]++;
+    };
+
+    util::par::for_each( inc, vector<int>{ 0, 1, 2, 3 } );
+    EQUALS( outputs, (vector<int>{ 2, 3, 4, 5 }) );
+
+    util::par::for_each( inc, vector<int>{ 1, 3 }, 1 );
+    EQUALS( outputs, (vector<int>{ 2, 4, 4, 6 }) );
+
+    util::par::for_each( inc, vector<int>{ 1, 3 }, 0 );
+    EQUALS( outputs, (vector<int>{ 2, 5, 4, 7 }) );
+
+    util::par::for_each( inc, vector<int>{ 1, 2, 3 } );
+    EQUALS( outputs, (vector<int>{ 2, 6, 5, 8 }) );
+}
+
 TEST( map_par )
 {
     // In this test, when creating vectors of Result's, can't use
@@ -22,18 +42,18 @@ TEST( map_par )
     };
 
     vector<int> v1;
-    auto res_v1 = util::map_par( inc, v1 );
+    auto res_v1 = util::par::map( inc, v1 );
     vector<util::Result<fs::path>> goal1;
     EQUALS( res_v1, goal1 );
 
     vector<int> v2{ 3 };
-    auto res_v2 = util::map_par( inc, v2 );
+    auto res_v2 = util::par::map( inc, v2 );
     vector<util::Result<fs::path>> goal2;
     goal2.emplace_back( fs::path( "4" ) );
     EQUALS( res_v2, goal2 );
 
     vector<int> v3{ 5, 4, 3, 2, 1 };
-    auto res_v3 = util::map_par( inc, v3 );
+    auto res_v3 = util::par::map( inc, v3 );
     vector<util::Result<fs::path>> goal3;
     for( auto p : { "6","5","4","3","2" } )
         goal3.emplace_back( fs::path( p ) );
@@ -46,11 +66,11 @@ TEST( map_par )
         v4.push_back( i );
         goal4.emplace_back( fs::path( to_string( i+1 ) ) );
     }
-    auto res_v4 = util::map_par( inc, v4, 1 );
+    auto res_v4 = util::par::map( inc, v4, 1 );
     EQUALS( res_v4, goal4 );
-    auto res_v5 = util::map_par( inc, v4, 2 );
+    auto res_v5 = util::par::map( inc, v4, 2 );
     EQUALS( res_v5, goal4 );
-    auto res_v6 = util::map_par( inc, v4, 0 );
+    auto res_v6 = util::par::map( inc, v4, 0 );
     EQUALS( res_v6, goal4 );
 
     // Now test error reporting.
@@ -59,7 +79,7 @@ TEST( map_par )
         ASSERT_( x != 3 );
         return fs::path( to_string( x+1 ) );
     };
-    auto res_v7 = util::map_par( inc_err, v7, 0 );
+    auto res_v7 = util::par::map( inc_err, v7, 0 );
     EQUALS( res_v7.size(), 5 );
     EQUALS( res_v7[0], util::Result<fs::path>( "6" ) );
     EQUALS( res_v7[1], util::Result<fs::path>( "5" ) );
@@ -550,6 +570,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_for_each_par,
                    test_map_par,
                    test_resolve,
                    test_string_util,

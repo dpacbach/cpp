@@ -13,7 +13,9 @@
 #define STRING_JO1N(arg1, arg2) arg1 ## arg2
 #define STRING_JOIN(arg1, arg2) STRING_JO1N(arg1, arg2)
 
-// ASSERT will fail if the argument is false.
+// ASSERT will fail if  the  argument  is  false. It is important
+// that  this  macro should NOT evaluate `b` unless `a` fails the
+// test. Also, it should consist  of  a single compound statement.
 #define ASSERT( a, b ) if( !(a) ) {                            \
     std::ostringstream out;                                    \
     out << "error:" __FILE__ ":";                              \
