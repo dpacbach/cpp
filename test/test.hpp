@@ -14,7 +14,7 @@
     }
 
 #define EQUALS( a, b )                                                  \
-    if( (a) != (b) ) {                                                  \
+    if( !((a) == (b)) ) {                                               \
         cerr << "--------------------------------------------" << endl; \
         cerr << "FAILED on line " TO_STRING( __LINE__ ) ": " << #a      \
              << " != " << #b << endl;                                   \

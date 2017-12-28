@@ -15,7 +15,8 @@ namespace util {
 /* Error: this struct  is  essentially  just  a  wrapper around a
  * string  for  the purpose of distinguishing it type-wise from a
  * string and to prevent implicit construction. */
-struct Error {
+struct Error : public non_copyable {
+    explicit Error() {}
     explicit Error( std::string_view sv ) : msg( sv ) {}
     bool operator==( Error const& rhs ) const
         { return rhs.msg == msg; }
@@ -26,7 +27,7 @@ struct Error {
 // that may have failed. Its value can be either the return value
 // or failure, which then contains an error message.
 template<typename PayloadT>
-using Result = std::variant<PayloadT, Error>;
+using Result = std::variant<Error, PayloadT>;
 
 // For convenience
 template<typename T>
