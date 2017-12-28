@@ -25,16 +25,16 @@ int max_threads();
 // functions in this module.
 void in_parallel( std::vector<std::function<void()>> const& v );
 
-/* Parallel  map:  apply a function to elements in a range in par-
- * allel.  This  is  being  implemented until the parallel STL be-
- * comes available. Note: the range here expects to have a size()
- * function. Each job processes indexes  from  the input array by
- * starting on the index given (i),  then jumping by intervals of
- * size jobs. */
+/* Parallel map (returns  variants  to  capture  errors): apply a
+ * function to elements in a range in parallel. This is being  im-
+ * plemented until the parallel STL  becomes available. Note: the
+ * range here expects to have a size() function. Each job
+ * processes  indexes  from  the  input  array by starting on the
+ * index  given  (i),  then jumping by intervals of size jobs. */
 template<typename FuncT, typename InputT>
-auto map( FuncT                      func,
-          std::vector<InputT> const& input,
-          int                        jobs_in = 0 )
+auto map_safe( FuncT                      func,
+               std::vector<InputT> const& input,
+               int                        jobs_in = 0 )
 {
     // Number of jobs must be valid (which includes zero).
     ASSERT_( jobs_in >= 0 );
@@ -94,6 +94,90 @@ auto map( FuncT                      func,
     // ments, storing output in  the  outputs  array which it has
     // captured by reference.
     in_parallel( funcs );
+
+    return outputs;
+}
+
+/* Parallel map (throws on error): apply a function  to  elements
+ * in a range in parallel. This is being  implemented  until  the
+ * parallel STL becomes available.  Note:  the range here expects
+ * to have a size() function. Each job processes indexes from the
+ * input array by starting on the index given (i),  then  jumping
+ * by intervals of size jobs. */
+template<typename FuncT, typename InputT>
+auto map( FuncT                      func,
+          std::vector<InputT> const& input,
+          int                        jobs_in = 0 )
+{
+    // Number of jobs must be valid (which includes zero).
+    ASSERT_( jobs_in >= 0 );
+
+    // Interpret zero jobs as a request to use the maximum number
+    // of threads available on this system.
+    size_t jobs = (jobs_in == 0) ? max_threads() : jobs_in;
+
+    // Create one thread for  each  job,  unless  the size of the
+    // input is less than number of  requested jobs. jobs may end
+    // up  being  zero  here, and that is ok: at this point, zero
+    // jobs means that no threads will  be  spawned  and  nothing
+    // will be done (unlike jobs_in == 0 which means to  use  the
+    // max number of threads available).
+    jobs = std::min( jobs, input.size() );
+
+    // Get  the  underlying value type held by the range and then
+    // get the type of result after calling the  function  on  it,
+    // stripping away references and const.
+    using Payload = std::decay_t<decltype(
+        func( *std::begin( input ) )
+    )>;
+
+    // The results of calling  the  function.  Elements  will  be
+    // moved into place or hopefully NRVO'd; ditto for the vector
+    // as a whole when returned to caller
+    std::vector<Payload> outputs( input.size() );
+
+    // This will hold the success/failure result from each
+    // thread.  nullopt means success, while a string means error.
+    std::vector<std::optional<std::string>> results( jobs );
+
+    // One of the following functions will  be run in each thread.
+    auto job = [&]( size_t job_index ) -> void {
+
+        for( auto i = job_index; i < input.size(); i += jobs ) {
+            try {
+                outputs[i] = func( input[i] );
+                // If the function did  not  throw  an  exception
+                // then continue.
+                continue;
+            } catch( std::exception const& e ) {
+                results[job_index] = e.what();
+            } catch( ... ) {
+                results[job_index] = "unknown exception";
+            }
+            return; // error happened
+        }
+    };
+
+    // Package each job into a void(void) function  that  we  can
+    // then hand off to be executed in its own thread.
+    std::vector<std::function<void()>> funcs( jobs );
+    for( size_t i = 0; i < jobs; ++i )
+        // Each job processes indexes from  the  input  array  by
+        // starting on the index given (i), then  jumping  by  in-
+        // tervals of size jobs.
+        funcs[i] = [&job, i](){ return job( i ); };
+
+    // Run the functions in parallel. Each function will run in a
+    // single thread and will  handle  a  chunk  of the input ele-
+    // ments, storing output in  the  outputs  array which it has
+    // captured by reference.
+    in_parallel( funcs );
+
+    // Check  each  thread's results for any errors, and re-throw
+    // the first one we find. !r means success,  and  the  ASSERT
+    // macro  is  not supposed to evaluate the second argument un-
+    // less the first one is false.
+    for( auto const& r : results ) ASSERT( !r, *r );
 
     return outputs;
 }

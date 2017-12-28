@@ -43,28 +43,22 @@ TEST( map_par )
 
     vector<int> v1;
     auto res_v1 = util::par::map( inc, v1 );
-    vector<util::Result<fs::path>> goal1;
-    EQUALS( res_v1, goal1 );
+    EQUALS( res_v1, vector<fs::path>{} );
 
     vector<int> v2{ 3 };
     auto res_v2 = util::par::map( inc, v2 );
-    vector<util::Result<fs::path>> goal2;
-    goal2.emplace_back( fs::path( "4" ) );
-    EQUALS( res_v2, goal2 );
+    EQUALS( res_v2, vector<fs::path>{ "4" } );
 
     vector<int> v3{ 5, 4, 3, 2, 1 };
     auto res_v3 = util::par::map( inc, v3 );
-    vector<util::Result<fs::path>> goal3;
-    for( auto p : { "6","5","4","3","2" } )
-        goal3.emplace_back( fs::path( p ) );
-    EQUALS( res_v3, goal3 );
+    EQUALS( res_v3, (vector<fs::path>{ "6","5","4","3","2" }) );
 
     // First with one job, then with  two  jobs,  then  max  jobs.
     vector<int> v4;
-    vector<util::Result<fs::path>> goal4;
+    vector<fs::path> goal4;
     for( int i = 0; i < 1000; ++i ) {
         v4.push_back( i );
-        goal4.emplace_back( fs::path( to_string( i+1 ) ) );
+        goal4.emplace_back( to_string( i+1 ) );
     }
     auto res_v4 = util::par::map( inc, v4, 1 );
     EQUALS( res_v4, goal4 );
@@ -79,12 +73,64 @@ TEST( map_par )
         ASSERT_( x != 3 );
         return fs::path( to_string( x+1 ) );
     };
-    auto res_v7 = util::par::map( inc_err, v7, 0 );
+    THROWS( util::par::map( inc_err, v7, 0 ) );
+}
+
+TEST( map_par_safe )
+{
+    // In this test, when creating vectors of Result's, can't use
+    // initializer list directly because  for  some  reason  that
+    // will require the Result variant to have  a  copy  construc-
+    // tor, which  it  won't  because  the  Error  type  does not.
+
+    auto inc = []( int x ){
+        return fs::path( std::to_string( x+1 ) );
+    };
+
+    vector<int> v1;
+    auto res_v1 = util::par::map_safe( inc, v1 );
+    vector<util::Result<fs::path>> goal1;
+    EQUALS( res_v1, goal1 );
+
+    vector<int> v2{ 3 };
+    auto res_v2 = util::par::map_safe( inc, v2 );
+    vector<util::Result<fs::path>> goal2;
+    goal2.emplace_back( fs::path( "4" ) );
+    EQUALS( res_v2, goal2 );
+
+    vector<int> v3{ 5, 4, 3, 2, 1 };
+    auto res_v3 = util::par::map_safe( inc, v3 );
+    vector<util::Result<fs::path>> goal3;
+    for( auto p : { "6","5","4","3","2" } )
+        goal3.emplace_back( fs::path( p ) );
+    EQUALS( res_v3, goal3 );
+
+    // First with one job, then with  two  jobs,  then  max  jobs.
+    vector<int> v4;
+    vector<util::Result<fs::path>> goal4;
+    for( int i = 0; i < 1000; ++i ) {
+        v4.push_back( i );
+        goal4.emplace_back( fs::path( to_string( i+1 ) ) );
+    }
+    auto res_v4 = util::par::map_safe( inc, v4, 1 );
+    EQUALS( res_v4, goal4 );
+    auto res_v5 = util::par::map_safe( inc, v4, 2 );
+    EQUALS( res_v5, goal4 );
+    auto res_v6 = util::par::map_safe( inc, v4, 0 );
+    EQUALS( res_v6, goal4 );
+
+    // Now test error reporting.
+    vector<int> v7{ 5, 4, 3, 2, 1 };
+    auto inc_err = []( int x ){
+        ASSERT_( x != 3 );
+        return fs::path( to_string( x+1 ) );
+    };
+    auto res_v7 = util::par::map_safe( inc_err, v7, 0 );
     EQUALS( res_v7.size(), 5 );
     EQUALS( res_v7[0], util::Result<fs::path>( "6" ) );
     EQUALS( res_v7[1], util::Result<fs::path>( "5" ) );
-    TRUE( holds_alternative<util::Error>( res_v7[2] ) );
-    TRUE( util::contains(
+    TRUE_( holds_alternative<util::Error>( res_v7[2] ) );
+    TRUE_( util::contains(
                 get<util::Error>( res_v7[2] ).msg, "error" ) );
     EQUALS( res_v7[3], util::Result<fs::path>( "3" ) );
     EQUALS( res_v7[4], util::Result<fs::path>( "2" ) );
@@ -368,7 +414,7 @@ TEST( bimap )
     fs::path s;
 
     for( size_t i = 0; i < bm.size(); ++i )
-        { TRUE( bm.val_safe( i ) ); }
+        { TRUE_( bm.val_safe( i ) ); }
 
     s = *bm.val_safe( 0 ); EQUALS( s, ""          );
     s = *bm.val_safe( 1 ); EQUALS( s, "A"         );
@@ -379,8 +425,8 @@ TEST( bimap )
     s = *bm.val_safe( 6 ); EQUALS( s, "AAAA"      );
     s = *bm.val_safe( 7 ); EQUALS( s, "ABBB"      );
 
-    TRUE( !(bm.val_safe( 8 )) );
-    TRUE( !(bm.val_safe( 8000 )) );
+    TRUE_( !(bm.val_safe( 8 )) );
+    TRUE_( !(bm.val_safe( 8000 )) );
 
     EQUALS( bm.key_safe( ""          ), 0 );
     EQUALS( bm.key_safe( "A"         ), 1 );
@@ -572,6 +618,7 @@ void run_tests() {
     auto tests = { test_always_succeeds,
                    test_for_each_par,
                    test_map_par,
+                   test_map_par_safe,
                    test_resolve,
                    test_string_util,
                    test_filesystem,

@@ -19,28 +19,55 @@ std::string passed() {
     return util::c_green + "Passed" + util::c_norm;
 }
 
+std::string bar() {
+    return "---------------------------------------------------";
+}
+
 } // namespace testing
 
-#define TRUE( a )                                                       \
-    if( !(a) ) {                                                        \
-        cerr << "--------------------------------------------" << endl; \
-        cerr << testing::failed() << ": assert " << #a << endl;         \
-        cerr << "--------------------------------------------" << endl; \
-        throw logic_error( "test failed." );                            \
+#define TRUE_( a )                                        \
+    if( !(a) ) {                                          \
+        cerr << " ==> " << testing::failed() << endl;     \
+        cerr << testing::bar() << endl;                   \
+        cerr << "On line " << TO_STRING( __LINE__ ) ": "; \
+        cerr << "assert " << #a << endl;                  \
+        cerr << testing::bar() << endl;                   \
+        throw logic_error( "test failed." );              \
     }
 
-#define EQUALS( a, b )                                                  \
-    if( !((a) == (b)) ) {                                               \
-        cerr << endl;                                                   \
-        cerr << "--------------------------------------------" << endl; \
-        cerr << testing::failed() << " on line "                        \
-             << TO_STRING( __LINE__ ) ": " << #a                        \
-             << " != " << #b << endl;                                   \
-        cerr << "instead got: " << (a);                                 \
-        cerr << " ?= " << #b << endl;                                   \
-        cerr << "--------------------------------------------" << endl; \
-        throw logic_error( "test failed." );                            \
+// a  is an expression that must be true, and b is just something
+// printable that will be displayed  in  the  event  a  is  false.
+#define TRUE( a, b )                                      \
+    if( !(a) ) {                                          \
+        cerr << " ==> " << testing::failed() << endl;     \
+        cerr << testing::bar() << endl;                   \
+        cerr << "On line " << TO_STRING( __LINE__ ) ": "; \
+        cerr << b << endl;                                \
+        cerr << testing::bar() << endl;                   \
+        throw logic_error( "test failed." );              \
     }
+
+#define EQUALS( a, b )                                         \
+    if( !((a) == (b)) ) {                                      \
+        cerr << " ==> " << testing::failed() << endl;          \
+        cerr << testing::bar() << endl;                        \
+        cerr << "On line " << TO_STRING( __LINE__ ) ": " << #a \
+             << " != " << #b << endl;                          \
+        cerr << "instead got: " << (a);                        \
+        cerr << " ?= " << #b << endl;                          \
+        cerr << testing::bar() << endl;                        \
+        throw logic_error( "test failed." );                   \
+    }
+
+#define THROWS( a )                                 \
+    bool STRING_JOIN( __threw_, __LINE__ ) = false; \
+    try {                                           \
+        a;                                          \
+    } catch( std::exception const& ) {              \
+        STRING_JOIN( __threw_, __LINE__ ) = true;   \
+    }                                               \
+    TRUE( STRING_JOIN( __threw_, __LINE__ ),        \
+          "expression: " #a " did not throw." );
 
 // This is used to create a unit test function.
 #define TEST( a )                                         \
