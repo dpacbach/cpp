@@ -36,7 +36,7 @@ int main() try {
     };
 
     auto global = TIMEIT( "build global map",
-        pr::build_sources( source_folders, base );
+        pr::build_sources_par( source_folders, base, jobs );
     );
 
     TIMEIT( "preprocess",

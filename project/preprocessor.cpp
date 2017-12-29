@@ -1,6 +1,7 @@
 /****************************************************************
 * Mock Preprocessor
 ****************************************************************/
+#include "algo-par.hpp"
 #include "preprocessor.hpp"
 #include "macros.hpp"
 #include "stopwatch.hpp"
@@ -101,6 +102,48 @@ GlobalIncludeMap build_sources( PathVec const& from,
             }
         }
     }
+    return res;
+}
+
+// Same  as  above  but will attempt to divide the work among mul-
+// tiple threads. Zero value for jobs means that it will take max
+// threads available on system.
+GlobalIncludeMap build_sources_par( PathVec const& from,
+                                    fs::path       base_path,
+                                    int            jobs ) {
+    // If the base path is  not  absolute  then our algorithm for
+    // constructing  lexically  relative  paths  can  do  strange
+    // things, so we need to require that.
+    ASSERT_( base_path.is_absolute() );
+
+    // Gather up a list of all source files to parse.
+    vector<fs::path> paths;
+    for( auto const& folder : from ) {
+        ASSERT( folder.is_absolute(),
+                folder << " is not an absolute path." );
+        // Find all files under `folder`  and, if they are deemed
+        // interesting then insert them into paths vector.
+        copy_if( fs::recursive_directory_iterator( folder ),
+                 fs::recursive_directory_iterator(),
+                 back_inserter( paths ),
+                 is_interesting );
+    }
+
+    // Initialize hashmap with  number  of  buckets  that we have.
+    GlobalIncludeMap res( paths.size() );
+
+    // Parse all source files in parallel.
+    auto parsed = util::par::map( parse_includes, paths, jobs );
+
+    // Now normalize the  path  (which  is  currently relative to
+    // CWD)  and  use  that  as a key in the final hashmap, where
+    // value is the results of parsing the file.
+    for( size_t i = 0; i < paths.size(); ++i ) {
+        auto rel_path = util::lexically_relative(
+                                  paths[i], base_path );
+        res[rel_path] = parsed[i];
+    }
+
     return res;
 }
 
