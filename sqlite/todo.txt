@@ -1,0 +1,21 @@
+SQLite:
+
+    open connection to file
+    open connection with multiple databases
+
+    query returning results
+    query not returning any results
+
+    query taking parameters
+
+    query inserting many rows
+
+    with_connection function
+
+    vacuum
+
+    compatibility with types used
+
+other:
+
+    need to parse a SolutionFile from string
