@@ -14,6 +14,10 @@ namespace project {
 
 struct Project : public util::non_copyable {
 
+    // We need this to  support  initializing  vectors with empty
+    // projects for use in parallelization algorithms.
+    Project() {}
+
     ProjectAttr const& attr() const { return m_attr; }
     fs::path    const& path() const { return m_path; }
 

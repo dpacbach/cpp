@@ -306,7 +306,7 @@ void preprocess_solution( GlobalIncludeMap const& m,
                           string_view             platform,
                           int                     jobs ) {
     auto s = TIMEIT( "read full solution",
-        Solution::read( solution, platform, base )
+        Solution::read_par( solution, platform, base, jobs )
     );
     TIMEIT( "preprocess full solution",
         preprocess_solution( m, base, s, jobs )
