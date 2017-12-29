@@ -55,12 +55,6 @@ struct Solution : public util::non_copyable {
                           std::string_view platform,
                           fs::path const&  base = "" );
 
-    // Same as above but attempts to parallelize.
-    static Solution read_par( fs::path const&  file,
-                              std::string_view platform,
-                              fs::path const&  base = "",
-                              int              jobs = 0 );
-
     map_type const& projects() const { return m_projects; }
 
 private:

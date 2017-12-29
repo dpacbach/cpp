@@ -32,13 +32,6 @@ using GlobalRefIncludeMap = std::unordered_map<PathCRef,
 GlobalIncludeMap build_sources( PathVec const& from,
                                 fs::path       base_path );
 
-// Same  as  above  but will attempt to divide the work among mul-
-// tiple threads. Zero value for jobs means that it will take max
-// threads available on system.
-GlobalIncludeMap build_sources_par( PathVec const& from,
-                                    fs::path       base_path,
-                                    int            jobs = 0 );
-
 // Take  a  relative  path and a list of search paths and resolve
 // the path using (approximately) the algorithm that the compiler
 // would  use, which means to iterate through the search paths in

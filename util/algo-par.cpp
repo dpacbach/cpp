@@ -10,10 +10,11 @@ using namespace std;
 namespace util::par {
 
 // Will  return  the max number of simultaneous threads supported
-// on this system. Result will always be >= 1.
+// on this system. Result will always  be  >= 1. Will take 75% of
+// the total assuming the second half are hyperthreads.
 int max_threads() {
     if( auto ts = thread::hardware_concurrency(); ts >= 1 )
-        return int( ts );
+        return int( ts ) * 3 / 4;
     return 1;
 }
 

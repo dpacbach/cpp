@@ -100,36 +100,6 @@ Solution Solution::read( fs::path const& file,
     return Solution( move( m ) );
 }
 
-// Same as above but attempts to parallelize.
-Solution Solution::read_par( fs::path const&  file,
-                             std::string_view plat,
-                             fs::path const&  base,
-                             int              jobs ) {
-
-    SolutionFile sf = SolutionFile::read( file );
-
-    auto abs_dir = util::absnormpath( file ).parent_path();
-
-    auto single = [&]( auto const& path ){
-
-        auto abs = util::normpath( abs_dir / path );
-        auto rel = base.empty()
-                 ? abs : util::lexically_relative( abs, base );
-
-        return pair( move( rel ), Project::read( abs, plat, base ) );
-
-    };
-
-    // Load all projects in parallel.
-    auto ps = util::par::map( single, sf.projects(), jobs );
-
-    map<fs::path, Project> m;
-    for( auto&& p : ps ) m.insert( move( p ) );
-
-    return Solution( move( m ) );
-}
-
-
 // For debugging, just outputs the list of projects and, for each
 // project,  tells  the  project to print itself, which typically
 // results in a lot of output.
