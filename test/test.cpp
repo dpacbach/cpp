@@ -17,16 +17,16 @@ TEST( for_each_par )
         outputs[index]++;
     };
 
-    util::par::for_each( inc, vector<int>{ 0, 1, 2, 3 } );
+    util::par::for_each( vector<int>{ 0, 1, 2, 3 }, inc );
     EQUALS( outputs, (vector<int>{ 2, 3, 4, 5 }) );
 
-    util::par::for_each( inc, vector<int>{ 1, 3 }, 1 );
+    util::par::for_each( vector<int>{ 1, 3 }, inc, 1 );
     EQUALS( outputs, (vector<int>{ 2, 4, 4, 6 }) );
 
-    util::par::for_each( inc, vector<int>{ 1, 3 }, 0 );
+    util::par::for_each( vector<int>{ 1, 3 }, inc, 0 );
     EQUALS( outputs, (vector<int>{ 2, 5, 4, 7 }) );
 
-    util::par::for_each( inc, vector<int>{ 1, 2, 3 } );
+    util::par::for_each( vector<int>{ 1, 2, 3 }, inc );
     EQUALS( outputs, (vector<int>{ 2, 6, 5, 8 }) );
 }
 

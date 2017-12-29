@@ -214,8 +214,8 @@ auto map( FuncT                      func,
  * even  a single thread will stop processing items as soon as it
  * encounters an error). */
 template<typename FuncT, typename InputT>
-void for_each( FuncT                      func,
-               std::vector<InputT> const& input,
+void for_each( std::vector<InputT> const& input,
+               FuncT                      func,
                int                        jobs_in = 0 )
 {
     // Number of jobs must be valid (which includes zero).
