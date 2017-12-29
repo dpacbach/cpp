@@ -29,8 +29,8 @@ void in_parallel( std::vector<std::function<void()>> const& v );
  * function to elements in a range in parallel. This is being  im-
  * plemented until the parallel STL  becomes available. Note: the
  * range here expects to have a size() function. Each job
- * processes  indexes  from  the  input  array by starting on the
- * index  given  (i),  then jumping by intervals of size jobs. */
+ * processes  its  own  chunk  of the array so as to minimize con-
+ * tention between threads for the same memory. */
 template<typename FuncT, typename InputT>
 auto map_safe( FuncT                      func,
                std::vector<InputT> const& input,
@@ -67,9 +67,17 @@ auto map_safe( FuncT                      func,
     std::vector<Result<Payload>> outputs( input.size() );
 
     // One of the following functions will  be run in each thread.
-    auto job = [&]( size_t start ) -> void {
+    auto job = [&]( size_t job_idx ) -> void {
 
-        for( auto i = start; i < input.size(); i += jobs ) {
+        // Divide up chunks so that threads don't contend for the
+        // same memory.
+        auto inc   = 1;
+        auto size  = input.size()/jobs;
+        auto start = job_idx*size;
+        auto end   = (job_idx == jobs-1) ? input.size()
+                                         : start+size;
+
+        for( auto i = start; i < end; i += inc ) {
             try {
                 outputs[i] = func( input[i] );
             } catch( std::exception const& e ) {
@@ -101,9 +109,9 @@ auto map_safe( FuncT                      func,
 /* Parallel map (throws on error): apply a function  to  elements
  * in a range in parallel. This is being  implemented  until  the
  * parallel STL becomes available.  Note:  the range here expects
- * to have a size() function. Each job processes indexes from the
- * input array by starting on the index given (i),  then  jumping
- * by intervals of size jobs. */
+ * to  have  a size() function. Each job processes it's own chunk
+ * of the array so to minimize contention between threads for the
+ * same memory. */
 template<typename FuncT, typename InputT>
 auto map( FuncT                      func,
           std::vector<InputT> const& input,
@@ -141,18 +149,26 @@ auto map( FuncT                      func,
     std::vector<std::optional<std::string>> results( jobs );
 
     // One of the following functions will  be run in each thread.
-    auto job = [&]( size_t job_index ) -> void {
+    auto job = [&]( size_t job_idx ) -> void {
 
-        for( auto i = job_index; i < input.size(); i += jobs ) {
+        // Divide up chunks so that threads don't contend for the
+        // same memory.
+        auto inc   = 1;
+        auto size  = input.size()/jobs;
+        auto start = job_idx*size;
+        auto end   = (job_idx == jobs-1) ? input.size()
+                                         : start+size;
+
+        for( auto i = start; i < end; i += inc ) {
             try {
                 outputs[i] = func( input[i] );
                 // If the function did  not  throw  an  exception
                 // then continue.
                 continue;
             } catch( std::exception const& e ) {
-                results[job_index] = e.what();
+                results[job_idx] = e.what();
             } catch( ... ) {
-                results[job_index] = "unknown exception";
+                results[job_idx] = "unknown exception";
             }
             return; // error happened
         }
@@ -185,18 +201,18 @@ auto map( FuncT                      func,
 /* Parallel for_each: apply a function to  elements in a range in
  * parallel. This is being implemented  until the parallel STL be-
  * comes available. Note: the range here expects to have a size()
- * function. Each job processes indexes  from  the input array by
- * starting on the index given (i),  then jumping by intervals of
- * size jobs. Unlike map_par, this function does not  retain  the
- * return values of the function calls; i.e., the  functions  are
- * only called for their effects. Nevertheless it will still  mon-
- * itor  the threads for exceptions, and, if any thread throws an
- * error  it  will be rethrown after all threads are joined along
- * with  original  message  (if multiple threads throw exceptions
- * then only the first exception  message  encountered will be re-
- * turned; there is no point  in  trying  to  include all of them,
- * because even a single thread will  stop  processing  items  as
- * soon as it encounters an error). */
+ * function. Each job processes its own chunk of the array so  as
+ * to minimize contention  between  threads  for  the same memory.
+ * Unlike  map_par,  this  function  does  not  retain the return
+ * values of the function calls; i.e.,  the  functions  are  only
+ * called  for  their effects. Nevertheless it will still monitor
+ * the threads for exceptions, and, if any thread throws an error
+ * it will be rethrown after all threads are  joined  along  with
+ * original message (if  multiple  threads  throw exceptions then
+ * only the first exception message encountered will be returned;
+ * there is no point in trying to include all  of  them,  because
+ * even  a single thread will stop processing items as soon as it
+ * encounters an error). */
 template<typename FuncT, typename InputT>
 void for_each( FuncT                      func,
                std::vector<InputT> const& input,
@@ -222,9 +238,17 @@ void for_each( FuncT                      func,
     std::vector<std::optional<std::string>> results( jobs );
 
     // One of the following functions will  be run in each thread.
-    auto job = [&]( size_t job_index ) -> void {
+    auto job = [&]( size_t job_idx ) -> void {
 
-        for( auto i = job_index; i < input.size(); i += jobs ) {
+        // Divide up chunks so that threads don't contend for the
+        // same memory.
+        auto inc   = 1;
+        auto size  = input.size()/jobs;
+        auto start = job_idx*size;
+        auto end   = (job_idx == jobs-1) ? input.size()
+                                         : start+size;
+
+        for( auto i = start; i < end; i += inc ) {
             try {
                 func( input[i] );
                 // If the function was successfull then leave the
@@ -232,9 +256,9 @@ void for_each( FuncT                      func,
                 // success) and continue in the loop.
                 continue;
             } catch( std::exception const& e ) {
-                results[job_index] = e.what();
+                results[job_idx] = e.what();
             } catch( ... ) {
-                results[job_index] = "unknown exception";
+                results[job_idx] = "unknown exception";
             }
             return; // error happened
         }
