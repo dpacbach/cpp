@@ -39,13 +39,11 @@ int main() try {
         pr::build_sources_par( source_folders, base, jobs );
     );
 
-    TIMEIT( "preprocess",
-        pr::preprocess_solution( global,
-                                 base,
-                                 solution_file,
-                                 "Debug|Win32",
-                                 jobs );
-    );
+    pr::preprocess_solution( global,
+                             base,
+                             solution_file,
+                             "Debug|Win32",
+                             jobs );
 
     return 0;
 

@@ -282,31 +282,20 @@ void preprocess_solution( GlobalIncludeMap const& m,
                           fs::path         const& base,
                           Solution         const& solution,
                           int                     jobs ) {
-    ASSERT_( jobs > 0 && jobs < 60 );
 
-    vector<vector<fs::path>> job_paths( jobs );
-    int i = 0;
-    for( auto const& val : solution.projects() )
-        job_paths[(i++)%jobs].push_back( val.first );
+    auto const& ps = solution.projects();
 
-    auto chunk = [&]( PathVec const& ps ) {
-        for( auto const& p : ps ) {
-            auto const& proj = solution.projects().at( p );
-            auto cl_read = preprocess_project( m, base, proj );
-            // add mutex here
-            cout << "wrote to " << cl_read.string() << endl;
-        }
-    };
+    vector<fs::path> items; items.reserve( ps.size() );
+    for( auto const& p : ps )
+        items.push_back( p.first );
 
-    //vector<bool> outputs( jobs );
-    vector<thread> threads( jobs );
+    // Process all projects in parallel.
+    util::par::for_each( items, [&]( fs::path const& p ) {
 
-    // TODO: need to add error capture here
-    for( int i = 0; i < jobs; ++i )
-        threads[i] = thread( chunk, cref( job_paths[i] ) );
+        auto cl_read = preprocess_project( m, base, ps.at( p ) );
+        cout << "wrote to " << cl_read.string() << endl;
 
-    for( auto& t : threads )
-        t.join();
+    }, jobs );
 }
 
 // Will  open  the  solution,  parse  it, parse all project files
@@ -319,7 +308,9 @@ void preprocess_solution( GlobalIncludeMap const& m,
     auto s = TIMEIT( "read full solution",
         Solution::read( solution, platform, base )
     );
-    preprocess_solution( m, base, s, jobs );
+    TIMEIT( "preprocess full solution",
+        preprocess_solution( m, base, s, jobs )
+    );
 }
 
 } // namespace project

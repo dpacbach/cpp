@@ -94,7 +94,7 @@ fs::path preprocess_project( GlobalIncludeMap const& global,
 void preprocess_solution( GlobalIncludeMap const& global,
                           fs::path         const& base,
                           Solution         const& solution,
-                          int                     jobs = 1 );
+                          int                     jobs = 0 );
 
 // Will  open  the  solution,  parse  it, parse all project files
 // therein, and then call preprocess on each project.
@@ -102,6 +102,6 @@ void preprocess_solution( GlobalIncludeMap const& global,
                           fs::path         const& base,
                           fs::path         const& solution,
                           std::string_view        platform,
-                          int                     jobs = 1 );
+                          int                     jobs = 0 );
 
 } // namespace project
