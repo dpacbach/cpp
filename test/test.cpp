@@ -636,6 +636,8 @@ void run_tests() {
 
 int main() try {
 
+    util::Logger::enabled = false;
+
     run_tests();
     return 0;
 

@@ -1,8 +1,10 @@
 /****************************************************************
 * Mock Preprocessor
 ****************************************************************/
-#include "algo-par.hpp"
 #include "preprocessor.hpp"
+
+#include "algo-par.hpp"
+#include "logger.hpp"
 #include "macros.hpp"
 #include "stopwatch.hpp"
 #include "string-util.hpp"
@@ -251,7 +253,7 @@ void preprocess_solution( GlobalIncludeMap const& m,
     util::par::for_each( items, [&]( fs::path const& p ) {
 
         auto cl_read = preprocess_project( m, base, ps.at( p ) );
-        cout << "wrote to " << cl_read.string() << endl;
+        util::log << "wrote to " << cl_read.string() << "\n";
 
     }, jobs );
 }
