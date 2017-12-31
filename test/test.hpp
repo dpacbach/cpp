@@ -27,11 +27,12 @@ std::string bar() {
 
 #define TRUE_( a )                                        \
     if( !(a) ) {                                          \
-        cerr << " ==> " << testing::failed() << endl;     \
-        cerr << testing::bar() << endl;                   \
+        using util::operator<<;                           \
+        cerr << " ==> " << testing::failed() << "\n";     \
+        cerr << testing::bar() << "\n";                   \
         cerr << "On line " << TO_STRING( __LINE__ ) ": "; \
-        cerr << "assert " << #a << endl;                  \
-        cerr << testing::bar() << endl;                   \
+        cerr << "assert " << #a << "\n";                  \
+        cerr << testing::bar() << "\n";                   \
         throw logic_error( "test failed." );              \
     }
 
@@ -39,23 +40,25 @@ std::string bar() {
 // printable that will be displayed  in  the  event  a  is  false.
 #define TRUE( a, b )                                      \
     if( !(a) ) {                                          \
-        cerr << " ==> " << testing::failed() << endl;     \
-        cerr << testing::bar() << endl;                   \
+        using util::operator<<;                           \
+        cerr << " ==> " << testing::failed() << "\n";     \
+        cerr << testing::bar() << "\n";                   \
         cerr << "On line " << TO_STRING( __LINE__ ) ": "; \
-        cerr << b << endl;                                \
-        cerr << testing::bar() << endl;                   \
+        cerr << b << "\n";                                \
+        cerr << testing::bar() << "\n";                   \
         throw logic_error( "test failed." );              \
     }
 
 #define EQUALS( a, b )                                         \
     if( !((a) == (b)) ) {                                      \
-        cerr << " ==> " << testing::failed() << endl;          \
-        cerr << testing::bar() << endl;                        \
+        using util::operator<<;                                \
+        cerr << " ==> " << testing::failed() << "\n";          \
+        cerr << testing::bar() << "\n";                        \
         cerr << "On line " << TO_STRING( __LINE__ ) ": " << #a \
-             << " != " << #b << endl;                          \
+             << " != " << #b << "\n";                          \
         cerr << "instead got: " << (a);                        \
-        cerr << " ?= " << #b << endl;                          \
-        cerr << testing::bar() << endl;                        \
+        cerr << " ?= " << #b << "\n";                          \
+        cerr << testing::bar() << "\n";                        \
         throw logic_error( "test failed." );                   \
     }
 
@@ -77,6 +80,6 @@ std::string bar() {
         cout << left << setw( 40 ) << test;               \
         STRING_JOIN( __test_, a )();                      \
         cout << " ==> " << testing::passed();             \
-        cout << util::c_norm << endl;                     \
+        cout << util::c_norm << "\n";                     \
     }                                                     \
     void STRING_JOIN( __test_, a )()

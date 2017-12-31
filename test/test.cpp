@@ -631,7 +631,7 @@ void run_tests() {
     for( auto const& t : tests )
         t();
 
-    cout << endl << "All Tests Passed." << endl;
+    cout << "\nAll Tests Passed.\n";
 }
 
 int main() try {
@@ -640,9 +640,9 @@ int main() try {
     return 0;
 
 } catch( exception const& e ) {
-    cerr << "exception: " << e.what() << endl;
+    cerr << "exception: " << e.what() << "\n";
     return 1;
 } catch( ... ) {
-    cerr << "exception unknown." << endl;
+    cerr << "exception unknown.\n";
     return 1;
 }

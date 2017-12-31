@@ -35,10 +35,10 @@ void print_vec( std::vector<T> const& v,
                 bool                  indent = false,
                 std::string_view      name = std::string_view() ) {
     if( !name.empty() )
-        out << name << std::endl;
+        out << name << "\n";
     std::string padding = indent ? "    " : "";
     for( auto const& e : v )
-        out << padding << e << std::endl;
+        out << padding << e << "\n";
 }
 
 // Does the set contain the given key.
@@ -128,8 +128,6 @@ void uniq_sort( std::vector<T>& v ) {
     v.erase( i, end( v ) );
 }
 
-}
-
 // For a vector whose element type can be  streamed,  output  the
 // vector in a JSON-like syntax.
 template<typename T>
@@ -145,6 +143,8 @@ std::ostream& operator<<( std::ostream&         out,
     }
     out << "]";
     return out;
+}
+
 }
 
 // Here  we  open up the std namespace to add a hash function spe-

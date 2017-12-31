@@ -15,8 +15,6 @@ std::string to_string( std::optional<T> const& opt ) {
     return opt ? std::string( *opt ) : std::string( "nullopt" );
 }
 
-} // namespace util
-
 // In global namespace.
 template<typename T>
 std::ostream& operator<<( std::ostream&           out,
@@ -30,3 +28,5 @@ std::ostream& operator<<( std::ostream&           out,
         return (out << *opt);
     return (out << "nullopt");
 }
+
+} // namespace util

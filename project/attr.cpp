@@ -67,18 +67,17 @@ auto src_folders( ProjectAttr const& attr ) -> PathVec {
 ostream& operator<<( ostream& out, ProjectAttr const& attr ) {
 
     auto p = [&]( auto const& p ) {
-        // Need this so that the compile is willing to search the
-        // global namespace for this function, which we need, for
-        // e.g. output the std::optional types.
-        using ::operator<<;
-        out << p << endl;
+        // Our std::optional ostream operator  function is in the
+        // util namespace.
+        using util::operator<<;
+        out << p << "\n";
     };
 
     // Logic in this function is just for some nice
     // alignment on the console.
     auto p_v = [&]( auto const& v ) {
         if( v.empty() ) {
-            out << endl;
+            out << "\n";
             return;
         }
         bool first = true;

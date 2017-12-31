@@ -23,7 +23,7 @@
     std::ostringstream out_msg;                                \
     out_msg << b;                                              \
     if( !out_msg.str().empty() )                               \
-        out << std::endl << b;                                 \
+        out << "\n" << b;                                      \
     throw std::logic_error( out.str() );                       \
 }
 

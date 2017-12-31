@@ -106,8 +106,8 @@ Solution Solution::read( fs::path const& file,
 std::ostream& operator<<( std::ostream&   out,
                           Solution const& s ) {
     for( auto const& [path, project] : s.projects() ) {
-        out << path << ":" << endl << endl;
-        out << project << endl;
+        out << path << ":" << "\n\n";
+        out << project << "\n";
     }
     return out;
 }

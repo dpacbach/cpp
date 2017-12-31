@@ -226,13 +226,14 @@ Project Project::read( fs::path const& file,
 }
 
 ostream& operator<<( ostream& out, Project const& p ) {
-    using ::operator<<;
+
+    using util::operator<<;
 
     out << p.attr();
 
-    out << "Target Path  | " << trg_path( p ) << endl;
-    out << "LBS Path     | " << lbs_path( p ) << endl;
-    out << "UBS Path     | " << ubs_path( p ) << endl;
+    out << "Target Path  | " << trg_path( p ) << "\n";
+    out << "LBS Path     | " << lbs_path( p ) << "\n";
+    out << "UBS Path     | " << ubs_path( p ) << "\n";
     return out;
 }
 
