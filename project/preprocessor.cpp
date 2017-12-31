@@ -273,4 +273,25 @@ void preprocess_solution( GlobalIncludeMap const& m,
     );
 }
 
+// This will run the whole preprocessor.
+void run_preprocessor( fs::path const& base_folder,
+                       PathVec  const& source_folders,
+                       fs::path const& solution_file,
+                       StrVec   const& platforms,
+                       int             jobs ) {
+
+    auto global = TIMEIT( "build global map",
+        build_sources( source_folders, base_folder );
+    );
+
+    for( auto const& p : platforms ) {
+        util::log << "running preprocessor for " << p << "\n";
+        preprocess_solution( global,
+                             base_folder,
+                             solution_file,
+                             p,
+                             jobs );
+    }
+}
+
 } // namespace project

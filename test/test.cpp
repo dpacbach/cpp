@@ -10,6 +10,32 @@ namespace pr = project;
 
 TEST( always_succeeds ) { }
 
+TEST( preprocessor )
+{
+    // NOTE:  for  this  test  we must be running with CWD of the
+    // folder containing the test executable.
+
+    fs::path win32   = "../sln-demo/libmemcached-win/win32";
+    fs::path cl_read = win32 / "debug/CL.read.1.tlog";
+    fs::path sln     = win32 / "libmemcached.sln";
+
+    fs::path base = util::absnormpath( ".." );
+
+    if( fs::exists( cl_read ) )
+        fs::remove( cl_read );
+
+    pr::run_preprocessor(
+         base,              // base folder for relative paths
+         { base },          // src folders
+         sln,               // path to .sln file rel to cwd
+         { "Debug|Win32" }, // platforms
+         0                  // jobs
+    );
+
+    auto size = fs::file_size( cl_read );
+    EQUALS( size, 309680 );
+}
+
 TEST( for_each_par )
 {
     vector<int> outputs{ 1, 2, 3, 4 };
@@ -616,6 +642,7 @@ TEST( lexically_relative_fast )
 void run_tests() {
 
     auto tests = { test_always_succeeds,
+                   test_preprocessor,
                    test_for_each_par,
                    test_map_par,
                    test_map_par_safe,

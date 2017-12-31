@@ -97,4 +97,11 @@ void preprocess_solution( GlobalIncludeMap const& global,
                           std::string_view        platform,
                           int                     jobs = 0 );
 
+// This will run the whole preprocessor.
+void run_preprocessor( fs::path const& base_folder,
+                       PathVec  const& source_folders,
+                       fs::path const& solution_file,
+                       StrVec   const& platforms,
+                       int             jobs = 0 );
+
 } // namespace project
