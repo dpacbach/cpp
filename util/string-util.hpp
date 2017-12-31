@@ -7,6 +7,7 @@
 
 #include <cctype>
 #include <experimental/filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -68,19 +69,39 @@ split_strip( std::string_view sv, char c );
 std::vector<std::string>
 to_strings( std::vector<std::string_view> const& svs );
 
-// Trivial
-template<>
-std::string to_string<std::string>( std::string const& s );
-
-// Trivial; extract string from path.
-template<>
-std::string to_string<fs::path>( fs::path const& p );
-
 // Convert string to path
 fs::path to_path( std::string_view sv );
 
 // Convert element type.
 std::vector<fs::path>
 to_paths( std::vector<std::string> const& ss );
+
+/****************************************************************
+* To-String utilities
+****************************************************************/
+// Default version calls std::to_string which covers all of the
+// basic primitive types.
+template<typename T>
+std::string to_string( T const& arg ) {
+    return std::to_string( arg );
+}
+
+// NOTE: This puts quotes around the string!
+template<>
+std::string to_string<std::string>( std::string const& s );
+
+// NOTE: This puts quotes around the string!
+template<>
+std::string to_string<char const*>( char const* const& s );
+
+// Trivial; extract string from path.
+template<>
+std::string to_string<fs::path>( fs::path const& p );
+
+template<typename T>
+std::string to_string( std::optional<T> const& opt ) {
+    return opt ? util::to_string( *opt )
+               : std::string( "nullopt" );
+}
 
 }

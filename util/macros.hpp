@@ -29,6 +29,8 @@
 
 #define ASSERT_( a ) ASSERT( a, "" )
 
+#define ERROR( a ) ASSERT( false, a )
+
 #define TRY try {
 
 #define CATCH_ALL                                              \

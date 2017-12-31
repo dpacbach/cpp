@@ -10,11 +10,6 @@
 
 namespace util {
 
-template<typename T>
-std::string to_string( std::optional<T> const& opt ) {
-    return opt ? std::string( *opt ) : std::string( "nullopt" );
-}
-
 // In global namespace.
 template<typename T>
 std::ostream& operator<<( std::ostream&           out,

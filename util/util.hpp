@@ -28,9 +28,6 @@
 
 namespace util {
 
-template<typename T>
-std::string to_string( T const& arg );
-
 // Loop through the elements in a vector and output them.
 template<typename T>
 void print_vec( std::vector<T> const& v,

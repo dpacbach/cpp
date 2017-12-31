@@ -65,12 +65,6 @@ vector<string_view> split_strip( string_view sv, char c ) {
     return res;
 }
 
-// Trivial
-template<>
-std::string to_string<std::string>( std::string const& s ) {
-    return s;
-}
-
 // Convert element type.
 vector<string> to_strings( vector<string_view> const& svs ) {
 
@@ -92,6 +86,27 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
     for( auto s : ss )
         res.emplace_back( s );
     return res;
+}
+
+/****************************************************************
+* To-String utilities
+****************************************************************/
+// NOTE: This puts quotes around the string!
+template<>
+string to_string<string>( string const& s ) {
+    return "\"" + s + "\"";
+}
+
+// NOTE: This puts quotes around the string!
+template<>
+string to_string<char const*>( char const* const& s ) {
+    return "\"" + string( s ) + "\"";
+}
+
+// Trivial; extract string from path.
+template<>
+string to_string<fs::path>( fs::path const& ) {
+   ERROR( "should not call this method as it is not portable" );
 }
 
 }
