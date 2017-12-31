@@ -13,7 +13,9 @@ namespace testing {
 
 TEST( sqlite )
 {
-    sqlite::database db(":memory:");
+    // This  will  create  a  database in memory so that we don't
+    // have to bother with temp files.
+    sqlite::database db( ":memory:" );
 
     db << "CREATE TABLE IF NOT EXISTS user ("
           "   _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
@@ -115,7 +117,7 @@ TEST( sqlite )
     THROWS( db << query >> var );
 
     // Test blobs.
-    db << "INSERT INTO USER (name,data) VALUES (?,?);"
+    db << "INSERT INTO user (name,data) VALUES (?,?);"
        << "fred"
        << vector<char>{ 'a', 'c', 'x' };
     EQUALS( db.last_insert_rowid(), 4 );
@@ -123,6 +125,29 @@ TEST( sqlite )
     vector<char> v;
     db << "SELECT data FROM user WHERE _id=4" >> v;
     EQUALS( v, (vector<char>{ 'a', 'c', 'x' }) );
+
+    // Test inserting many rows from vector  from  a  single  pre-
+    // pared statement.
+    vector<tuple<int, string, double>> rows{
+        {54, "rich", 45.0},
+        {43, "mark", 56.0},
+        {32, "ted",  67.0},
+        {87, "dave", 78.0}
+    };
+
+    // Prepare the query once,  then  execute  once  for each row.
+    sqlite::insert_many( db,
+        "INSERT INTO user (age, name, weight) VALUES (?,?,?)",
+        rows
+    );
+
+    // Spot-check a row.
+    db << "SELECT age, name, weight FROM user WHERE _id=7 ;"
+       >> []( int age, string name, double weight ){
+          EQUALS( age,     32   );
+          EQUALS( name,   "ted" );
+          EQUALS( weight,  67.0 );
+       };
 }
 
 TEST( preprocessor )
