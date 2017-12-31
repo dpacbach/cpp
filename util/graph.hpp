@@ -35,7 +35,11 @@ public:
                const& m
     );
 
-    std::vector<NameT> accessible( NameT const& name ) const;
+    // By default the node with the given name, if found, will be
+    // included among the results,  unless  with_self == false in
+    // which case it will be left out.
+    std::vector<NameT> accessible( NameT const& name,
+                                   bool with_self = true ) const;
 
 private:
 
@@ -94,14 +98,18 @@ DirectedGraph<NameT> make_graph( MapT<
 
 template<typename NameT>
 std::vector<NameT>
-DirectedGraph<NameT>::accessible( NameT const& name ) const {
+DirectedGraph<NameT>::accessible( NameT const& name,
+                                  bool with_self ) const {
     std::vector<NameT> res;
     std::vector<Id>    visited( m_names.size(), 0 );
     std::vector<Id>    to_visit;
 
     auto start = m_names.key_safe( name );
-    if( start )
-        to_visit.push_back( *start );
+    Id self = -1; // invalid Id
+    if( start ) {
+        self = *start;
+        to_visit.push_back( self );
+    }
      
     while( to_visit.size() ) {
         Id i = to_visit.back(); to_visit.pop_back();
@@ -112,7 +120,11 @@ DirectedGraph<NameT>::accessible( NameT const& name ) const {
             continue;
         visited[i] = 1;
         auto name = m_names.val( i );
-        res.push_back( name );
+        if( i != self || with_self )
+            // Always add nodes that are not  the  starting  node,
+            // and then only add the starting node  if  with_self
+            // is true (i.e., caller wants it added).
+            res.push_back( name );
         for( Id i : m_edges[i] )
             if( !visited[i] )
                 to_visit.push_back( i );
