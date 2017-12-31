@@ -2,6 +2,7 @@
 * Test driver for cpp libraries
 ****************************************************************/
 #include "logger.hpp"
+#include "main.hpp"
 #include "stopwatch.hpp"
 
 #include <string>
@@ -11,15 +12,11 @@
 using namespace std;
 using util::operator<<;
 
-int main() try {
-
+int main_( int, char** )
+{
     util::Logger::enabled = true;
 
     util::log << "finished.\n";
 
     return 0;
-
-} catch( exception const& e ) {
-    cerr << "exception: " << e.what() << endl;
-    return 1;
 }

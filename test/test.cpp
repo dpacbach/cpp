@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "precomp.hpp"
 #include "common-test.hpp"
+#include "main.hpp"
 
 using namespace std;
 
@@ -642,17 +643,11 @@ TEST( lexically_relative_fast )
 
 } // namespace testing
 
-int main() try {
-
+int main_( int, char** )
+{
     util::Logger::enabled = false;
 
     testing::run_all_tests();
-    return 0;
 
-} catch( exception const& e ) {
-    cerr << "exception: " << e.what() << "\n";
-    return 1;
-} catch( ... ) {
-    cerr << "exception unknown.\n";
-    return 1;
+    return 0;
 }

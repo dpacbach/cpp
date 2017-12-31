@@ -35,10 +35,8 @@ std::string bar();
     if( !(a) ) {                                         \
         using util::operator<<;                          \
         ostringstream ss;                                \
-        ss << testing::bar() << "\n";                    \
         ss << "On line " << TO_STRING( __LINE__ ) ": ";  \
-        ss << "assert " << #a << "\n";                   \
-        ss << testing::bar() << "\n";                    \
+        ss << "assert " << #a;                           \
         throw logic_error( ss.str() );                   \
     }
 
@@ -48,10 +46,8 @@ std::string bar();
     if( !(a) ) {                                         \
         using util::operator<<;                          \
         ostringstream ss;                                \
-        ss << testing::bar() << "\n";                    \
         ss << "On line " << TO_STRING( __LINE__ ) ": ";  \
-        ss << b << "\n";                                 \
-        ss << testing::bar() << "\n";                    \
+        ss << b;                                         \
         throw logic_error( ss.str() );                   \
     }
 
@@ -59,12 +55,10 @@ std::string bar();
     if( !((a) == (b)) ) {                                     \
         using util::operator<<;                               \
         ostringstream ss;                                     \
-        ss << testing::bar() << "\n";                         \
         ss << "On line " << TO_STRING( __LINE__ ) ": " << #a  \
              << " != " << #b << "\n";                         \
         ss << "instead got: " << (a);                         \
-        ss << " ?= " << #b << "\n";                           \
-        ss << testing::bar() << "\n";                         \
+        ss << " ?= " << #b;                                   \
         throw logic_error( ss.str() );                        \
     }
 
@@ -98,7 +92,9 @@ std::string bar();
         }                                                  \
         if( threw ) {                                      \
             cerr << " ==> " << testing::fail() << "\n";    \
+            cerr << testing::bar() << "\n";                \
             cerr << err << "\n";                           \
+            cerr << testing::bar() << "\n";                \
             throw runtime_error( "test failed" );          \
         } else {                                           \
             cout << " ==> " << testing::pass();            \
