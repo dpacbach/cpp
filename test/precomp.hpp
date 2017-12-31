@@ -13,6 +13,7 @@
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 #include "solution.hpp"
+#include "sqlite-util.hpp"
 #include "stopwatch.hpp"
 #include "string-util.hpp"
 #include "types.hpp"

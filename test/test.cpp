@@ -11,6 +11,120 @@ namespace pr = project;
 
 namespace testing {
 
+TEST( sqlite )
+{
+    sqlite::database db(":memory:");
+
+    db << "CREATE TABLE IF NOT EXISTS user ("
+          "   _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+          "   age INT,"
+          "   name TEXT,"
+          "   weight REAL,"
+          "   data BLOB"
+          ");";
+
+    db << "INSERT INTO USER (age,name,weight) VALUES (?,?,?);"
+       << 18
+       << u"bob"
+       << 83.25;
+
+    int    age    = 21;
+    double weight = 68.5;
+    string name   = "jack";
+
+    db << u"INSERT INTO USER (age,name,weight) VALUES (?,?,?);"
+       << age
+       << name
+       << weight;
+
+    EQUALS( db.last_insert_rowid(), 2 );
+
+    // Test that we get nothing if  we  select a row id that does
+    // not exist.
+    db << "SELECT age, name, weight FROM user WHERE _id=3;"
+       >> []( int, string const&, double ){
+              TRUE( false, "got row but there should be none" );
+          };
+
+    // Selects from user table on a  condition (age > 18) and exe-
+    // cutes the lambda for each row returned.
+    db << "SELECT age, name, weight FROM user WHERE age > ? ;"
+       << 18
+       >> []( int age, string name, double weight ){
+          EQUALS( age,     21    );
+          EQUALS( name,   "jack" );
+          EQUALS( weight,  68.5  );
+       };
+
+    int count = 0;
+    db << "SELECT COUNT(*) FROM user" >> count;
+    EQUALS( count, 2 );
+
+    // Test SQL syntax error.
+    THROWS( db << "SELECTx COUNT(*) FROM user" >> count );
+
+    // Test unpacking to wrong number of params.
+    // db << "SELECT COUNT(*), COUNT(*) FROM user" >> count;
+    // Note: above line doesn't throw... library defect?
+
+    // Test unpacking to wrong number of params.
+    THROWS( db << "SELECT * FROM user" >> count );
+    // Test inputting wrong number of params.
+    THROWS( db << "" << 5 );
+
+    db << "SELECT age, name FROM user WHERE _id=1;"
+       >> tie( age, name );
+    EQUALS( age,   18   );
+    EQUALS( name, "bob" );
+
+    // Test automatic string conversion.
+    db << "SELECT COUNT(*) FROM user" >> []( string const& s ){
+        EQUALS( s, "2" );
+    };
+
+    db << "INSERT INTO USER (age,name,weight) VALUES (?,NULL,?);"
+       << 30
+       << 100.0;
+
+    EQUALS( db.last_insert_rowid(), 3 );
+    db << "SELECT COUNT(*) FROM user" >> []( int c ){
+        EQUALS( c, 3 );
+    };
+
+    // The following function signature should throw if we try to
+    // extract row 3 int it since name is null,  but  instead  it
+    // seems  the  library  will  just default construct the para-
+    // meter in these cases, which is bad...
+    // []( int age, string const& name, double weight )
+
+    // Test optional
+    auto opt = []( int age, OptStr const& name, double weight ){
+        EQUALS( age,    30 );
+        EQUALS( name,   nullopt );
+        EQUALS( weight, 100.0 );
+    };
+    string query =
+        "SELECT age, name, weight FROM user WHERE _id=3;";
+
+    db << query >> opt;
+
+    // Test variant. Below  function  body  should  not be called.
+    auto var = []( int, variant<string> const&, double ){};
+    // This  should throw because the variant (with no nullptr_t)
+    // type should not allow null values.
+    THROWS( db << query >> var );
+
+    // Test blobs.
+    db << "INSERT INTO USER (name,data) VALUES (?,?);"
+       << "fred"
+       << vector<char>{ 'a', 'c', 'x' };
+    EQUALS( db.last_insert_rowid(), 4 );
+
+    vector<char> v;
+    db << "SELECT data FROM user WHERE _id=4" >> v;
+    EQUALS( v, (vector<char>{ 'a', 'c', 'x' }) );
+}
+
 TEST( preprocessor )
 {
     // NOTE:  for  this  test  we must be running with CWD of the

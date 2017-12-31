@@ -19,3 +19,53 @@ SQLite:
 other:
 
     need to parse a SolutionFile from string
+
+wrappers:
+
+    maybe:
+
+        sqlite_modern_cpp (https://github.com/SqliteModernCpp/sqlite_modern_cpp):
+
+            + somewhat modern c++ interface
+            + currently maintained
+            + blob support with vector<>
+            + transaction support
+            + can access underlying db connection
+            + support null values with std::optional
+            + variant type support
+            + good error handling support
+            + native custom function support
+
+        sqlite3pp (https://github.com/iwongu/sqlite3pp):
+
+            + currently maintained
+            + no dependencies
+            + could potentially work if nothing better
+
+        SQLiteCpp (https://github.com/SRombauts/SQLiteCpp):
+
+            + currently maintained
+            + no dependencies
+            + linux/win/osx
+            + as thread safe as sqlite itself
+            - pre C++11
+
+    no:
+
+        sqlite_orm (https://github.com/fnc12/sqlite_orm):
+
+            - seems to be designed for object databases
+            - based around performing sql operations with
+              C++ functions
+            - provides unneeded functionality
+            - modern, but not quite modern-enough C++
+
+        CppSQLite3:
+
+            - 2011, unmaintained
+            - amateur looking
+
+        sqlite.cpp (https://www.dlbeer.co.nz/oss/sqlite.html):
+
+            - extremely light
+            - seems unsophisticated type-wise

@@ -17,11 +17,14 @@
 
 // This is intended to lessen  typing  for the simplest of lambda
 // functions, namely, those  which  have  no  captures,  take one
-// const ref parameter, and consist of a single return  statement.
+// const ref parameter, and  consist  of  either  a single return
+// statement or just a single expression.
 #define L( a )  [] ( auto const& _ ) { return a; }
+#define L_( a ) [] ( auto const& _ ) { a; }
 
 // One  for  lambdas  that  capture  all (usually for simplicity).
-#define LC( a ) [&]( auto const& _ ) { return a; }
+#define LC( a )  [&]( auto const& _ ) { return a; }
+#define LC_( a ) [&]( auto const& _ ) { a; }
 
 namespace util {
 

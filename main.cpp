@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "logger.hpp"
 #include "main.hpp"
+#include "sqlite-util.hpp"
 #include "stopwatch.hpp"
 
 #include <string>
