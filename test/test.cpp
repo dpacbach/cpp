@@ -2,13 +2,13 @@
 * Unit tests
 ****************************************************************/
 #include "precomp.hpp"
-#include "test.hpp"
+#include "common-test.hpp"
 
 using namespace std;
 
 namespace pr = project;
 
-TEST( always_succeeds ) { }
+namespace testing {
 
 TEST( preprocessor )
 {
@@ -640,33 +640,13 @@ TEST( lexically_relative_fast )
     EQUALS( f( "/u/v/x/y/z", "/a/b/c/d/e" ), "../../../../../u/v/x/y/z" );
 }
 
-void run_tests() {
-
-    auto tests = { test_always_succeeds,
-                   test_preprocessor,
-                   test_for_each_par,
-                   test_map_par,
-                   test_map_par_safe,
-                   test_resolve,
-                   test_string_util,
-                   test_filesystem,
-                   test_include_scan,
-                   test_directed_graph,
-                   test_bimap,
-                   test_lexically_normal,
-                   test_lexically_relative,
-                   test_lexically_relative_fast };
-    for( auto const& t : tests )
-        t();
-
-    cout << "\nAll Tests Passed.\n";
-}
+} // namespace testing
 
 int main() try {
 
     util::Logger::enabled = false;
 
-    run_tests();
+    testing::run_all_tests();
     return 0;
 
 } catch( exception const& e ) {

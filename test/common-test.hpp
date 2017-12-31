@@ -9,20 +9,25 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace testing {
 
-std::string failed() {
-    return util::c_red + "Failed" + util::c_norm;
-}
+// This  is the type of a unit test function. All that it does is
+// to  throw an exception if the test fails. If it returns, it is
+// assumed to have passed.
+using TestType = void(void);
 
-std::string passed() {
-    return util::c_green + "Passed" + util::c_norm;
-}
+// Global test list: tests are automatically registered and added
+// to this list at static initialization time.
+std::vector<TestType*>& test_list();
 
-std::string bar() {
-    return "---------------------------------------------------";
-}
+void run_all_tests();
+
+// Functions for printing to console
+std::string fail();
+std::string pass();
+std::string bar();
 
 } // namespace testing
 
@@ -92,12 +97,15 @@ std::string bar() {
             threw = true;                                  \
         }                                                  \
         if( threw ) {                                      \
-            cerr << " ==> " << testing::failed() << "\n";  \
+            cerr << " ==> " << testing::fail() << "\n";    \
             cerr << err << "\n";                           \
             throw runtime_error( "test failed" );          \
         } else {                                           \
-            cout << " ==> " << testing::passed();          \
+            cout << " ==> " << testing::pass();            \
             cout << util::c_norm << "\n";                  \
         }                                                  \
+    }                                                      \
+    STARTUP() {                                            \
+        test_list().push_back( STRING_JOIN( test_, a ) );  \
     }                                                      \
     void STRING_JOIN( __test_, a )()
