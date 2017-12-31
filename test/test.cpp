@@ -15,7 +15,8 @@ TEST( preprocessor )
     // NOTE:  for  this  test  we must be running with CWD of the
     // folder containing the test executable.
 
-    fs::path win32   = "../sln-demo/libmemcached-win/win32";
+    fs::path demo    = util::absnormpath( "../sln-demo" );
+    fs::path win32   = demo  / "libmemcached-win/win32";
     fs::path cl_read = win32 / "debug/CL.read.1.tlog";
     fs::path sln     = win32 / "libmemcached.sln";
 
@@ -26,7 +27,7 @@ TEST( preprocessor )
 
     pr::run_preprocessor(
          base,              // base folder for relative paths
-         { base },          // src folders
+         { demo },          // src folders
          sln,               // path to .sln file rel to cwd
          { "Debug|Win32" }, // platforms
          0                  // jobs
