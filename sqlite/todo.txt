@@ -1,71 +1,24 @@
 SQLite:
 
-    open connection to file
     open connection with multiple databases
 
     query returning results
     query not returning any results
 
-    query taking parameters
-
-    query inserting many rows
-
     with_connection function
 
     vacuum
 
+    executeMany, executeMany1, insertMany, insertMany1
+
     compatibility with types used
+
+    md5
 
 other:
 
     need to parse a SolutionFile from string
 
-wrappers:
-
-    maybe:
-
-        sqlite_modern_cpp (https://github.com/SqliteModernCpp/sqlite_modern_cpp):
-
-            + somewhat modern c++ interface
-            + currently maintained
-            + blob support with vector<>
-            + transaction support
-            + can access underlying db connection
-            + support null values with std::optional
-            + variant type support
-            + good error handling support
-            + native custom function support
-
-        sqlite3pp (https://github.com/iwongu/sqlite3pp):
-
-            + currently maintained
-            + no dependencies
-            + could potentially work if nothing better
-
-        SQLiteCpp (https://github.com/SRombauts/SQLiteCpp):
-
-            + currently maintained
-            + no dependencies
-            + linux/win/osx
-            + as thread safe as sqlite itself
-            - pre C++11
-
-    no:
-
-        sqlite_orm (https://github.com/fnc12/sqlite_orm):
-
-            - seems to be designed for object databases
-            - based around performing sql operations with
-              C++ functions
-            - provides unneeded functionality
-            - modern, but not quite modern-enough C++
-
-        CppSQLite3:
-
-            - 2011, unmaintained
-            - amateur looking
-
-        sqlite.cpp (https://www.dlbeer.co.nz/oss/sqlite.html):
-
-            - extremely light
-            - seems unsophisticated type-wise
+    need to parse cl_read files for all files
+       affecting project, or find better way to
+       do it.
