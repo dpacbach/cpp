@@ -4,7 +4,7 @@ LDFLAGS += -lstdc++fs -pthread
 
 project.deps   = xml-utils
 xml-utils.deps = pugixml util
-sqlite.deps    = util smcpp
+sqlite.deps    = sqlite-amal util smcpp
 
 top-level-folders = util xml-utils sqlite project
 
@@ -20,5 +20,4 @@ main_is = main
 
 $(call enter_all,$(top-level-folders))
 
-TP_LINK_main := -lsqlite3
 $(call make_exe,main,main)

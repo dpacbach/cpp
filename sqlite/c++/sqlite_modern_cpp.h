@@ -46,7 +46,9 @@
 #error "including boost optional"
 #endif
 
-#include <sqlite3.h>
+// #include <sqlite3.h>
+// we want our version included and not the one on the system.
+#include "sqlite3.h"
 
 #include "sqlite_modern_cpp/errors.h"
 #include "sqlite_modern_cpp/utility/function_traits.h"
