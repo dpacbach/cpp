@@ -91,7 +91,15 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
 /****************************************************************
 * To-String utilities
 ****************************************************************/
-// NOTE: This puts quotes around the string!
+// NOTE: This puts quotes around the  string! The reason for this
+// behavior  is that we want to try to perform the to_string oper-
+// ation  (in general) such that it has some degree of reversibil-
+// ity. For example, converting  the  integer  55  and the string
+// "55" to strings should yield different  results so that we can
+// distinguish the types from the  string representations (and or
+// convert  back, at least approximately). So therefore, whenever
+// the  to_string methods convert a already-string-like entity to
+// a string, it will insert quotes in the string itself.
 template<>
 string to_string<string>( string const& s ) {
     return "\"" + s + "\"";
@@ -107,14 +115,17 @@ std::string to_string( char const* s ) {
     return "\"" + string( s ) + "\"";
 }
 
-// NOTE: This puts single quotes around the string!
+// NOTE: This puts single quotes around the character!
 template<>
 string to_string<char>( char const& s ) {
     string res( 1, s );
     return "'" + res + "'";
 }
 
-// Trivial; extract string from path.
+// This one always throws an error because it would not be
+// portable to allow this since on Windows  fs::path's  only  con-
+// vert to wide strings. Though would be better  to  have  a  com-
+// piler error rather than exception.
 template<>
 string to_string<fs::path>( fs::path const& ) {
    ERROR( "should not call this method as it is not portable" );

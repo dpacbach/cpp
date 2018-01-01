@@ -56,20 +56,21 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
 }
 
 // This  will  intersperse  `what` into the vector of strings and
-// join  the  result.  It  will attempt o compute require reserve
+// join the result. It  will  attempt  to compute require reserve
 // space before hand to minimize memory allocations.
 template<typename T>
-std::string join( std::vector<T> const& v, std::string_view what ) {
-    if( !v.size() )
-        return {};
+std::string join( std::vector<T> const& v,
+                  std::string_view      what ) {
+
+    if( !v.size() ) return {};
     // First attempt to compute how much space we need, which  we
     // should be able to do exactly.
     size_t total = 0;
     for( auto const& e : v )
         total += e.size();
     total += what.size()*(v.size() - 1); // v.size() > 0 always
-    // Now construct the result
-    std::string res; res.reserve( total+1 ); // +1 for good measure.
+    // Now construct the result (reserve +1 for good measure).
+    std::string res; res.reserve( total+1 );
     bool first = true;
     for( auto const& e : v ) {
         if( !first )
@@ -110,6 +111,19 @@ to_paths( std::vector<std::string> const& ss );
 
 /****************************************************************
 * To-String utilities
+*
+* util::to_string  family of overloaded functions are intended so
+* that  a  user  can call them on any commonly-used type and they
+* will return a sensibly  formatted result. Unlike std::to_string
+* these overloads work on  various  containers  as  well, such as
+* vectors and tuples. For simple  numeric  types  util::to_string
+* delegates  to  std::to_string.  If  all else fails, the default
+* overload  attempts  to use a string stream to do the conversion.
+*
+* See the special note below  on  the  std::string  overload.  In
+* short, Whenever the to_string methods  convert a string (or any
+* string-like entity) to a string, they will insert quotes in the
+* string itself.
 ****************************************************************/
 template<typename T>
 std::string to_string( T const& );
@@ -118,7 +132,15 @@ std::string to_string( T const& );
 template<>
 std::string to_string<char>( char const& c );
 
-// NOTE: This puts quotes around the string!
+// NOTE: This puts quotes around the  string! The reason for this
+// behavior  is that we want to try to perform the to_string oper-
+// ation  (in general) such that it has some degree of reversibil-
+// ity. For example, converting  the  integer  55  and the string
+// "55" to strings should yield different  results so that we can
+// distinguish the types from the string representations  (and/or
+// convert  back, at least approximately). So therefore, whenever
+// the  to_string methods convert a already-string-like entity to
+// a string, it will insert quotes in the string itself.
 template<>
 std::string to_string<std::string>( std::string const& s );
 
@@ -130,13 +152,16 @@ std::string to_string<std::string>( std::string const& s );
 // select it when we give it a string literal.
 std::string to_string( char const* s );
 
-// Trivial; extract string from path.
+// This one simply throws an exception to prevent the  user  from
+// calling it because it is  platform  dependent. Would be better
+// though to have a compiler error.
 template<>
 std::string to_string<fs::path>( fs::path const& p );
 
-// Prints in JSON style notation.
+// Prints in JSON style notation. E.g. [1,2,3]
 template<typename T>
 std::string to_string( std::vector<T> const& v ) {
+
     std::vector<std::string> res( v.size() );
     // We  need  this lambda to help std::transform with overload
     // resolution of to_string.
@@ -146,11 +171,13 @@ std::string to_string( std::vector<T> const& v ) {
     return "[" + join( res, "," ) + "]";
 }
 
+// Simply delegate to the wrapped type.
 template<typename T>
 std::string to_string( std::reference_wrapper<T> const& rw ) {
     return util::to_string( rw.get() );
 }
 
+// Not  sure if this one is also needed, but doesn't seem to hurt.
 template<typename T>
 std::string to_string( std::reference_wrapper<T const> const& rw ) {
     return util::to_string( rw.get() );
@@ -162,6 +189,13 @@ std::string to_string( std::optional<T> const& opt ) {
                : std::string( "nullopt" );
 }
 
+// This function exists for the purpose of  having  the  compiler
+// deduce the Indexes variadic integer arguments that we can then
+// use to index the tuple; it probably is not useful to call this
+// method  directly  (it is called by to_string). Was not able to
+// find a more elegant way of unpacking an arbitrary tuple passed
+// in as an argument apart from using  this  helper  function  in-
+// volving the index_sequence.
 template<typename Tuple, size_t... Indexes>
 StrVec tuple_elems_to_string( Tuple const& tp,
                               std::index_sequence<Indexes...> ) {
@@ -171,6 +205,7 @@ StrVec tuple_elems_to_string( Tuple const& tp,
     return res;
 }
 
+// Will do JSON-like notation. E.g. (1,2,3)
 template<typename... Args>
 std::string to_string( std::tuple<Args...> const& tp ) {
     auto is = std::make_index_sequence<sizeof...(Args)>();
@@ -182,7 +217,10 @@ std::string to_string( std::tuple<Args...> const& tp ) {
 // if that can't be used.
 template<typename T>
 std::string to_string( T const& arg ) {
-    // This check is done at compile time.
+    // This  check  is done at compile time. Note, this check may
+    // not be exactly right in that it might not  filter  on  the
+    // precise  set  of  types for which there are std::to_string
+    // overloads, but it seems close enough.
     if constexpr( std::is_integral_v<T> ||
                   std::is_floating_point_v<T> ) {
         // Specialization  for  primitive types for which we will
