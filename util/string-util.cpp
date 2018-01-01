@@ -97,10 +97,21 @@ string to_string<string>( string const& s ) {
     return "\"" + s + "\"";
 }
 
-// NOTE: This puts quotes around the string!
-template<>
-string to_string<char const*>( char const* const& s ) {
+// NOTE:  This  puts  quotes around the string! Also, it is not a
+// template  specialization  because  for  some reason gcc always
+// wants to select the version for ints/floats below  instead  of
+// this one when we give it string literals (i.e., type deduction
+// is not doing what we want). But  having this one causes gcc to
+// select it when we give it a string literal.
+std::string to_string( char const* s ) {
     return "\"" + string( s ) + "\"";
+}
+
+// NOTE: This puts single quotes around the string!
+template<>
+string to_string<char>( char const& s ) {
+    string res( 1, s );
+    return "'" + res + "'";
 }
 
 // Trivial; extract string from path.

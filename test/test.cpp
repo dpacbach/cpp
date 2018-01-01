@@ -11,6 +11,34 @@ namespace pr = project;
 
 namespace testing {
 
+TEST( to_string )
+{
+    EQUALS( util::to_string( 5    ), "5"        );
+    EQUALS( util::to_string( 5.5  ), "5.500000" );
+    EQUALS( util::to_string( true ), "1"        );
+    EQUALS( util::to_string( 'a'  ), "'a'"      );
+    EQUALS( util::to_string( "a"  ), "\"a\""    );
+
+    string s = "xyz";
+    EQUALS( util::to_string( s ), "\"xyz\"" );
+
+    tuple<int, string, double> tp{ 5, "david", 67.9 };
+    vector<int> v1{ 3, 4, 5 };
+    vector<string> v2{ "A", "B", "C" };
+
+    EQUALS( util::to_string( tp ), "(5,\"david\",67.900000)" );
+    EQUALS( util::to_string( v1 ), "[3,4,5]"                 );
+    EQUALS( util::to_string( v2 ), "[\"A\",\"B\",\"C\"]"     );
+
+    char c = 'c'; auto rw = cref( c );
+    EQUALS( util::to_string( rw ), "'c'" );
+
+    OptStr opt;
+    EQUALS( util::to_string( opt ), "nullopt" );
+    opt = "something";
+    EQUALS( util::to_string( opt ), "\"something\"" );
+}
+
 TEST( sqlite )
 {
     // This  will  create  a  database in memory so that we don't

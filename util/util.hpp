@@ -128,23 +128,6 @@ void uniq_sort( std::vector<T>& v ) {
     v.erase( i, end( v ) );
 }
 
-// For a vector whose element type can be  streamed,  output  the
-// vector in a JSON-like syntax.
-template<typename T>
-std::ostream& operator<<( std::ostream&         out,
-                          std::vector<T> const& v ) {
-    out << "[";
-    bool first = true;
-    for( auto const& i : v ) {
-        if( !first )
-            out << ",";
-        out << i;
-        first = false;
-    }
-    out << "]";
-    return out;
-}
-
 }
 
 // Here  we  open up the std namespace to add a hash function spe-

@@ -4,12 +4,15 @@
 #pragma once
 
 #include "util.hpp"
+#include "types.hpp"
 
 #include <cctype>
 #include <experimental/filesystem>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 namespace fs = std::experimental::filesystem;
@@ -79,29 +82,106 @@ to_paths( std::vector<std::string> const& ss );
 /****************************************************************
 * To-String utilities
 ****************************************************************/
-// Default version calls std::to_string which covers all of the
-// basic primitive types.
 template<typename T>
-std::string to_string( T const& arg ) {
-    return std::to_string( arg );
-}
+std::string to_string( T const& );
+
+// NOTE: This puts single quotes around the character!
+template<>
+std::string to_string<char>( char const& c );
 
 // NOTE: This puts quotes around the string!
 template<>
 std::string to_string<std::string>( std::string const& s );
 
-// NOTE: This puts quotes around the string!
-template<>
-std::string to_string<char const*>( char const* const& s );
+// NOTE:  This  puts  quotes around the string! Also, it is not a
+// template  specialization  because  for  some reason gcc always
+// wants to select the version for ints/floats below  instead  of
+// this one when we give it string literals (i.e., type deduction
+// is not doing what we want). But  having this one causes gcc to
+// select it when we give it a string literal.
+std::string to_string( char const* s );
 
 // Trivial; extract string from path.
 template<>
 std::string to_string<fs::path>( fs::path const& p );
 
+// Prints in JSON style notation.
+template<typename T>
+std::string to_string( std::vector<T> const& v ) {
+    std::string res = "[";
+    bool first = true;
+    for( auto const& i : v ) {
+        if( !first )
+            res += ",";
+        res += util::to_string( i );
+        first = false;
+    }
+    res += "]";
+    return res;
+}
+
+template<typename T>
+std::string to_string( std::reference_wrapper<T> const& rw ) {
+    return util::to_string( rw.get() );
+}
+
+template<typename T>
+std::string to_string( std::reference_wrapper<T const> const& rw ) {
+    return util::to_string( rw.get() );
+}
+
 template<typename T>
 std::string to_string( std::optional<T> const& opt ) {
     return opt ? util::to_string( *opt )
                : std::string( "nullopt" );
+}
+
+template<typename Tuple, size_t... Indexes>
+StrVec tuple_elems_to_string( Tuple const& tp,
+                              std::index_sequence<Indexes...> ) {
+    StrVec res; res.reserve( std::tuple_size_v<Tuple> );
+    // Unary right fold of template parameter pack.
+    ((res.push_back( util::to_string( std::get<Indexes>( tp ) ))), ...);
+    return res;
+}
+
+template<typename... Args>
+std::string to_string( std::tuple<Args...> const& tp ) {
+    auto is = std::make_index_sequence<sizeof...(Args)>();
+    auto v = tuple_elems_to_string( tp, is );
+    std::string res = "(";
+    bool first = true;
+    for( auto const& i : v ) {
+        if( !first )
+            res += ",";
+        res += i;
+        first = false;
+    }
+    res += ")";
+    return res;
+}
+
+// Default version using either std::to_string or string  streams
+// if that can't be used.
+template<typename T>
+std::string to_string( T const& arg ) {
+    // This check is done at compile time.
+    if constexpr( std::is_integral_v<T> ||
+                  std::is_floating_point_v<T> ) {
+        // Specialization  for  primitive types for which we will
+        // just call std::to_string assuming that will be
+        // fastest.
+        return std::to_string( arg );
+    } else {
+        std::ostringstream oss; oss << arg;
+        return oss.str();
+    }
+}
+
+template<typename T>
+std::ostream& operator<<( std::ostream&         out,
+                          std::vector<T> const& v ) {
+    return (out << util::to_string( v ));
 }
 
 }
