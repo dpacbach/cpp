@@ -50,8 +50,8 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
         }
     };
 
-    return std::equal( begin( s1 ), end( s1 ),
-                       begin( s2 ), end( s2 ),
+    return std::equal( std::begin( s1 ), std::end( s1 ),
+                       std::begin( s2 ), std::end( s2 ),
                        predicate );
 }
 
@@ -141,7 +141,8 @@ std::string to_string( std::vector<T> const& v ) {
     // We  need  this lambda to help std::transform with overload
     // resolution of to_string.
     auto f = []( T const& e ){ return util::to_string<T>( e ); };
-    std::transform( begin( v ), end( v ), begin( res ), f );
+    std::transform( std::begin( v   ), std::end( v ),
+                    std::begin( res ), f );
     return "[" + join( res, "," ) + "]";
 }
 

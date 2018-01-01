@@ -4,8 +4,9 @@
 #pragma once
 
 #include "sqlite_modern_cpp.h"
+#include "string-util.hpp"
 
-#include <string_view>
+#include <algorithm>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -64,6 +65,27 @@ void insert_many( sqlite::database&  db,
         impl::insert_tuple_impl( ps, t, is );
         ps.execute();
     }
+}
+
+// Takes  a  partial  query  without the values and will manually
+// convert the tuples to strings and insert them into  the  query
+// in a list to improve insertion time significantly.
+template<typename... Args>
+void insert_many_fast( sqlite::database&  db,
+                       std::string const& query,
+                       std::vector<std::tuple<Args...>> const& in ) {
+
+    using Tp = std::tuple<Args...>;
+
+    std::vector<std::string> strs( in.size() );
+    // We  need  this lambda to help std::transform with overload
+    // resolution of to_string.
+    auto f = []( Tp const& e ){ return util::to_string( e ); };
+    std::transform( std::begin( in   ), std::end( in ),
+                    std::begin( strs ), f );
+
+    // Insert all elements in one shot.
+    db << (query + " " + util::join( strs, "," ));
 }
 
 } // namespace sqlite

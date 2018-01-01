@@ -189,6 +189,21 @@ TEST( sqlite )
           EQUALS( name,   "ted" );
           EQUALS( weight,  67.0 );
        };
+
+    // Run  same  test  again,  but this time with the "fast" ver-
+    // sion.
+    sqlite::insert_many_fast( db,
+        "INSERT INTO user (age, name, weight) VALUES",
+        rows
+    );
+
+    // Spot-check a row.
+    db << "SELECT age, name, weight FROM user WHERE _id=11 ;"
+       >> []( int age, string name, double weight ){
+          EQUALS( age,     32   );
+          EQUALS( name,   "ted" );
+          EQUALS( weight,  67.0 );
+       };
 }
 
 TEST( preprocessor )
