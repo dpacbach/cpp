@@ -11,6 +11,19 @@ namespace pr = project;
 
 namespace testing {
 
+TEST( split_join )
+{
+    SVVec v{ "one", "two", "three" };
+    EQUALS( util::join( v, "," ), "one,two,three" );
+    EQUALS( util::join( v, "--" ), "one--two--three" );
+
+    SVVec svv{ "ab", "cd", "ef" };
+    EQUALS( util::split( "ab,cd,ef", ',' ), svv );
+
+    EQUALS( util::join( util::split( "ab,cd,ef", ',' ), "," ),
+            "ab,cd,ef" );
+}
+
 TEST( to_string )
 {
     EQUALS( util::to_string( 5    ), "5"        );

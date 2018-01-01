@@ -55,6 +55,35 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
                        predicate );
 }
 
+// This  will  intersperse  `what` into the vector of strings and
+// join  the  result.  It  will attempt o compute require reserve
+// space before hand to minimize memory allocations.
+template<typename T>
+std::string join( std::vector<T> const& v, std::string_view what ) {
+    if( !v.size() )
+        return {};
+    // First attempt to compute how much space we need, which  we
+    // should be able to do exactly.
+    size_t total = 0;
+    for( auto const& e : v )
+        total += e.size();
+    total += what.size()*(v.size() - 1); // v.size() > 0 always
+    // Now construct the result
+    std::string res; res.reserve( total+1 ); // +1 for good measure.
+    bool first = true;
+    for( auto const& e : v ) {
+        if( !first )
+            res += what;
+        res += e;
+        first = false;
+    }
+    // Just to make sure  we  did  the  calculation right; if not,
+    // then we might pay extra in memory allocations.
+    ASSERT( res.size() == total, "res.size() == " << res.size() <<
+                                 " and total == " << total );
+    return res;
+}
+
 // Strip all blank space off of a string view and return
 // a new one.
 std::string_view strip( std::string_view sv );
@@ -108,16 +137,12 @@ std::string to_string<fs::path>( fs::path const& p );
 // Prints in JSON style notation.
 template<typename T>
 std::string to_string( std::vector<T> const& v ) {
-    std::string res = "[";
-    bool first = true;
-    for( auto const& i : v ) {
-        if( !first )
-            res += ",";
-        res += util::to_string( i );
-        first = false;
-    }
-    res += "]";
-    return res;
+    std::vector<std::string> res( v.size() );
+    // We  need  this lambda to help std::transform with overload
+    // resolution of to_string.
+    auto f = []( T const& e ){ return util::to_string<T>( e ); };
+    std::transform( begin( v ), end( v ), begin( res ), f );
+    return "[" + join( res, "," ) + "]";
 }
 
 template<typename T>
@@ -149,16 +174,7 @@ template<typename... Args>
 std::string to_string( std::tuple<Args...> const& tp ) {
     auto is = std::make_index_sequence<sizeof...(Args)>();
     auto v = tuple_elems_to_string( tp, is );
-    std::string res = "(";
-    bool first = true;
-    for( auto const& i : v ) {
-        if( !first )
-            res += ",";
-        res += i;
-        first = false;
-    }
-    res += ")";
-    return res;
+    return "(" + join( v, "," ) + ")";
 }
 
 // Default version using either std::to_string or string  streams
