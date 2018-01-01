@@ -11,9 +11,10 @@ namespace util::par {
 
 // Will  return  the max number of simultaneous threads supported
 // on this system. Result will always  be  >= 1. Will take 75% of
-// the total assuming the second half are hyperthreads.
+// the  total assuming the  second half are  hyperthreads (unless
+// that would  result in zero, in  which case  we just  return 1).
 int max_threads() {
-    if( auto ts = thread::hardware_concurrency(); ts >= 1 )
+    if( auto ts = thread::hardware_concurrency(); ts > 1 )
         return int( ts ) * 3 / 4;
     return 1;
 }

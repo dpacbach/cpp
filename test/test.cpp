@@ -229,6 +229,8 @@ TEST( preprocessor )
          0                  // jobs
     );
 
+    TRUE( fs::exists( cl_read ), "file " << cl_read << " not "
+                                 "generated." );
     auto size = fs::file_size( cl_read );
     EQUALS( size, 309680 );
 }
