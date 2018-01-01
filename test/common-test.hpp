@@ -91,13 +91,13 @@ std::string bar();
             threw = true;                                  \
         }                                                  \
         if( threw ) {                                      \
-            cerr << " ==> " << testing::fail() << "\n";    \
+            cerr << " | " << testing::fail() << "\n";      \
             cerr << testing::bar() << "\n";                \
             cerr << err << "\n";                           \
             cerr << testing::bar() << "\n";                \
             throw runtime_error( "test failed" );          \
         } else {                                           \
-            cout << " ==> " << testing::pass();            \
+            cout << " | " << testing::pass();              \
             cout << util::c_norm << "\n";                  \
         }                                                  \
     }                                                      \
