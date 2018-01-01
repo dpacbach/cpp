@@ -10,11 +10,11 @@ top-level-folders = util xml-utils sqlite project
 
 main.deps = $(top-level-folders)
 
-ifeq (undefined,$(origin OPT))
+#ifeq (undefined,$(origin OPT))
     top-level-folders += test
     test.deps          = $(filter-out test,$(top-level-folders))
     test_is            = test
-endif
+#endif
 
 main_is = main
 
