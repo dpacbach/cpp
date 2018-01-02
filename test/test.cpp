@@ -10,6 +10,7 @@ using namespace std;
 namespace pr = project;
 
 fs::path const data_common = "../test/data-common";
+fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
@@ -224,19 +225,31 @@ TEST( preprocessor )
     // NOTE:  for  this  test  we must be running with CWD of the
     // folder containing the test executable.
 
-    fs::path demo    = util::absnormpath( "../sln-demo" );
-    fs::path win32   = demo  / "libmemcached-win/win32";
-    fs::path cl_read = win32 / "debug/CL.read.1.tlog";
-    fs::path sln     = win32 / "libmemcached.sln";
+    auto v = util::read_file_lines(
+                 data_local / "preprocessor-input.txt" );
+    EQUALS( v.size(), 4 );
 
-    fs::path base = util::absnormpath( ".." );
+    fs::path cwd = fs::current_path();
+
+    fs::path sln      = util::lexically_normal( cwd / v[0] );
+    fs::path cl_read  = util::lexically_normal( cwd / v[1] );
+    string   src_line = v[2]; // comma-separated list
+    fs::path base     = v[3];
+
+    PathVec srcs = util::to_paths(
+        util::to_strings( util::split( src_line, ',' ) ) );
+
+    for( auto& p : srcs )
+        p = util::lexically_normal( cwd / p );
+
+    base = util::absnormpath( base );
 
     if( fs::exists( cl_read ) )
         fs::remove( cl_read );
 
     pr::run_preprocessor(
          base,              // base folder for relative paths
-         { demo },          // src folders
+         srcs,
          sln,               // path to .sln file rel to cwd
          { "Debug|Win32" }, // platforms
          0                  // jobs
@@ -245,7 +258,8 @@ TEST( preprocessor )
     TRUE( fs::exists( cl_read ), "file " << cl_read << " not "
                                  "generated." );
     auto size = fs::file_size( cl_read );
-    EQUALS( size, 309680 );
+    // Just make sure something was written.
+    TRUE_( size > 1000 );
 }
 
 TEST( for_each_par )
