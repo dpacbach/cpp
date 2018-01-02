@@ -5,6 +5,7 @@
 #include "error.hpp"
 #include "fs.hpp"
 #include "graph.hpp"
+#include "io.hpp"
 #include "macros.hpp"
 #include "non-copyable.hpp"
 #include "opt-util.hpp"

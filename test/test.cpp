@@ -9,7 +9,20 @@ using namespace std;
 
 namespace pr = project;
 
+fs::path const data_common = "../test/data-common";
+
 namespace testing {
+
+TEST( read_file )
+{
+    auto f = data_common / "3-lines.txt";
+
+    auto v = util::read_file_lines( f );
+    EQUALS( v, (StrVec{ "line 1", "line 2", "line 3" }) );
+
+    auto s = util::read_file_str( f );
+    EQUALS( s, "line 1\nline 2\nline 3" );
+}
 
 TEST( split_join )
 {
