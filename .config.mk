@@ -1,6 +1,6 @@
-CXXFLAGS += -std=c++1z -pthread
-
-LDFLAGS += -lstdc++fs -pthread
+CFLAGS   += -pthread
+CXXFLAGS += -std=c++1z
+LDFLAGS  += -lstdc++fs -pthread
 
 project.deps   = xml-utils
 xml-utils.deps = pugixml util
