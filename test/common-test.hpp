@@ -37,6 +37,7 @@ void run_all_tests();
 // Run a single unit test; no need to call this directly.
 void run_single_test( size_t      line,
                       char const* file,
+                      char const* name,
                       std::function<void(void)> func );
 
 // Functions for printing to console
@@ -121,6 +122,7 @@ struct skipped_exception : public std::exception {};
     void STRING_JOIN( __test_, a )();                           \
     void STRING_JOIN( test_, a )() {                            \
         testing::run_single_test( __LINE__, __FILE__,           \
+                                  TO_STRING( a ),               \
                                   STRING_JOIN( __test_, a ) );  \
     }                                                           \
     STARTUP() {                                                 \

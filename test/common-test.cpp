@@ -41,12 +41,13 @@ void run_all_tests() {
 // Run a single unit test; no need to call this directly.
 void run_single_test( size_t      line,
                       char const* file,
+                      char const* name,
                       function<void(void)> func ) {
 
     using util::operator<<;
     checkpoint_line = line;
     checkpoint_file = file;
-    string test = string( "Test " ) + TO_STRING( a );
+    string test = string( "Test " ) + name;
     cout << left << setw( 40 ) << test;
     enum class Res { PASSED, SKIPPED, FAILED };
     Res result = Res::FAILED;
