@@ -18,47 +18,47 @@ TEST( chunking )
 {
     using PType = PairVec<size_t, size_t>;
 
-    THROWS( util::chunk_offsets( 1, 0 ) );
+    THROWS( util::chunks( 1, 0 ) );
 
-    EQUALS( util::chunk_offsets( 0, 0 ),
+    EQUALS( util::chunks( 0, 0 ),
             (PType{}) );
 
-    EQUALS( util::chunk_offsets( 0, 1 ),
+    EQUALS( util::chunks( 0, 1 ),
             (PType{}) );
-    EQUALS( util::chunk_offsets( 0, 3 ),
+    EQUALS( util::chunks( 0, 3 ),
             (PType{}) );
 
-    EQUALS( util::chunk_offsets( 1, 1 ),
+    EQUALS( util::chunks( 1, 1 ),
             (PType{ {0,1} }) );
-    EQUALS( util::chunk_offsets( 2, 1 ),
+    EQUALS( util::chunks( 2, 1 ),
             (PType{ {0,1},{1,2} }) );
-    EQUALS( util::chunk_offsets( 3, 1 ),
+    EQUALS( util::chunks( 3, 1 ),
             (PType{ {0,1},{1,2},{2,3} }) );
 
-    EQUALS( util::chunk_offsets( 10, 1 ),
+    EQUALS( util::chunks( 10, 1 ),
             (PType{ {0,1},{1,2},{2,3},{3,4},{4,5},
                     {5,6},{6,7},{7,8},{8,9},{9,10} }) );
-    EQUALS( util::chunk_offsets( 10, 2 ),
+    EQUALS( util::chunks( 10, 2 ),
             (PType{ {0,2},{2,4},{4,6},{6,8},{8,10} }) );
-    EQUALS( util::chunk_offsets( 10, 3 ),
+    EQUALS( util::chunks( 10, 3 ),
             (PType{ {0,3},{3,6},{6,9},{9,10} }) );
-    EQUALS( util::chunk_offsets( 10, 4 ),
+    EQUALS( util::chunks( 10, 4 ),
             (PType{ {0,4},{4,8},{8,10} }) );
-    EQUALS( util::chunk_offsets( 10, 5 ),
+    EQUALS( util::chunks( 10, 5 ),
             (PType{ {0,5},{5,10} }) );
-    EQUALS( util::chunk_offsets( 10, 6 ),
+    EQUALS( util::chunks( 10, 6 ),
             (PType{ {0,6},{6,10} }) );
-    EQUALS( util::chunk_offsets( 10, 7 ),
+    EQUALS( util::chunks( 10, 7 ),
             (PType{ {0,7},{7,10} }) );
-    EQUALS( util::chunk_offsets( 10, 8 ),
+    EQUALS( util::chunks( 10, 8 ),
             (PType{ {0,8},{8,10} }) );
-    EQUALS( util::chunk_offsets( 10, 9 ),
+    EQUALS( util::chunks( 10, 9 ),
             (PType{ {0,9},{9,10} }) );
-    EQUALS( util::chunk_offsets( 10, 10 ),
+    EQUALS( util::chunks( 10, 10 ),
             (PType{ {0,10} }) );
-    EQUALS( util::chunk_offsets( 10, 11 ),
+    EQUALS( util::chunks( 10, 11 ),
             (PType{ {0,10} }) );
-    EQUALS( util::chunk_offsets( 10, 20 ),
+    EQUALS( util::chunks( 10, 20 ),
             (PType{ {0,10} }) );
 }
 
@@ -265,6 +265,61 @@ TEST( sqlite )
           EQUALS( age,     32   );
           EQUALS( name,   "ted" );
           EQUALS( weight,  67.0 );
+       };
+
+    // Test inserting many rows from vector  from  a  single  pre-
+    // pared statement without a tuple inside (we have a special
+    // overload for this).
+    vector<int> rows_1{ 55, 44, 33, 88 };
+
+    // Prepare the query once,  then  execute  once  for each row.
+    sqlite::insert_many( db,
+        "INSERT INTO user (age) VALUES (?)",
+        rows_1
+    );
+
+    // Spot-check a row.
+    db << "SELECT age, name, weight FROM user WHERE _id=15 ;"
+       >> []( int age, string name, double weight ){
+          EQUALS( age,     33 );
+          EQUALS( name,    "" );
+          EQUALS( weight,  0  );
+       };
+
+    // Run  same  test  again,  but this time with the "fast" ver-
+    // sion.
+    sqlite::insert_many_fast( db,
+        "INSERT INTO user (age) VALUES",
+        rows_1
+    );
+
+    // Spot-check a row.
+    db << "SELECT age, name, weight FROM user WHERE _id=19 ;"
+       >> []( int age, string name, double weight ){
+          EQUALS( age,     33 );
+          EQUALS( name,    "" );
+          EQUALS( weight,  0  );
+       };
+
+    // Now test chunking; we insert a  number of rows a few times
+    // larger than the chunk size to make sure we  have  multiple
+    // chunks.
+    vector<tuple<int, string>> rows2;
+    for( size_t i = 0; i < sqlite::impl::chunk*3+7; ++i )
+        rows2.push_back( { 333, util::to_string( i ) } );
+
+    sqlite::insert_many_fast( db,
+        "INSERT INTO user (age, name) VALUES",
+        rows2
+    );
+
+    // Check all the rows.
+    size_t count2 = 0;
+    db << "SELECT age, name FROM user "
+          "WHERE age=333 ORDER BY _id ASC"
+       >> [&count2]( int, string name ){
+          EQUALS( name, util::to_string( count2 ) );
+          ++count2;
        };
 }
 

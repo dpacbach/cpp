@@ -15,6 +15,11 @@ namespace sqlite {
 
 namespace impl {
 
+// When building large queries  with  many  substituted values we
+// will do it in chunks for this many elements in order to  avoid
+// generating query strings that exceed sqlite's  maximum  length.
+size_t constexpr chunk = 2000;
+
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
 // use to index the tuple.  Note  that this function expects that
@@ -47,11 +52,13 @@ void insert_tuple( sqlite::database&  db,
     impl::insert_tuple_impl( db, t, is );
 }
 
-// Just iterate through the vector and  add in each tuple individ-
-// ually. Despite the fact that we are using a prepared statement
-// (and only streaming the query string  once) it seems that this
-// is  still  extremely slow, so should probably not be used when
-// there are more than a handful of elements.
+// This overload is for when  the  query  string has multiple sub-
+// stitution  parameters. Just iterate through the vector and add
+// in each tuple individually. Despite the fact that we are using
+// a prepared statement  (and  only  streaming  the  query string
+// once)  it  seems  that this is still extremely slow, so should
+// probably  not be used when there are more than a handful of el-
+// ements.
 template<typename... Args>
 void insert_many( sqlite::database&  db,
                   std::string const& query,
@@ -61,15 +68,41 @@ void insert_many( sqlite::database&  db,
     // Get "prepared statement" which is not immediately executed.
     auto ps = (db << query);
 
-    for( auto const t : in ) {
+    for( auto const& t : in ) {
         impl::insert_tuple_impl( ps, t, is );
         ps.execute();
     }
 }
 
-// Takes  a  partial  query  without the values and will manually
-// convert the tuples to strings and insert them into  the  query
-// in a list to improve insertion time significantly.
+// This  overload  is for when the query string has only a single
+// substitution parameter. Just  iterate  through  the vector and
+// add in each element individually. Despite the fact that we are
+// using  a  prepared  statement  (and  only  streaming the query
+// string once) it seems that  this  is  still extremely slow, so
+// should probably not be used when there are more than a handful
+// of elements.
+template<typename T>
+void insert_many( sqlite::database&     db,
+                  std::string const&    query,
+                  std::vector<T> const& in ) {
+
+    // Get "prepared statement" which is not immediately executed.
+    auto ps = (db << query);
+
+    for( auto const& t : in ) {
+        ps << t;
+        ps.execute();
+    }
+}
+
+// This overload is for when  the  query  string has multiple sub-
+// stitution parameters. Takes a partial query without the values
+// and  will  manually  convert  the tuples to strings and insert
+// them  into  the  query in a list to improve insertion time sig-
+// nificantly. NOTE: this will only work for queries that end  in
+// a list of tuples containing only  argument  substitutions,  as
+// opposed to queries whose  substitution  marks  are embedded in
+// the query in a more complicated way.
 template<typename... Args>
 void insert_many_fast( sqlite::database&  db,
                        std::string const& query,
@@ -77,15 +110,58 @@ void insert_many_fast( sqlite::database&  db,
 
     using Tp = std::tuple<Args...>;
 
-    std::vector<std::string> strs( in.size() );
     // We  need  this lambda to help std::transform with overload
     // resolution of to_string.
     auto f = []( Tp const& e ){ return util::to_string( e ); };
-    std::transform( std::begin( in   ), std::end( in ),
-                    std::begin( strs ), f );
 
-    // Insert all elements in one shot.
-    db << (query + " " + util::join( strs, "," ));
+    // Do  the  entire  operation  in  chunks  to avoid exceeding
+    // sqlite's maximum query length.
+    for( auto [l,r] : util::chunks( in.size(), impl::chunk ) ) {
+        // This is the number  of  elements  in this chunk, which
+        // may  be less than impl::chunk if we're on the last one.
+        std::vector<std::string> strs( r-l );
+        // l,r are offsets from beginning of vector, and r  is  a
+        // one-past-the-end offset.
+        std::transform( std::begin( in )+l, std::begin( in )+r,
+                        std::begin( strs ), f );
+
+        // Insert all elements in one shot.
+        db << (query + " " + util::join( strs, "," ));
+    }
+}
+
+// This  overload  is  for when the query string has only one sub-
+// stitution parameter. Takes a partial  query without the values
+// and  will  manually convert the elements to strings and insert
+// them  into  the  query in a list to improve insertion time sig-
+// nificantly. NOTE: this will only work for queries that end  in
+// a list of tuples containing only  argument  substitutions,  as
+// opposed to queries whose  substitution  marks  are embedded in
+// the query in a more complicated way.
+template<typename T>
+void insert_many_fast( sqlite::database&     db,
+                       std::string const&    query,
+                       std::vector<T> const& in ) {
+
+    // We  need  this lambda to help std::transform with overload
+    // resolution of to_string.
+    auto f = []( T const& e )
+        { return "(" + util::to_string( e ) + ")"; };
+
+    // Do  the  entire  operation  in  chunks  to avoid exceeding
+    // sqlite's maximum query length.
+    for( auto [l,r] : util::chunks( in.size(), impl::chunk ) ) {
+        // This is the number  of  elements  in this chunk, which
+        // may  be less than impl::chunk if we're on the last one.
+        std::vector<std::string> strs( r-l );
+        // l,r are offsets from beginning of vector, and r  is  a
+        // one-past-the-end offset.
+        std::transform( std::begin( in )+l, std::begin( in )+r,
+                        std::begin( strs ), f );
+
+        // Insert all elements in one shot.
+        db << (query + " " + util::join( strs, "," ));
+    }
 }
 
 } // namespace sqlite
