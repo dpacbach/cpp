@@ -8,8 +8,9 @@ using namespace std;
 
 namespace testing {
 
-string fail() { return util::c_red   + "Failed" + util::c_norm; }
-string pass() { return util::c_green + "Passed" + util::c_norm; }
+string fail() { return util::c_red    + "Fail" + util::c_norm; }
+string pass() { return util::c_green  + "Pass" + util::c_norm; }
+string skip() { return util::c_yellow + "Skip" + util::c_norm; }
 
 string bar() {
     return "---------------------------------------------------";

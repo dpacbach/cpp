@@ -6,6 +6,7 @@
 #include "colors.hpp"
 #include "macros.hpp"
 
+#include <exception>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -27,7 +28,12 @@ void run_all_tests();
 // Functions for printing to console
 std::string fail();
 std::string pass();
+std::string skip();
 std::string bar();
+
+// This exception is thrown by a  test  to indicate that the test
+// should be skipped.
+struct skipped_exception : public std::exception {};
 
 } // namespace testing
 
@@ -73,35 +79,48 @@ std::string bar();
           "expression: " #a " did not throw." );
 
 // This is used to create a unit test function.
-#define TEST( a )                                          \
-    void STRING_JOIN( __test_, a )();                      \
-    void STRING_JOIN( test_, a )() {                       \
-        using util::operator<<;                            \
-        string test = string( "Test " ) + TO_STRING( a );  \
-        cout << left << setw( 40 ) << test;                \
-        bool threw = false;                                \
-        string err;                                        \
-        try {                                              \
-            STRING_JOIN( __test_, a )();                   \
-        } catch( std::exception const& e ) {               \
-            err = e.what();                                \
-            threw = true;                                  \
-        } catch( ... ) {                                   \
-            err = "unknown exception";                     \
-            threw = true;                                  \
-        }                                                  \
-        if( threw ) {                                      \
-            cerr << "   | " << testing::fail() << "\n";    \
-            cerr << testing::bar() << "\n";                \
-            cerr << err << "\n";                           \
-            cerr << testing::bar() << "\n";                \
-            throw runtime_error( "test failed" );          \
-        } else {                                           \
-            cout << "   | " << testing::pass();            \
-            cout << util::c_norm << "\n";                  \
-        }                                                  \
-    }                                                      \
-    STARTUP() {                                            \
-        test_list().push_back( STRING_JOIN( test_, a ) );  \
-    }                                                      \
+#define TEST( a )                                           \
+    void STRING_JOIN( __test_, a )();                       \
+    void STRING_JOIN( test_, a )() {                        \
+        using util::operator<<;                             \
+        string test = string( "Test " ) + TO_STRING( a );   \
+        cout << left << setw( 40 ) << test;                 \
+        enum class Res { PASSED, SKIPPED, FAILED };         \
+        Res result = Res::FAILED;                           \
+        string err;                                         \
+        try {                                               \
+            STRING_JOIN( __test_, a )();                    \
+            result = Res::PASSED;                           \
+        } catch( testing::skipped_exception const& ) {      \
+            result = Res::SKIPPED;                          \
+        } catch( std::exception const& e ) {                \
+            err = e.what();                                 \
+            result = Res::FAILED;                           \
+        } catch( ... ) {                                    \
+            err = "unknown exception";                      \
+            result = Res::FAILED;                           \
+        }                                                   \
+        cerr << "   | ";                                    \
+        bool failed = false;                                \
+        switch( result ) {                                  \
+        case Res::FAILED:                                   \
+            failed = true;                                  \
+            cerr << testing::fail() << "\n";                \
+            cerr << testing::bar() << "\n";                 \
+            cerr << err << "\n";                            \
+            cerr << testing::bar() << "\n";                 \
+            break;                                          \
+        case Res::SKIPPED:                                  \
+            cout << testing::skip();                        \
+            break;                                          \
+        case Res::PASSED:                                   \
+            cout << testing::pass();                        \
+            break;                                          \
+        }                                                   \
+        cout << util::c_norm << "\n";                       \
+        if( failed ) throw runtime_error( "test failed" );  \
+    }                                                       \
+    STARTUP() {                                             \
+        test_list().push_back( STRING_JOIN( test_, a ) );   \
+    }                                                       \
     void STRING_JOIN( __test_, a )()

@@ -222,6 +222,10 @@ TEST( sqlite )
 
 TEST( preprocessor )
 {
+#ifdef DEBUG
+    // This  test  can be slow, so only run it in release testing.
+    throw testing::skipped_exception();
+#endif
     // NOTE:  for  this  test  we must be running with CWD of the
     // folder containing the test executable.
 
