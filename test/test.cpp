@@ -112,6 +112,14 @@ TEST( to_string )
     EQUALS( util::to_string( opt ), "nullopt" );
     opt = "something";
     EQUALS( util::to_string( opt ), "\"something\"" );
+
+    variant<int, string> var = 5;
+    EQUALS( util::to_string( var ), "5" );
+    var = "hello";
+    EQUALS( util::to_string( var ), "\"hello\"" );
+
+    vector<tuple<int, string>> v3{ {5,"a"}, {6,"b"} };
+    EQUALS( util::to_string( v3 ), "[(5,\"a\"),(6,\"b\")]" );
 }
 
 TEST( sqlite )
