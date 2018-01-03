@@ -329,6 +329,24 @@ TEST( sqlite )
           EQUALS( name, util::to_string( count2 ) );
           ++count2;
        };
+
+    // Now do a query with the select function.
+    using res_type_2 = vector<tuple<int, string>>;
+    auto v2 = sqlite::select<int, string>( db,
+        "SELECT age, name FROM user WHERE age=333 "
+        "ORDER BY _id ASC LIMIT 5"
+    );
+
+    EQUALS( v2, (res_type_2{ {333,"0"},{333,"1"},{333,"2"},
+                             {333,"3"},{333,"4"} }) );
+
+    using res_type_3 = vector<string>;
+    auto v3 = sqlite::select1<string>( db,
+        "SELECT name FROM user WHERE age=333 "
+        "ORDER BY _id ASC LIMIT 5"
+    );
+
+    EQUALS( v3, (res_type_3{ "0","1","2","3","4" }) );
 }
 
 TEST( preprocessor )

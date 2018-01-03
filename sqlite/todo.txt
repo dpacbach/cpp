@@ -2,17 +2,6 @@ SQLite:
 
     open connection with multiple databases
 
-    query returning results
-    query not returning any results
-
-    with_connection function
-
-    vacuum
-
-    executeMany, executeMany1, insertMany, insertMany1
-
-    compatibility with types used
-
     md5
 
 other:

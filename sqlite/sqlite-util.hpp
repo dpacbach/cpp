@@ -37,6 +37,50 @@ void insert_tuple_impl( Receiver&    db,
 
 }
 
+// With move and/or NRVO this should be  a  convenient  yet  effi-
+// cient way to select data from the  db.  This  variant  is  for
+// queries that return multiple columns.
+template<typename... Args>
+std::vector<std::tuple<Args...>>
+select( sqlite::database& db, std::string const& query ) {
+
+    std::vector<std::tuple<Args...>> res;
+
+    auto func = [&res]( Args&&... args ) {
+        res.emplace_back( std::move( args )... );
+    };
+
+    // For each resulting row run  the  above function which will
+    // append it to the list.
+    db << query >> func;
+
+    return res;
+}
+
+// With move and/or NRVO this should be  a  convenient  yet  effi-
+// cient way to select data from the  db.  This  variant  is  for
+// queries that return a single column.
+template<typename T>
+std::vector<T> select1( sqlite::database&  db,
+                        std::string const& query ) {
+
+    std::vector<T> res;
+
+    auto func = [&res]( T&& arg ) {
+        res.emplace_back( std::move( arg ) );
+    };
+
+    // For each resulting row run  the  above function which will
+    // append it to the list.
+    db << query >> func;
+
+    return res;
+}
+
+// Not sure exactly what this does, but  it  seems  like  a  good
+// thing to do from time to  time  on  a database when editing it.
+inline void vacuum( sqlite::database& db ) { db << "VACUUM"; }
+
 // Take a query with parameters and a tuple of arguments and will
 // run  the query and feed in the components of the tuple individ-
 // ually for substitution. In order to  unpack  the  tuple  in  a
