@@ -219,7 +219,7 @@ fs::path preprocess_project( GlobalIncludeMap const& m,
     // folders; those are assumed to  exist  and  it should be an
     // error if they don't, so we want it to throw in  that  case.
     fs::create_directory( cl_read.parent_path() );
-    ofstream out( cl_read );
+    ofstream out( cl_read.string() );
     ASSERT( out.good(), "failed to open " << cl_read );
     for( auto s : sources ) {
         // Have to call the string() method so that it will
