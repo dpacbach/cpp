@@ -91,7 +91,7 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
 /****************************************************************
 * To-String utilities
 ****************************************************************/
-// NOTE: This puts quotes around the  string! The reason for this
+// NOTE: These puts quotes around the string! The reason for this
 // behavior  is that we want to try to perform the to_string oper-
 // ation  (in general) such that it has some degree of reversibil-
 // ity. For example, converting  the  integer  55  and the string
@@ -103,6 +103,12 @@ vector<fs::path> to_paths( vector<string> const& ss ) {
 template<>
 string to_string<string>( string const& s ) {
     return "\"" + s + "\"";
+}
+template<>
+string to_string<std::string_view>( string_view const& s ) {
+    // Below may seem redundant, but we want to put quotes around
+    // the string.
+    return to_string( string( s ) );
 }
 
 // NOTE:  This  puts  quotes around the string! Also, it is not a

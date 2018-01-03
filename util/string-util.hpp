@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "error.hpp"
 #include "util.hpp"
 #include "types.hpp"
 
@@ -13,6 +14,7 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace fs = std::experimental::filesystem;
@@ -132,7 +134,7 @@ std::string to_string( T const& );
 template<>
 std::string to_string<char>( char const& c );
 
-// NOTE: This puts quotes around the  string! The reason for this
+// NOTE: These puts quotes around the string! The reason for this
 // behavior  is that we want to try to perform the to_string oper-
 // ation  (in general) such that it has some degree of reversibil-
 // ity. For example, converting  the  integer  55  and the string
@@ -143,6 +145,9 @@ std::string to_string<char>( char const& c );
 // a string, it will insert quotes in the string itself.
 template<>
 std::string to_string<std::string>( std::string const& s );
+template<>
+std::string to_string<std::string_view>(
+        std::string_view const& s );
 
 // NOTE:  This  puts  quotes around the string! Also, it is not a
 // template  specialization  because  for  some reason gcc always
@@ -157,19 +162,6 @@ std::string to_string( char const* s );
 // though to have a compiler error.
 template<>
 std::string to_string<fs::path>( fs::path const& p );
-
-// Prints in JSON style notation. E.g. [1,2,3]
-template<typename T>
-std::string to_string( std::vector<T> const& v ) {
-
-    std::vector<std::string> res( v.size() );
-    // We  need  this lambda to help std::transform with overload
-    // resolution of to_string.
-    auto f = []( T const& e ){ return util::to_string<T>( e ); };
-    std::transform( std::begin( v   ), std::end( v ),
-                    std::begin( res ), f );
-    return "[" + join( res, "," ) + "]";
-}
 
 // Simply delegate to the wrapped type.
 template<typename T>
@@ -213,6 +205,32 @@ std::string to_string( std::tuple<Args...> const& tp ) {
     return "(" + join( v, "," ) + ")";
 }
 
+// This function exists for the purpose of  having  the  compiler
+// deduce the Indexes variadic integer arguments that we can then
+// use  to  index  the variant; it probably is not useful to call
+// this method directly (it is called by to_string).
+template<typename Variant, size_t... Indexes>
+std::string variant_elems_to_string(
+        Variant const& v,
+        std::index_sequence<Indexes...> ) {
+    std::string res;
+    // Unary right fold of template parameter pack.
+    (( res += (Indexes == v.index())
+            ? util::to_string( std::get<Indexes>( v ) ) : ""
+    ), ...);
+    return res;
+}
+
+template<typename... Args>
+std::string to_string( std::variant<Args...> const& v ) {
+    auto is = std::make_index_sequence<sizeof...(Args)>();
+    return variant_elems_to_string( v, is );
+}
+
+template<>
+inline std::string to_string<Error>( Error const& e )
+    { return e.msg; }
+
 // Will do JSON-like notation. E.g. (1,"hello")
 template<typename U, typename V>
 std::string to_string( std::pair<U, V> const& p ) {
@@ -220,24 +238,24 @@ std::string to_string( std::pair<U, V> const& p ) {
                + util::to_string( p.second ) + ")";
 }
 
-// Default version using either std::to_string or string  streams
-// if that can't be used.
+// Prints in JSON style notation. E.g. [1,2,3]
+template<typename T>
+std::string to_string( std::vector<T> const& v ) {
+
+    std::vector<std::string> res( v.size() );
+    // We  need  this lambda to help std::transform with overload
+    // resolution of to_string.
+    auto f = []( T const& e ){ return util::to_string( e ); };
+    std::transform( std::begin( v   ), std::end( v ),
+                    std::begin( res ), f );
+    return "[" + join( res, "," ) + "]";
+}
+
+// Default  version uses std::to_string which is only defined for
+// a few primitive types.
 template<typename T>
 std::string to_string( T const& arg ) {
-    // This  check  is done at compile time. Note, this check may
-    // not be exactly right in that it might not  filter  on  the
-    // precise  set  of  types for which there are std::to_string
-    // overloads, but it seems close enough.
-    if constexpr( std::is_integral_v<T> ||
-                  std::is_floating_point_v<T> ) {
-        // Specialization  for  primitive types for which we will
-        // just call std::to_string assuming that will be
-        // fastest.
-        return std::to_string( arg );
-    } else {
-        std::ostringstream oss; oss << arg;
-        return oss.str();
-    }
+    return std::to_string( arg );
 }
 
 template<typename T>
