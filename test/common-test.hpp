@@ -7,6 +7,7 @@
 #include "macros.hpp"
 
 #include <exception>
+#include <functional>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -30,7 +31,13 @@ using TestType = void(void);
 // to this list at static initialization time.
 std::vector<TestType*>& test_list();
 
+// Run all unit tests in all modules.
 void run_all_tests();
+
+// Run a single unit test; no need to call this directly.
+void run_single_test( size_t      line,
+                      char const* file,
+                      std::function<void(void)> func );
 
 // Functions for printing to console
 std::string fail();
@@ -55,9 +62,12 @@ struct skipped_exception : public std::exception {};
 
 } // namespace testing
 
-#define TRUE_( a ) {                                     \
+#define CHECKPOINT \
     testing::checkpoint_line = __LINE__;                 \
     testing::checkpoint_file = __FILE__;                 \
+
+#define TRUE_( a ) {                                     \
+    CHECKPOINT                                           \
     if( !(a) ) {                                         \
         using util::operator<<;                          \
         ostringstream ss;                                \
@@ -69,8 +79,7 @@ struct skipped_exception : public std::exception {};
 // a  is an expression that must be true, and b is just something
 // printable that will be displayed  in  the  event  a  is  false.
 #define TRUE( a, b ) {                                   \
-    testing::checkpoint_line = __LINE__;                 \
-    testing::checkpoint_file = __FILE__;                 \
+    CHECKPOINT                                           \
     if( !(a) ) {                                         \
         using util::operator<<;                          \
         ostringstream ss;                                \
@@ -80,8 +89,7 @@ struct skipped_exception : public std::exception {};
     } }
 
 #define EQUALS( a, b ) {                                      \
-    testing::checkpoint_line = __LINE__;                      \
-    testing::checkpoint_file = __FILE__;                      \
+    CHECKPOINT                                                \
     if( !((a) == (b)) ) {                                     \
         using util::operator<<;                               \
         ostringstream ss;                                     \
@@ -92,73 +100,30 @@ struct skipped_exception : public std::exception {};
         throw failed_exception( ss.str() );                   \
     } }
 
-#define THROWS( a ) {                                \
-    testing::checkpoint_line = __LINE__;             \
-    testing::checkpoint_file = __FILE__;             \
-    bool STRING_JOIN( __threw_, __LINE__ ) = false;  \
-    try {                                            \
-        a;                                           \
-    } catch( std::exception const& ) {               \
-        STRING_JOIN( __threw_, __LINE__ ) = true;    \
-    }                                                \
-    TRUE( STRING_JOIN( __threw_, __LINE__ ),         \
-          "expression: " #a " did not throw." );     \
+// This  is  a  bit messy because we want to throw just after the
+// `a` gets executed, but we can't throw there because  otherwise
+// it  would  get  caught  by the catch block, so instead we just
+// record  if  the  code didn't throw and then throw an exception
+// later.
+#define THROWS( a ) {                                    \
+    CHECKPOINT                                           \
+    bool threw = false;                                  \
+    try {                                                \
+        a;                                               \
+    } catch( std::exception const& ) {                   \
+        threw = true;                                    \
+    }                                                    \
+    TRUE( threw, "expression: " #a " did not throw." );  \
 }
 
 // This is used to create a unit test function.
-// TODO: move this code into a cpp function to avoid  duplicating
-// it in test.cpp and to reduce compile times.
-#define TEST( a )                                           \
-    void STRING_JOIN( __test_, a )();                       \
-    void STRING_JOIN( test_, a )() {                        \
-        using util::operator<<;                             \
-        testing::checkpoint_line = __LINE__;                \
-        testing::checkpoint_file = __FILE__;                \
-        string test = string( "Test " ) + TO_STRING( a );   \
-        cout << left << setw( 40 ) << test;                 \
-        enum class Res { PASSED, SKIPPED, FAILED };         \
-        Res result = Res::FAILED;                           \
-        string err;                                         \
-        try {                                               \
-            STRING_JOIN( __test_, a )();                    \
-            result = Res::PASSED;                           \
-        } catch( testing::skipped_exception const& ) {      \
-            result = Res::SKIPPED;                          \
-        } catch( testing::failed_exception const& e ) {     \
-            err = e.what();                                 \
-            result = Res::FAILED;                           \
-        } catch( std::exception const& e ) {                \
-            err = e.what();                                 \
-            err += "\nLast checkpoint: ";                   \
-            err += std::string( checkpoint_file );          \
-            err += ", line ";                               \
-            err += util::to_string( checkpoint_line );      \
-            result = Res::FAILED;                           \
-        } catch( ... ) {                                    \
-            err = "unknown exception";                      \
-            result = Res::FAILED;                           \
-        }                                                   \
-        cerr << "     | ";                                  \
-        bool failed = false;                                \
-        switch( result ) {                                  \
-        case Res::FAILED:                                   \
-            failed = true;                                  \
-            cerr << testing::fail() << "\n";                \
-            cerr << testing::bar() << "\n";                 \
-            cerr << err << "\n";                            \
-            cerr << testing::bar() << "\n";                 \
-            break;                                          \
-        case Res::SKIPPED:                                  \
-            cout << testing::skip();                        \
-            break;                                          \
-        case Res::PASSED:                                   \
-            cout << testing::pass();                        \
-            break;                                          \
-        }                                                   \
-        cout << util::c_norm << "\n";                       \
-        if( failed ) throw runtime_error( "test failed" );  \
-    }                                                       \
-    STARTUP() {                                             \
-        test_list().push_back( STRING_JOIN( test_, a ) );   \
-    }                                                       \
+#define TEST( a )                                               \
+    void STRING_JOIN( __test_, a )();                           \
+    void STRING_JOIN( test_, a )() {                            \
+        testing::run_single_test( __LINE__, __FILE__,           \
+                                  STRING_JOIN( __test_, a ) );  \
+    }                                                           \
+    STARTUP() {                                                 \
+        test_list().push_back( STRING_JOIN( test_, a ) );       \
+    }                                                           \
     void STRING_JOIN( __test_, a )()

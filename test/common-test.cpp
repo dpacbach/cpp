@@ -4,6 +4,9 @@
 #include "precomp.hpp"
 #include "common-test.hpp"
 
+#include <iostream>
+#include <string>
+
 using namespace std;
 
 namespace testing {
@@ -30,8 +33,60 @@ vector<TestType*>& test_list() {
     return g_tests;
 }
 
+// Run all unit tests in all modules.
 void run_all_tests() {
     for( auto f : test_list() ) f();
+}
+
+// Run a single unit test; no need to call this directly.
+void run_single_test( size_t      line,
+                      char const* file,
+                      function<void(void)> func ) {
+
+    using util::operator<<;
+    checkpoint_line = line;
+    checkpoint_file = file;
+    string test = string( "Test " ) + TO_STRING( a );
+    cout << left << setw( 40 ) << test;
+    enum class Res { PASSED, SKIPPED, FAILED };
+    Res result = Res::FAILED;
+    string err;
+    try {
+        func();
+        result = Res::PASSED;
+    } catch( skipped_exception const& ) {
+        result = Res::SKIPPED;
+    } catch( failed_exception const& e ) {
+        err = e.what();
+        result = Res::FAILED;
+    } catch( exception const& e ) {
+        err = e.what();
+        err += "\nLast checkpoint: ";
+        err += string( checkpoint_file );
+        err += ", line ";
+        err += util::to_string( checkpoint_line );
+        result = Res::FAILED;
+    } catch( ... ) {
+        err = "unknown exception";
+        result = Res::FAILED;
+    }
+    cerr << "     | ";
+    bool failed = false;
+    switch( result ) {
+    case Res::FAILED:
+        failed = true;
+        cerr << fail() << "\n" << bar() << "\n";
+        cerr << err << "\n" << bar() << "\n";
+        break;
+    case Res::SKIPPED:
+        cout << skip();
+        break;
+    case Res::PASSED:
+        cout << pass();
+        break;
+    }
+    cout << util::c_norm << "\n";
+    if( failed ) throw runtime_error( "test failed" );
 }
 
 } // namespace testing
