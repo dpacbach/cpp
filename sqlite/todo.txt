@@ -1,7 +1,5 @@
 SQLite:
 
-    open connection with multiple databases
-
     md5
 
 other:

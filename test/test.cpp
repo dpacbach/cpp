@@ -126,7 +126,7 @@ TEST( sqlite )
 {
     // This  will  create  a  database in memory so that we don't
     // have to bother with temp files.
-    sqlite::database db( ":memory:" );
+    sqlite::database db = sqlite::open( { ":memory:", "", false } );
 
     db << "CREATE TABLE IF NOT EXISTS user ("
           "   _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"

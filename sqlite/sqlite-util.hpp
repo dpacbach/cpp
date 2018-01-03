@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "fs.hpp"
 #include "sqlite_modern_cpp.h"
 #include "string-util.hpp"
 
@@ -36,6 +37,25 @@ void insert_tuple_impl( Receiver&    db,
 }
 
 }
+
+// This  is a pair used to hold information about additional data-
+// bases  that should be added into the connection beyond the pri-
+// mary. The first element is the file path to the database,  the
+// second is the name that it will be given for the  purposes  of
+// accessing it from within  queries,  and  the  third  indicates
+// whether it is required to exist.
+using DBDesc    = std::tuple<fs::path, std::string, bool>;
+using DBDescVec = std::vector<DBDesc>;
+
+// Open  a  primary database connection and, optionally, a series
+// of additional ones. Note that the alias name specified in  the
+// primary  database  connection  is  ignored (it will not be put
+// under an alias), however any others in `rest` will.
+sqlite::database open( DBDesc    const& primary,
+                       DBDescVec const& rest = {} );
+
+// Attach to an existing connection.
+void attach( sqlite::database& db, DBDescVec const& dbs );
 
 // With move and/or NRVO this should be  a  convenient  yet  effi-
 // cient way to select data from the  db.  This  variant  is  for
