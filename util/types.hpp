@@ -12,6 +12,7 @@
 #include <experimental/filesystem>
 #include <functional>
 #include <optional>
+#include <utility>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -33,3 +34,6 @@ using OptRef  = std::optional<std::reference_wrapper<T>>;
 
 template<typename T>
 using OptCRef = std::optional<std::reference_wrapper<T const>>;
+
+template<typename U, typename V>
+using PairVec = std::vector<std::pair<U, V>>;

@@ -213,6 +213,13 @@ std::string to_string( std::tuple<Args...> const& tp ) {
     return "(" + join( v, "," ) + ")";
 }
 
+// Will do JSON-like notation. E.g. (1,"hello")
+template<typename U, typename V>
+std::string to_string( std::pair<U, V> const& p ) {
+    return "(" + util::to_string( p.first )  + ","
+               + util::to_string( p.second ) + ")";
+}
+
 // Default version using either std::to_string or string  streams
 // if that can't be used.
 template<typename T>
@@ -237,6 +244,12 @@ template<typename T>
 std::ostream& operator<<( std::ostream&         out,
                           std::vector<T> const& v ) {
     return (out << util::to_string( v ));
+}
+
+template<typename U, typename V>
+std::ostream& operator<<( std::ostream&          out,
+                          std::pair<U, V> const& p ) {
+    return (out << util::to_string( p ));
 }
 
 }

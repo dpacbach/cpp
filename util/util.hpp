@@ -28,6 +28,21 @@
 
 namespace util {
 
+// Given a range size and chunk  size  this  will  partition  the
+// range into equal sized chunks of size chunk_size with the last
+// chunk possibly being smaller than  chunk_size. The result will
+// be a list of pairs, each pair  describing a chunk as a pair of
+// offsets  each  representing the distance from the start of the
+// range to the (beginning, end) of the chunk, and where the  end
+// is a one-passed-the-end marker.
+//
+//   E.g.: chunk_offsets( 7, 2 ) == [(0,2),(2,4),(4,6),(6,7)]
+//
+// The resulting offsets can be added to iterators to index  into
+// containers.
+PairVec<size_t, size_t> chunk_offsets( size_t size,
+                                       size_t chunk_size );
+
 // Loop through the elements in a vector and output them.
 template<typename T>
 void print_vec( std::vector<T> const& v,

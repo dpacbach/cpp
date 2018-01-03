@@ -14,6 +14,54 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( chunking )
+{
+    using PType = PairVec<size_t, size_t>;
+
+    THROWS( util::chunk_offsets( 1, 0 ) );
+
+    EQUALS( util::chunk_offsets( 0, 0 ),
+            (PType{}) );
+
+    EQUALS( util::chunk_offsets( 0, 1 ),
+            (PType{}) );
+    EQUALS( util::chunk_offsets( 0, 3 ),
+            (PType{}) );
+
+    EQUALS( util::chunk_offsets( 1, 1 ),
+            (PType{ {0,1} }) );
+    EQUALS( util::chunk_offsets( 2, 1 ),
+            (PType{ {0,1},{1,2} }) );
+    EQUALS( util::chunk_offsets( 3, 1 ),
+            (PType{ {0,1},{1,2},{2,3} }) );
+
+    EQUALS( util::chunk_offsets( 10, 1 ),
+            (PType{ {0,1},{1,2},{2,3},{3,4},{4,5},
+                    {5,6},{6,7},{7,8},{8,9},{9,10} }) );
+    EQUALS( util::chunk_offsets( 10, 2 ),
+            (PType{ {0,2},{2,4},{4,6},{6,8},{8,10} }) );
+    EQUALS( util::chunk_offsets( 10, 3 ),
+            (PType{ {0,3},{3,6},{6,9},{9,10} }) );
+    EQUALS( util::chunk_offsets( 10, 4 ),
+            (PType{ {0,4},{4,8},{8,10} }) );
+    EQUALS( util::chunk_offsets( 10, 5 ),
+            (PType{ {0,5},{5,10} }) );
+    EQUALS( util::chunk_offsets( 10, 6 ),
+            (PType{ {0,6},{6,10} }) );
+    EQUALS( util::chunk_offsets( 10, 7 ),
+            (PType{ {0,7},{7,10} }) );
+    EQUALS( util::chunk_offsets( 10, 8 ),
+            (PType{ {0,8},{8,10} }) );
+    EQUALS( util::chunk_offsets( 10, 9 ),
+            (PType{ {0,9},{9,10} }) );
+    EQUALS( util::chunk_offsets( 10, 10 ),
+            (PType{ {0,10} }) );
+    EQUALS( util::chunk_offsets( 10, 11 ),
+            (PType{ {0,10} }) );
+    EQUALS( util::chunk_offsets( 10, 20 ),
+            (PType{ {0,10} }) );
+}
+
 TEST( read_file )
 {
     auto f = data_common / "3-lines.txt";
