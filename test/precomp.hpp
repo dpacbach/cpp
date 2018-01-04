@@ -7,6 +7,7 @@
 #include "graph.hpp"
 #include "io.hpp"
 #include "macros.hpp"
+#include "md5-util.hpp"
 #include "non-copyable.hpp"
 #include "opt-util.hpp"
 #include "preprocessor.hpp"

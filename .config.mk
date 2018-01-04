@@ -5,18 +5,16 @@ LDFLAGS  += -lstdc++fs -pthread
 project.deps   = xml-utils
 xml-utils.deps = pugixml util
 sqlite.deps    = sqlite-amal util smcpp
+crypto.deps    = md5
 
-top-level-folders = util xml-utils sqlite project
+# Must be in order of dependencies.
+top-level-folders = util xml-utils sqlite project crypto test
 
 main.deps = $(top-level-folders)
-
-#ifeq (undefined,$(origin OPT))
-    top-level-folders += test
-    test.deps          = $(filter-out test,$(top-level-folders))
-    test_is            = test
-#endif
+test.deps = $(filter-out test,$(top-level-folders))
 
 main_is = main
+test_is = test
 
 $(call enter_all,$(top-level-folders))
 
