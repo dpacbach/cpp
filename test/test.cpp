@@ -199,9 +199,21 @@ TEST( read_file )
 
 TEST( split_join )
 {
+    SVVec v_{ "" };
+    EQUALS( util::join( v_, "," ), "" );
+
+    SVVec v0{ "one" };
+    EQUALS( util::join( v0, "," ), "one" );
+
     SVVec v{ "one", "two", "three" };
     EQUALS( util::join( v, "," ), "one,two,three" );
     EQUALS( util::join( v, "--" ), "one--two--three" );
+
+    SVVec svv_{ "" };
+    EQUALS( util::split( "", ',' ), svv_ );
+
+    SVVec svv0{ "ab" };
+    EQUALS( util::split( "ab", ',' ), svv0 );
 
     SVVec svv{ "ab", "cd", "ef" };
     EQUALS( util::split( "ab,cd,ef", ',' ), svv );
