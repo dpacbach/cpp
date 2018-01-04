@@ -69,6 +69,10 @@ void run_single_test( size_t      line,
         result = Res::FAILED;
     } catch( ... ) {
         err = "unknown exception";
+        err += "\nLast checkpoint: ";
+        err += string( checkpoint_file );
+        err += ", line ";
+        err += util::to_string( checkpoint_line );
         result = Res::FAILED;
     }
     cerr << "     | ";
