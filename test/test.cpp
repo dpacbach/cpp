@@ -120,6 +120,9 @@ TEST( to_string )
 
     vector<tuple<int, string>> v3{ {5,"a"}, {6,"b"} };
     EQUALS( util::to_string( v3 ), "[(5,\"a\"),(6,\"b\")]" );
+
+    fs::path p = "A/B/C";
+    EQUALS( util::to_string( p ), "\"A/B/C\"" );
 }
 
 TEST( sqlite )

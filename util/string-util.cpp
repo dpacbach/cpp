@@ -128,13 +128,14 @@ string to_string<char>( char const& s ) {
     return "'" + res + "'";
 }
 
-// This one always throws an error because it would not be
-// portable to allow this since on Windows  fs::path's  only  con-
-// vert to wide strings. Though would be better  to  have  a  com-
-// piler error rather than exception.
+// Note two important things about this function: 1) it will will
+// force the string to be converted to a std::string  by  calling
+// its string() member function,  despite  the  fact that on some
+// platforms (e.g. Windows) paths are stored internally in  UTF16.
+// Also, it will put quotes around it.
 template<>
-string to_string<fs::path>( fs::path const& ) {
-   ERROR( "should not call this method as it is not portable" );
+string to_string<fs::path>( fs::path const& p ) {
+   return "\"" + p.string() + "\"";
 }
 
 }

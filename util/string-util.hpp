@@ -157,9 +157,11 @@ std::string to_string<std::string_view>(
 // select it when we give it a string literal.
 std::string to_string( char const* s );
 
-// This one simply throws an exception to prevent the  user  from
-// calling it because it is  platform  dependent. Would be better
-// though to have a compiler error.
+// Note two important things about this function: 1) it will will
+// force the string to be converted to a std::string  by  calling
+// its string() member function,  despite  the  fact that on some
+// platforms (e.g. Windows) paths are stored internally in  UTF16.
+// Also, it will put quotes around it.
 template<>
 std::string to_string<fs::path>( fs::path const& p );
 
