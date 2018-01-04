@@ -50,7 +50,9 @@ using DBDescVec = std::vector<DBDesc>;
 // Open  a  primary database connection and, optionally, a series
 // of additional ones. Note that the alias name specified in  the
 // primary  database  connection  is  ignored (it will not be put
-// under an alias), however any others in `rest` will.
+// under an alias), however any others in `rest` will. Also, this
+// will run some initialization on the database and so it is  rec-
+// ommended to  always  open  the  databases  using  this  method.
 sqlite::database open( DBDesc    const& primary,
                        DBDescVec const& rest = {} );
 

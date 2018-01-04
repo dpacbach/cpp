@@ -37,7 +37,9 @@ void attach( sqlite::database& db, DBDescVec const& dbs ) {
 // Open  a  primary database connection and, optionally, a series
 // of additional ones. Note that the alias name specified in  the
 // primary  database  connection  is  ignored (it will not be put
-// under an alias), however any others in `rest` will.
+// under an alias), however any others in `rest` will. Also, this
+// will run some initialization on the database and so it is  rec-
+// ommended to  always  open  the  databases  using  this  method.
 sqlite::database open( DBDesc    const& primary,
                        DBDescVec const& rest ) {
 
@@ -45,6 +47,12 @@ sqlite::database open( DBDesc    const& primary,
     sqlite::database db( get<fs::path>( primary ).string() );
 
     attach( db, rest );
+
+    // sqlite  disables  this  by default, so we need to manually
+    // enable it whenever we open  a  connection. We enable it au-
+    // tomatically  because  a)  we  use it, abd b) there doesn't
+    // seem to be any good reason to have it disabled.
+    db << "PRAGMA foreign_keys = ON";
 
     return db;
 }
