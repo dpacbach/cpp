@@ -4,11 +4,38 @@
 #include "io.hpp"
 #include "macros.hpp"
 
+#include <cstdio>
 #include <fstream>
 
 using namespace std;
 
 namespace util {
+
+// Read  a  file in its entirety into a vector of chars. This may
+// be a bit less efficient than possible because the vector, when
+// created, will initialize all of its bytes  to  zero  which  we
+// don't actually need.
+vector<char> read_file( fs::path p ) {
+
+    ASSERT( fs::exists( p ), "file " << p << " does not exist" );
+
+    size_t size = fs::file_size( p );
+    vector<char> res( size );
+
+    FILE* fp = fopen( p.string().c_str(), "rb" );
+    // Read the bytes.
+    size_t read = fread( (void*)&res[0], 1, size, fp );
+    // Close the file before checking for errors (which might
+    // throw an exception).
+    fclose( fp );
+
+    // Read the bytes and be sure that we have  read  all  of  it.
+    ASSERT( read == size, "failed to read all " << size <<
+                          " bytes of file " << p << ".  Instead "
+                          " read " << read << " bytes." );
+
+    return res;
+}
 
 // Read a text file into a string in its entirety.
 string read_file_str( fs::path p ) {
