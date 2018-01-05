@@ -161,7 +161,9 @@ std::string to_string( char const* s );
 // force the string to be converted to a std::string  by  calling
 // its string() member function,  despite  the  fact that on some
 // platforms (e.g. Windows) paths are stored internally in  UTF16.
-// Also, it will put quotes around it.
+// Also, it will put quotes around it. To convert  a  path  to  a
+// string without quotes use the  path's  string() method (or one
+// of its variants).
 template<>
 std::string to_string<fs::path>( fs::path const& p );
 

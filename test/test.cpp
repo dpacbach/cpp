@@ -486,6 +486,23 @@ TEST( sqlite )
     );
 
     EQUALS( v3, (res_type_3{ "0","1","2","3","4" }) );
+
+    // Test inserting fs::path's into  string columns. In particu-
+    // lar,  we are testing that the path gets properly converted
+    // to  a  string  without  quotes around it, which the util::-
+    // to_string method would do (as well as fs::path's streaming
+    // operator<<);  i.e.,  when we insert a path into the DB, we
+    // do not want quotes around  it.  It appears that the sqlite
+    // wrapper will  just  automatically  convert  fs::path  to a
+    // string (probably by casting), and that conversion does not
+    // put quotes in the string.
+    db << "INSERT INTO user (age, name) VALUES (?, ?)"
+       << 765 << fs::path( "A/B/C" );
+
+    auto v4 = sqlite::select<int, string>( db,
+        "SELECT age, name FROM user WHERE age=765" );
+    EQUALS( v4.size(), 1 );
+    EQUALS( get<string>( v4[0] ), "A/B/C" );
 }
 
 TEST( preprocessor )
