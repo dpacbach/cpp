@@ -507,6 +507,37 @@ TEST( sqlite )
     );
     EQUALS( v4.size(), 1 );
     EQUALS( get<string>( v4[0] ), "A/B/C" );
+
+    // Test that, on error, the library throws a sqlite_exception
+    // and that the query appears  in  the  error message that we
+    // get by calling exception_msg() on it.
+    bool threw = true, good_except = false, good_msg = false;
+    string q = "SELECTx * from user";
+    try {
+        db << q;
+        // If we're here then we have a problem because the above
+        // query is supposed to throw. However,  we  can't  throw
+        // here  to  indicate  test  failure otherwise it will be
+        // caught below.
+        threw = false;
+    } catch( sqlite::sqlite_exception const& e ) {
+        good_except = true;
+        auto msg = sqlite::exception_msg( e );
+        if( util::contains( msg, "SELECTx" ) )
+            good_msg = true;
+    } catch( ... ) {
+
+    }
+    // Test to make sure the query  threw  an  exception  at  all.
+    TRUE( threw, "query " << quoted( q ) << " did not throw" );
+    // Make sure it  through  an  exception  of  the  right  type.
+    TRUE( good_except, "query " << quoted( q ) << " threw an "
+            " exception but it was not a sqlite_exception" );
+    // Make sure the error  message  returned  by  our  error  ex-
+    // tracting function included the sql query.
+    TRUE( good_msg, "query " << quoted( q ) << " threw a "
+            "sqlite_exception but the exception_msg function "
+            "did not yield the query in its message." );
 }
 
 TEST( preprocessor )

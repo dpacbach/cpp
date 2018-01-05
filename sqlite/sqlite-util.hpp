@@ -38,6 +38,12 @@ void insert_tuple_impl( Receiver&    db,
 
 }
 
+// We use this to extract  the  message from the sqlite_exception
+// if we catch one  since  there  is  some additional information
+// (namely, the offending SQL query) which is not included in the
+// default message.
+std::string exception_msg( sqlite_exception const& e );
+
 // We need to provide this because, if  not,  then  the  compiler
 // will attempt to automatically convert the  path  to  a  string
 // (because the sqlite wrapper has no overload for  paths)  which

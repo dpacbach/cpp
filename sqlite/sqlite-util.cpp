@@ -23,6 +23,15 @@ void dbdesc_exists( DBDesc const& d ) {
 
 } // anonymous namespace
 
+// We use this to extract  the  message from the sqlite_exception
+// if we catch one  since  there  is  some additional information
+// (namely, the offending SQL query) which is not included in the
+// default message.
+string exception_msg( sqlite_exception const& e ) {
+    return string( "sqlite exception:" ) + e.what() +
+           ", in query:\n\"" + e.get_sql() + "\"";
+}
+
 // We need to provide this because, if  not,  then  the  compiler
 // will attempt to automatically convert the  path  to  a  string
 // (because the sqlite wrapper has no overload for  paths)  which
