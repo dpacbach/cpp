@@ -38,6 +38,16 @@ void insert_tuple_impl( Receiver&    db,
 
 }
 
+// We need to provide this because, if  not,  then  the  compiler
+// will attempt to automatically convert the  path  to  a  string
+// (because the sqlite wrapper has no overload for  paths)  which
+// will  fail  on windows because on Windows the automatic string
+// conversion  from  a  path is to a wide string (unlike on Linux,
+// where it would work). So what we  have  to do here is to force
+// the path to a standard string.
+sqlite::database_binder& operator<<( sqlite::database_binder& db,
+                                     fs::path const& path );
+
 // This  is a pair used to hold information about additional data-
 // bases  that should be added into the connection beyond the pri-
 // mary. The first element is the file path to the database,  the
