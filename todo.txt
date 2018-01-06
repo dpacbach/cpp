@@ -1,0 +1,34 @@
+* BDMap using two BDIndex maps
+  construct at least from vector of pairs
+
+* create al module with al object that stores
+  efficiently the contents and can yield them
+  as an iterator (pairs or 2-tuples?).
+  should it store a full list of pairs?
+
+  must by symmetric in both values
+
+  can be mutable in the sense of adding new
+  elements.  It can represent data internally
+  with both keys and values as vectors. how
+  to construct and distinguish between vectors
+  as values and vector as list of values?
+  should automatically unpack?
+
+  it can accept a vector of pairs
+  or a vector of two-tuples (same thing?).
+
+  get list of unique keys and unique vals
+  (not sorted)
+
+  implemented with index map? BDMap?
+
+  create from list and key function (val function)
+  or list and both key/val functions
+
+* insert_many_fast 1 which takes a function to
+  use to convert the argument to the string tuple.
+  this could also be used to select an element
+  from a tuple and convert it to string.
+
+* equivalent to catMaybes
