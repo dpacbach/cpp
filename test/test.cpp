@@ -14,6 +14,77 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( algo )
+{
+    auto find_n = []( int n, int test ) { return test < n; };
+
+    vector<int> v1{};
+
+    // Test with empty vector
+    auto r1 = util::lower_bound( v1, LC( find_n( 5, _ ) ) );
+    auto r2 = util::lower_bound( v1, LC( find_n( 0, _ ) ) );
+    TRUE_( r1 == end( v1 ) );
+    TRUE_( r2 == end( v1 ) );
+
+    // Test with vector with one element.
+    vector v2{ 4 };
+
+    auto r3 = util::lower_bound( v2, LC( find_n( 5, _ ) ) );
+    auto r4 = util::lower_bound( v2, LC( find_n( 3, _ ) ) );
+    auto r5 = util::lower_bound( v2, LC( find_n( 4, _ ) ) );
+    TRUE_( r3 == end( v2 ) );
+    TRUE_( r4 != end( v2 ) ); EQUALS( *r4, 4 );
+    TRUE_( r5 != end( v2 ) ); EQUALS( *r5, 4 );
+
+    // Test with vector with two elements.
+    vector v3{ 4, 10 };
+    auto r6  = util::lower_bound( v3, LC( find_n( 0,  _ ) ) );
+    auto r7  = util::lower_bound( v3, LC( find_n( 3,  _ ) ) );
+    auto r8  = util::lower_bound( v3, LC( find_n( 4,  _ ) ) );
+    auto r9  = util::lower_bound( v3, LC( find_n( 5,  _ ) ) );
+    auto r10 = util::lower_bound( v3, LC( find_n( 9,  _ ) ) );
+    auto r11 = util::lower_bound( v3, LC( find_n( 10, _ ) ) );
+    auto r12 = util::lower_bound( v3, LC( find_n( 11, _ ) ) );
+    auto r13 = util::lower_bound( v3, LC( find_n( 12, _ ) ) );
+    TRUE_( r6  != end( v3 ) ); EQUALS( *r6,  4  );
+    TRUE_( r7  != end( v3 ) ); EQUALS( *r7,  4  );
+    TRUE_( r8  != end( v3 ) ); EQUALS( *r8,  4  );
+    TRUE_( r9  != end( v3 ) ); EQUALS( *r9,  10 );
+    TRUE_( r10 != end( v3 ) ); EQUALS( *r10, 10 );
+    TRUE_( r11 != end( v3 ) ); EQUALS( *r11, 10 );
+    TRUE_( r12 == end( v3 ) );
+    TRUE_( r13 == end( v3 ) );
+
+    // Test with vector with many elements.
+    vector v4{ 0, 4, 7, 9, 55, 102, 103, 104, 200 };
+
+    auto r14 = util::lower_bound( v4, LC( find_n( -1,    _ ) ) );
+    auto r15 = util::lower_bound( v4, LC( find_n(  0,    _ ) ) );
+    auto r16 = util::lower_bound( v4, LC( find_n(  4,    _ ) ) );
+    auto r17 = util::lower_bound( v4, LC( find_n(  5,    _ ) ) );
+    auto r18 = util::lower_bound( v4, LC( find_n(  101,  _ ) ) );
+    auto r19 = util::lower_bound( v4, LC( find_n(  102,  _ ) ) );
+    auto r20 = util::lower_bound( v4, LC( find_n(  103,  _ ) ) );
+    auto r21 = util::lower_bound( v4, LC( find_n(  104,  _ ) ) );
+    auto r22 = util::lower_bound( v4, LC( find_n(  105,  _ ) ) );
+    auto r23 = util::lower_bound( v4, LC( find_n(  106,  _ ) ) );
+    auto r24 = util::lower_bound( v4, LC( find_n(  200,  _ ) ) );
+    auto r25 = util::lower_bound( v4, LC( find_n(  220,  _ ) ) );
+
+    TRUE_( r14 != end( v4 ) ); EQUALS( *r14, 0   );
+    TRUE_( r15 != end( v4 ) ); EQUALS( *r15, 0   );
+    TRUE_( r16 != end( v4 ) ); EQUALS( *r16, 4   );
+    TRUE_( r17 != end( v4 ) ); EQUALS( *r17, 7   );
+    TRUE_( r18 != end( v4 ) ); EQUALS( *r18, 102 );
+    TRUE_( r19 != end( v4 ) ); EQUALS( *r19, 102 );
+    TRUE_( r20 != end( v4 ) ); EQUALS( *r20, 103 );
+    TRUE_( r21 != end( v4 ) ); EQUALS( *r21, 104 );
+    TRUE_( r22 != end( v4 ) ); EQUALS( *r22, 200 );
+    TRUE_( r23 != end( v4 ) ); EQUALS( *r23, 200 );
+    TRUE_( r24 != end( v4 ) ); EQUALS( *r24, 200 );
+    TRUE_( r25 == end( v4 ) );
+}
+
 TEST( md5 )
 {
     vector<char> v;

@@ -1,5 +1,6 @@
 /* Precompiled Headers */
 #include "attr.hpp"
+#include "algo.hpp"
 #include "algo-par.hpp"
 #include "bimap.hpp"
 #include "error.hpp"
