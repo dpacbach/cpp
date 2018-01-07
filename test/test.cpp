@@ -1086,6 +1086,76 @@ TEST( bimap )
 
     EQUALS( bm.key_safe( "XXXX" ), nullopt );
     EQUALS( bm.key_safe( "AAA"  ), nullopt );
+
+    /******************************************************/
+    // Now test BiMapFixed.
+
+    // First empty map.
+    vector<tuple<string, int>> v0{};
+    util::BiMapFixed bmf0( move( v0 ) );
+    EQUALS( bmf0.size(), 0 );
+    TRUE_( !bmf0.val_safe( "xxx" ) );
+    TRUE_( !bmf0.key_safe( 1     ) );
+
+    // Now a large map.
+    vector<tuple<string, int>> v1{
+        { "abc",     9    },
+        { "def",     2    },
+        { "yyy",     3000 },
+        { "ab",      8    },
+        { "xxx",     2000 },
+        { "d",       3    },
+        { "hello",   7    },
+        { "one",     4    },
+        { "two",     6    },
+        { "three",   5    },
+        { "33",      33   },
+        { "98",      98   },
+        { "",        101  }
+    };
+
+    // This will move from the vector!
+    util::BiMapFixed bmf1( move( v1 ) );
+
+    EQUALS( bmf1.size(), 13 );
+    auto r1 = bmf1.val_safe( "xxx" );
+    TRUE_( r1 ); EQUALS( *r1, 2000 );
+    auto r2 = bmf1.val_safe( "three" );
+    TRUE_( r2 ); EQUALS( *r2, 5 );
+    auto r3 = bmf1.val_safe( "aaa" );
+    TRUE_( !r3 );
+    auto r4 = bmf1.val_safe( "" );
+    TRUE_( r4 ); EQUALS( *r4, 101 );
+
+    auto r5 = bmf1.key_safe( 101 );
+    TRUE_( r5 ); EQUALS( (*r5).get(), string( "" ) );
+    auto r6 = bmf1.key_safe( 3000 );
+    TRUE_( r6 ); EQUALS( (*r6).get(), string( "yyy" ) );
+    auto r7 = bmf1.key_safe( 6 );
+    TRUE_( r7 ); EQUALS( (*r7).get(), string( "two" ) );
+    auto r8 = bmf1.key_safe( 3001 );
+    TRUE_( !r8 );
+
+    THROWS( bmf1.key(  102  ) );
+    THROWS( bmf1.val( "988" ) );
+
+    EQUALS( bmf1.key(  98   ), string( "98" ) );
+    EQUALS( bmf1.key(  3    ), string( "d"  ) );
+    EQUALS( bmf1.val( "98"  ), 98 );
+    EQUALS( bmf1.val( "d"   ), 3  );
+
+    // test iterator interface.
+    vector<tuple<string, int>> v2;
+    for( auto const& [k,v] : bmf1 )
+        v2.emplace_back( k, v );
+
+    EQUALS( v2.size(), 13 );
+    EQUALS( get<0>( v2[0]  ), string( "" )    );
+    EQUALS( get<1>( v2[0]  ), 101             );
+    EQUALS( get<0>( v2[2]  ), string( "98" )  );
+    EQUALS( get<1>( v2[2]  ), 98              );
+    EQUALS( get<0>( v2[12] ), string( "yyy" ) );
+    EQUALS( get<1>( v2[12] ), 3000            );
 }
 
 TEST( lexically_normal )

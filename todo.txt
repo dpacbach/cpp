@@ -1,6 +1,3 @@
-* BDMap using two BDIndex maps
-  construct at least from vector of pairs
-
 * create al module with al object that stores
   efficiently the contents and can yield them
   as an iterator (pairs or 2-tuples?).
@@ -32,3 +29,5 @@
   from a tuple and convert it to string.
 
 * equivalent to catMaybes
+
+* read solution file from string
