@@ -22,5 +22,3 @@
 
   create from list and key function (val function)
   or list and both key/val functions
-
-* read solution file from string

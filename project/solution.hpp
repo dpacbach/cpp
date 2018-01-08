@@ -25,6 +25,8 @@ struct SolutionFile : public util::non_copyable {
     // Reads  in  the  solution  file and parses it for any lines
     // that declare projects, and then  extracts the project file
     // location (vcxproj) for each project.
+    static SolutionFile read( std::istream& in );
+    // This one reads from a file.
     static SolutionFile read( fs::path const& file );
 
     PathVec const& projects() const { return m_projects; }
@@ -51,6 +53,11 @@ struct Solution : public util::non_copyable {
     // Read in a solution file, parse  it  to  get  the  list  of
     // projects that it contains, then  read in each project file
     // and parse it completely.
+    static Solution read( std::istream&    in,
+                          fs::path const&  sln_parent,
+                          std::string_view platform,
+                          fs::path const&  base = "" );
+    // This one reads from a file.
     static Solution read( fs::path const&  file,
                           std::string_view platform,
                           fs::path const&  base = "" );

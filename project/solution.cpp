@@ -36,10 +36,7 @@ SolutionFile::SolutionFile( PathVec&& ps )
 // Reads in the solution file and parses it for  any  lines  that
 // declare  projects, and then extracts the project file location
 // (vcxproj) for each project.
-SolutionFile SolutionFile::read( fs::path const&  file ) {
-
-    ifstream in( file.string() );
-    ASSERT( in.good(), "failed to open solution file " << file );
+SolutionFile SolutionFile::read( istream& in ) {
 
     regex p_regex( project_line );
     smatch m;
@@ -57,6 +54,14 @@ SolutionFile SolutionFile::read( fs::path const&  file ) {
         }
     }
     return SolutionFile( move( ps ) );
+}
+
+// This one takes file path.
+SolutionFile SolutionFile::read( fs::path const& file ) {
+
+    ifstream in( file.string() );
+    ASSERT( in.good(), "failed to open solution file " << file );
+    return SolutionFile::read( in );
 }
 
 // For  debugging,  just  prints  out a list of the project paths
@@ -78,14 +83,20 @@ Solution::Solution( map<fs::path, Project>&& ps )
 
 // Read in a solution file, parse it  to get the list of projects
 // that  it contains, then read in each project file and parse it
-// completely.
-Solution Solution::read( fs::path const& file,
+// completely.  Alhough  we're being given the contents of the so-
+// lution file in a stream we still need to know the location  of
+// the  solution  file's containing folder so that we can resolve
+// the paths of the  project  files  referred  to in the solution
+// file (which are  relative  to  the  location  of  the solution
+// file).
+Solution Solution::read( istream&        in,
+                         fs::path const& sln_parent,
                          string_view     plat,
                          fs::path const& base ) {
 
-    SolutionFile sf = SolutionFile::read( file );
+    SolutionFile sf = SolutionFile::read( in );
 
-    auto abs_dir = util::absnormpath( file ).parent_path();
+    auto abs_dir = util::absnormpath( sln_parent );
 
     map<fs::path, Project> m;
 
@@ -98,6 +109,15 @@ Solution Solution::read( fs::path const& file,
     }
 
     return Solution( move( m ) );
+}
+
+// This one takes a file path.
+Solution Solution::read( fs::path const& file,
+                         string_view     plat,
+                         fs::path const& base ) {
+    ifstream in( file.string() );
+    ASSERT( in.good(), "failed to open solution file " << file );
+    return Solution::read( in, file.parent_path(), plat, base );
 }
 
 // For debugging, just outputs the list of projects and, for each
