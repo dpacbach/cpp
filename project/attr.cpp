@@ -58,9 +58,7 @@ auto src_folders( ProjectAttr const& attr ) -> PathVec {
     PathVec v = attr.cl_compiles;
     auto parent = []( fs::path& p ){ return p.parent_path(); };
     transform( begin( v ), end( v ), begin( v ), parent );
-    sort( begin( v ), end( v ) );
-    auto new_end = unique( begin( v ), end( v ) );
-    v.erase( new_end, end( v ) );
+    util::uniq_sort( v );
     return v;
 }
 

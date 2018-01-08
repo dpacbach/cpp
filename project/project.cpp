@@ -279,15 +279,4 @@ auto ubs_path( Project const& p ) -> fs::path {
     return tlog_path( p ) / ubs_name( p.attr() );
 }
 
-// Get a list of all compiled  files  in project, get the folders
-// in  which  they reside, and return a unique list of them (i.e.,
-// most projects should  return  just  a  small  handful of items
-// here).
-auto src_folder_paths( Project const& p ) -> PathVec {
-    auto v = src_folders( p.attr() );
-    for( auto& i : v )
-        i = util::lexically_normal( p.path() / i );
-    return v;
-}
-
 } // namespace project

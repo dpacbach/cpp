@@ -50,9 +50,5 @@ auto exp_path ( Project const& p ) -> OptPath;
 // lasbuildstate & unsuccessfulbuild are in the tlog folder.
 auto lbs_path ( Project const& p ) -> fs::path;
 auto ubs_path ( Project const& p ) -> fs::path;
-// Unique list of paths of folders containing at least one  compi-
-// lable source file in this project (i.e.,  not  including  head-
-// ers).
-auto src_folder_paths( Project const& p ) -> PathVec;
 
 } // namespace project
