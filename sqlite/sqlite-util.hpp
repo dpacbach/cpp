@@ -77,10 +77,16 @@ void attach( sqlite::database& db, DBDescVec const& dbs );
 
 // With move and/or NRVO this should be  a  convenient  yet  effi-
 // cient way to select data from the  db.  This  variant  is  for
-// queries that return multiple columns.
+// queries that return  multiple  columns.  This  variant takes a
+// database  binder  for  a  query that has already been prepared
+// (perhaps  with  some  substitutions).  We  take  the binder by
+// rvalue reference because 1) we're  going  to execute it (after
+// which it won't be of any value), and 2) so that the caller can
+// pass  a temporary binder object to this function which is some-
+// times convenient.
 template<typename... Args>
 std::vector<std::tuple<Args...>>
-select( sqlite::database& db, std::string const& query ) {
+select( sqlite::database_binder&& db ) {
 
     std::vector<std::tuple<Args...>> res;
 
@@ -90,17 +96,30 @@ select( sqlite::database& db, std::string const& query ) {
 
     // For each resulting row run  the  above function which will
     // append it to the list.
-    db << query >> func;
+    db >> func;
 
     return res;
 }
 
+// Same as above but takes a query  string  ready  for  execution.
+template<typename... Args>
+std::vector<std::tuple<Args...>>
+select( sqlite::database& db, std::string const& query ) {
+
+    return select<Args...>(db << query);
+}
+
 // With move and/or NRVO this should be  a  convenient  yet  effi-
 // cient way to select data from the  db.  This  variant  is  for
-// queries that return a single column.
+// queries that return  a  single  column.  This  variant takes a
+// database  binder  for  a  query that has already been prepared
+// (perhaps  with  some  substitutions).  We  take  the binder by
+// rvalue reference because 1) we're  going  to execute it (after
+// which it won't be of any value), and 2) so that the caller can
+// pass  a temporary binder object to this function which is some-
+// times convenient.
 template<typename T>
-std::vector<T> select1( sqlite::database&  db,
-                        std::string const& query ) {
+std::vector<T> select1( sqlite::database_binder&& db ) {
 
     std::vector<T> res;
 
@@ -110,9 +129,17 @@ std::vector<T> select1( sqlite::database&  db,
 
     // For each resulting row run  the  above function which will
     // append it to the list.
-    db << query >> func;
+    db >> func;
 
     return res;
+}
+
+// Same as above but takes a query  string  ready  for  execution.
+template<typename T>
+std::vector<T> select1( sqlite::database&  db,
+                        std::string const& query ) {
+
+    return select1<T>( db << query );
 }
 
 // Not sure exactly what this does, but  it  seems  like  a  good
