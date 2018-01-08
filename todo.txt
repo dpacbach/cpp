@@ -23,11 +23,4 @@
   create from list and key function (val function)
   or list and both key/val functions
 
-* insert_many_fast 1 which takes a function to
-  use to convert the argument to the string tuple.
-  this could also be used to select an element
-  from a tuple and convert it to string.
-
-* equivalent to catMaybes
-
 * read solution file from string

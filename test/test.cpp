@@ -14,6 +14,15 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( opt_util )
+{
+    vector<optional<int>> v{
+        { 5 }, nullopt, { 7 }, { 9 }, nullopt, { 0 }, { 1 } };
+
+    auto res = util::cat_opts( v );
+    EQUALS( res, (vector<int>{ 5, 7, 9, 0, 1 }) );
+}
+
 TEST( algo )
 {
     auto find_n = []( int n, int test ) { return test < n; };

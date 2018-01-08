@@ -24,4 +24,18 @@ std::ostream& operator<<( std::ostream&           out,
     return (out << "nullopt");
 }
 
+// This will take the vectors of optionals and will gather all of
+// them that are not nullopt and move their values into a  vector
+// and return it.
+template<typename T>
+std::vector<T> cat_opts( std::vector<std::optional<T>>& opts ) {
+    // We might need up to this size.
+    std::vector<T> res; res.reserve( opts.size() );
+    for( auto const& o : opts )
+        if( o )
+            res.emplace_back( std::move( *o ) );
+
+    return res;
+}
+
 } // namespace util
