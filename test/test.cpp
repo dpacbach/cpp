@@ -609,6 +609,24 @@ TEST( sqlite )
     TRUE( good_msg, "query " << quoted( q ) << " threw a "
             "sqlite_exception but the exception_msg function "
             "did not yield the query in its message." );
+
+    // Test the insert_many_fast with custom function.
+    vector<tuple<int, int, int>> tp3{
+        { 0, 299, 1 },
+        { 0, 299, 1 },
+        { 0, 299, 1 },
+    };
+    sqlite::insert_many_fast( db,
+        "INSERT INTO user (age, weight) VALUES", tp3, LC(
+        string( "(" ) + util::to_string( get<1>( _ ) ) +
+        ", " + util::to_string( 8.9 ) + ")"
+    ) );
+
+    int c; double w;
+    db << "SELECT COUNT(*) FROM user WHERE age=299"        >> c;
+    db << "SELECT DISTINCT weight FROM user WHERE age=299" >> w;
+    EQUALS( c, 3   );
+    EQUALS( w, 8.9 );
 }
 
 TEST( preprocessor )
