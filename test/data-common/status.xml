@@ -1,0 +1,63 @@
+<status>
+  <target path=".">
+    <entry path="some_external">
+      <wc-status props="none" item="external"> </wc-status>
+    </entry>
+    <entry path="script.sh">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="text_file.txt">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="another_external">
+      <wc-status props="none" item="external"> </wc-status>
+    </entry>
+    <entry path="test.py">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="a_path/and_a_file.r10">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="a_path/and_a_file.mine">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="a_path/and_a_file.r11">
+      <wc-status props="none" item="unversioned"> </wc-status>
+    </entry>
+    <entry path="a_path/and_a_file">
+      <wc-status props="normal" item="conflicted" revision="11">
+        <commit revision="13">
+          <author>jack</author>
+          <date>2018-01-11T15:03:37.763861Z</date>
+        </commit>
+      </wc-status>
+    </entry>
+    <entry path="python.py">
+      <wc-status props="normal" item="modified" revision="11">
+        <commit revision="14">
+          <author>jill</author>
+          <date>2017-05-23T18:38:42.056032Z</date>
+        </commit>
+      </wc-status>
+    </entry>
+    <entry path="another_file.py">
+      <wc-status props="normal" item="modified" revision="11">
+        <commit revision="15">
+          <author>bob</author>
+          <date>2017-08-01T20:30:34.410065Z</date>
+        </commit>
+      </wc-status>
+    </entry>
+    <entry path="added_file.abc">
+      <wc-status props="none" item="added" revision="0"> </wc-status>
+    </entry>
+    <entry path="funcs.sh">
+      <wc-status props="none" item="deleted" revision="1">
+        <commit revision="16">
+          <author>joe</author>
+          <date>2016-03-07T19:17:39.060395Z</date>
+        </commit>
+      </wc-status>
+    </entry>
+  </target>
+</status>

@@ -3,7 +3,7 @@
 ****************************************************************/
 #include "macros.hpp"
 #include "string-util.hpp"
-#include "xml-utils.hpp"
+#include "xml-util.hpp"
 
 #include <fstream>
 

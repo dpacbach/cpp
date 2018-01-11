@@ -3,7 +3,7 @@
 ****************************************************************/
 #include "opt-util.hpp"
 #include "project.hpp"
-#include "xml-utils.hpp"
+#include "xml-util.hpp"
 #include "string-util.hpp"
 #include "util.hpp"
 

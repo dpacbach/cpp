@@ -2,13 +2,13 @@ CFLAGS   += -pthread
 CXXFLAGS += -std=c++1z
 LDFLAGS  += -lstdc++fs -pthread
 
-project.deps   = xml-utils
-xml-utils.deps = pugixml util
+project.deps   = xml
+xml.deps       = pugixml util
 sqlite.deps    = sqlite-amal util smcpp
 crypto.deps    = md5
 
 # Must be in order of dependencies.
-top-level-folders = util xml-utils sqlite project crypto test
+top-level-folders = util xml sqlite project crypto test
 
 main.deps = $(top-level-folders)
 test.deps = $(filter-out test,$(top-level-folders))

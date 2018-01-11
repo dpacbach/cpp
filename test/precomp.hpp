@@ -21,7 +21,7 @@
 #include "string-util.hpp"
 #include "types.hpp"
 #include "util.hpp"
-#include "xml-utils.hpp"
+#include "xml-util.hpp"
 #include <algorithm>
 #include <assert.h>
 #include <cctype>
