@@ -466,9 +466,8 @@ TEST( sqlite )
     };
 
     // Prepare the query once,  then  execute  once  for each row.
-    sqlite::insert_many( db,
-        "INSERT INTO user (age, name, weight) VALUES (?,?,?)",
-        rows
+    sqlite::insert_many( db, rows,
+        "INSERT INTO user (age, name, weight) VALUES (?,?,?)"
     );
 
     // Spot-check a row.
@@ -499,9 +498,8 @@ TEST( sqlite )
     vector<int> rows_1{ 55, 44, 33, 88 };
 
     // Prepare the query once,  then  execute  once  for each row.
-    sqlite::insert_many( db,
-        "INSERT INTO user (age) VALUES (?)",
-        rows_1
+    sqlite::insert_many( db, rows_1,
+        "INSERT INTO user (age) VALUES (?)"
     );
 
     // Spot-check a row.

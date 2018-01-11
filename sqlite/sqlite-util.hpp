@@ -229,8 +229,8 @@ void insert_tuple( sqlite::database&  db,
 // ements.
 template<typename... Args>
 void insert_many( sqlite::database&  db,
-                  std::string const& query,
-                  std::vector<std::tuple<Args...>> const& in ) {
+                  std::vector<std::tuple<Args...>> const& in,
+                  std::string const& query ) {
 
     auto is = std::make_index_sequence<sizeof...(Args)>();
     // Get "prepared statement" which is not immediately executed.
@@ -251,8 +251,8 @@ void insert_many( sqlite::database&  db,
 // of elements.
 template<typename T>
 void insert_many( sqlite::database&     db,
-                  std::string const&    query,
-                  std::vector<T> const& in ) {
+                  std::vector<T> const& in,
+                  std::string const&    query ) {
 
     // Get "prepared statement" which is not immediately executed.
     auto ps = (db << query);
