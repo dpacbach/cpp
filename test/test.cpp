@@ -481,9 +481,8 @@ TEST( sqlite )
 
     // Run  same  test  again,  but this time with the "fast" ver-
     // sion.
-    sqlite::insert_many_fast( db,
-        "INSERT INTO user (age, name, weight) VALUES",
-        rows
+    sqlite::insert_many_fast( db, rows,
+        "INSERT INTO user (age, name, weight) VALUES"
     );
 
     // Spot-check a row.
@@ -515,9 +514,8 @@ TEST( sqlite )
 
     // Run  same  test  again,  but this time with the "fast" ver-
     // sion.
-    sqlite::insert_many_fast( db,
-        "INSERT INTO user (age) VALUES",
-        rows_1
+    sqlite::insert_many_fast( db, rows_1,
+        "INSERT INTO user (age) VALUES"
     );
 
     // Spot-check a row.
@@ -535,9 +533,8 @@ TEST( sqlite )
     for( size_t i = 0; i < sqlite::impl::chunk*3+7; ++i )
         rows2.push_back( { 333, util::to_string( i ) } );
 
-    sqlite::insert_many_fast( db,
-        "INSERT INTO user (age, name) VALUES",
-        rows2
+    sqlite::insert_many_fast( db, rows2,
+        "INSERT INTO user (age, name) VALUES"
     );
 
     // Check all the rows.
@@ -625,8 +622,8 @@ TEST( sqlite )
         { 0, 299, 1 },
         { 0, 299, 1 },
     };
-    sqlite::insert_many_fast( db,
-        "INSERT INTO user (age, weight) VALUES", tp3, LC(
+    sqlite::insert_many_fast( db, tp3,
+        "INSERT INTO user (age, weight) VALUES", LC(
         string( "(" ) + util::to_string( get<1>( _ ) ) +
         ", " + util::to_string( 8.9 ) + ")"
     ) );
@@ -636,6 +633,30 @@ TEST( sqlite )
     db << "SELECT DISTINCT weight FROM user WHERE age=299" >> w;
     EQUALS( c, 3   );
     EQUALS( w, 8.9 );
+
+    // Test that we can send and  receive  NULL  values  properly
+    // using std::optional and using  the  insert_many_fast  func-
+    // tions.
+    vector<tuple<optional<int>, OptStr, double>> rows3{
+        { 654,     "hello",  7.6 },
+        { 654,      nullopt, 7.6 },
+        { nullopt,  nullopt, 7.6 }
+    };
+
+    sqlite::insert_many_fast( db, rows3,
+        "INSERT INTO user (age, name, weight) VALUES" );
+
+    auto v5 = sqlite::select<optional<int>, OptStr>( db,
+        "SELECT age, name FROM user WHERE weight=7.6" );
+
+    EQUALS( v5.size(), 3 );
+
+    EQUALS( std::get<0>( v5[0] ), 654     );
+    EQUALS( std::get<0>( v5[1] ), 654     );
+    EQUALS( std::get<0>( v5[2] ), nullopt );
+    EQUALS( std::get<1>( v5[0] ), "hello" );
+    EQUALS( std::get<1>( v5[1] ), nullopt );
+    EQUALS( std::get<1>( v5[2] ), nullopt );
 }
 
 TEST( preprocessor )

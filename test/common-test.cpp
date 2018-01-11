@@ -60,6 +60,8 @@ void run_single_test( size_t      line,
     } catch( failed_exception const& e ) {
         err = e.what();
         result = Res::FAILED;
+    } catch( sqlite::sqlite_exception const& e ) {
+        std::cerr << sqlite::exception_msg( e ) << "\n";
     } catch( exception const& e ) {
         err = e.what();
         err += "\nLast checkpoint: ";

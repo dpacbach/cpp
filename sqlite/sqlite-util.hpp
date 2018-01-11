@@ -36,6 +36,65 @@ void insert_tuple_impl( Receiver&    db,
     ((db << std::get<Indexes>( t )), ...);
 }
 
+// This is the top-level (unspecialized) to_string method that we
+// use  in  this  module when we need to manually convert a query
+// substitution  argument  to  a string. We may want to do manual
+// conversion (instead of letting our sqlite cpp  wrapper  do  it
+// for us) in order  to  manually  construct  queries that insert
+// many values in a single shot. Furthermore, the reason we don't
+// use  util::to_string  to do the conversion is that we need spe-
+// cialized  behavior  for  std::optional (and tuples thereof) be-
+// cause, just like the  sqlite_modern_cpp  wrapper,  we want our
+// API to support using std::optional  types to represent columsn
+// that can be null, in which case std::nullopt represents a null
+// values, which is then converted to  NULL in the query (with no
+// quotes). Important: we must use these  impl::to_string  family
+// of  functions (defined in this module) whenever we need to con-
+// vert a query parameter to a string in this module.
+//
+// In  what  follows  we  create  just  enough specializations of
+// to_string  to support all of the to_string conversions that we
+// might make here and in which  we'd need to worry about std::op-
+// tional.
+template<typename T>
+std::string to_string( T const& what ) {
+    // Default case, just delegate.
+    return util::to_string( what );
+}
+
+// We  need  special  SQL-specifc  behavior for the std::optional.
+template<typename T>
+std::string to_string( std::optional<T> const& what ) {
+    if( !what )
+        return "NULL";
+    return util::to_string( *what );
+}
+
+// This function exists for the purpose of  having  the  compiler
+// deduce the Indexes variadic integer arguments that we can then
+// use to index the tuple; it probably is not useful to call this
+// method directly (it is called by to_string).
+template<typename Tuple, size_t... Indexes>
+StrVec tuple_elems_to_string( Tuple const& tp,
+                              std::index_sequence<Indexes...> ) {
+    StrVec res; res.reserve( std::tuple_size_v<Tuple> );
+    // Unary  right  fold  of  template parameter pack. NOTE: the
+    // to_string  method  used  here  is  the  one in this module.
+    ((res.push_back( to_string( std::get<Indexes>( tp ) ))), ...);
+    return res;
+}
+
+// Will do JSON-like notation.  E.g.  (1,"hello",2),  however  it
+// calls impl::to_string (in this module) so that components that
+// are optional will be properly converted  to "NULL" if they are
+// nullopt.
+template<typename... Args>
+std::string to_string( std::tuple<Args...> const& tp ) {
+    auto is = std::make_index_sequence<sizeof...(Args)>();
+    auto v = tuple_elems_to_string( tp, is );
+    return "(" + util::join( v, "," ) + ")";
+}
+
 }
 
 // We use this to extract  the  message from the sqlite_exception
@@ -106,7 +165,7 @@ template<typename... Args>
 std::vector<std::tuple<Args...>>
 select( sqlite::database& db, std::string const& query ) {
 
-    return select<Args...>(db << query);
+    return select<Args...>( db << query );
 }
 
 // With move and/or NRVO this should be  a  convenient  yet  effi-
@@ -214,14 +273,14 @@ void insert_many( sqlite::database&     db,
 // the query in a more complicated way.
 template<typename... Args>
 void insert_many_fast( sqlite::database&  db,
-                       std::string const& query,
-                       std::vector<std::tuple<Args...>> const& in ) {
+                       std::vector<std::tuple<Args...>> const& in,
+                       std::string const& query ) {
 
     using Tp = std::tuple<Args...>;
 
     // We  need  this lambda to help std::transform with overload
     // resolution of to_string.
-    auto f = []( Tp const& e ){ return util::to_string( e ); };
+    auto f = []( Tp const& e ){ return impl::to_string( e ); };
 
     // Do  the  entire  operation  in  chunks  to avoid exceeding
     // sqlite's maximum query length.
@@ -260,8 +319,8 @@ void insert_many_fast( sqlite::database&  db,
 // a more complicated way.
 template<typename T, typename Func>
 void insert_many_fast( sqlite::database&     db,
-                       std::string const&    query,
                        std::vector<T> const& in,
+                       std::string const&    query,
                        Func                  func ) {
 
     // Do  the  entire  operation  in  chunks  to avoid exceeding
@@ -285,10 +344,10 @@ void insert_many_fast( sqlite::database&     db,
 // want to simply call util::to_string on it.
 template<typename T>
 void insert_many_fast( sqlite::database&     db,
-                       std::string const&    query,
-                       std::vector<T> const& in ) {
-    auto f = L( "(" + util::to_string( _ ) + ")" );
-    insert_many_fast( db, query, in, f );
+                       std::vector<T> const& in,
+                       std::string const&    query ) {
+    auto f = L( "(" + impl::to_string( _ ) + ")" );
+    insert_many_fast( db, in, query, f );
 }
 
 } // namespace sqlite
