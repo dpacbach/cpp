@@ -66,11 +66,11 @@ char const* target_ext =
 }
 
 vector<string> cl_compiles( pugi::xml_document const& doc ) {
-    return xml::attr( doc, xpaths::cl_compiles, {}, false );
+    return xml::attrs( doc, xpaths::cl_compiles, {}, false );
 }
 
 vector<string> cl_includes( pugi::xml_document const& doc ) {
-    return xml::attr( doc, xpaths::cl_includes, {}, false );
+    return xml::attrs( doc, xpaths::cl_includes, {}, false );
 }
 
 vector<string> search_paths( pugi::xml_document const& doc,

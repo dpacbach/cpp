@@ -52,6 +52,9 @@ public:
     BiMapFixed( std::vector<value_type>&& data,
                 bool sorted = false );
 
+    // Data will be sorted according to the first element in pair.
+    BiMapFixed( std::initializer_list<value_type> data );
+
     // Returns #keys (== #values)
     size_t size() const { return m_data.size(); }
 
@@ -73,6 +76,9 @@ private:
 
     using ref_type = std::reference_wrapper<value_type const>;
 
+    // Helper to facilitate sharing code between constructors.
+    void initialize( bool sorted );
+
     // These are references to the data  in m_data; they exist so
     // that we can have the data sorted  both by key and by value
     // for quick lookup in either direction.
@@ -93,13 +99,12 @@ typename BiMapFixed<KeyT, ValT>::const_iterator end(
         BiMapFixed<KeyT, ValT> const& bmf )
     { return bmf.end(); }
 
+// Helper function to  facilitate  sharing  code between construc-
+// tors. This function assumes as a precondition that the
+// m_by_key and m_by_val are empty and that m_data has been  popu-
+// lated with values.
 template<typename KeyT, typename ValT>
-BiMapFixed<KeyT, ValT>::BiMapFixed(
-    std::vector<value_type>&& data,
-    bool sorted ) : m_by_key(), m_by_val(), m_data( move( data ) )
-{
-    m_by_key.reserve( m_data.size() );
-    m_by_val.reserve( m_data.size() );
+void BiMapFixed<KeyT, ValT>::initialize( bool sorted ) {
 
     // First we sort m_data by key. This  way,  when  we  iterate
     // through m_data it will  appear  in  order  sorted  by  key,
@@ -129,6 +134,32 @@ BiMapFixed<KeyT, ValT>::BiMapFixed(
 
     std::sort( std::begin( m_by_val ), std::end( m_by_val ),
                lt_snd );
+}
+
+template<typename KeyT, typename ValT>
+BiMapFixed<KeyT, ValT>::BiMapFixed(
+    std::vector<value_type>&& data,
+    bool sorted ) : m_by_key(), m_by_val(), m_data( move( data ) )
+{
+    m_by_key.reserve( m_data.size() );
+    m_by_val.reserve( m_data.size() );
+
+    initialize( sorted );
+}
+
+// Data will be sorted according to the first element in pair.
+template<typename KeyT, typename ValT>
+BiMapFixed<KeyT, ValT>::BiMapFixed(
+        std::initializer_list<value_type> data )
+      : m_by_key(), m_by_val(), m_data() {
+
+    m_data.reserve( data.size() );
+    for( auto const& e : data )
+        m_data.emplace_back( e );
+
+    // Finish initialization; `false` means that we do not assume
+    // the contents of the initializer list are sorted.
+    initialize( false );
 }
 
 // Returns  an optional of reference, so no copying/moving should

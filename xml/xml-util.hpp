@@ -52,29 +52,36 @@ struct err_location {
 
 err_location offset_to_line( int offset, fs::path file );
 
-void parse( pugi::xml_document& doc, fs::path file );
+void parse( pugi::xml_document& doc, fs::path const& file );
+void parse( pugi::xml_document& doc, std::string const& s );
 
 /****************************************************************
 * XPath Wrappers
 ****************************************************************/
-StrVec attr( pugi::xml_document const& doc,
-             char const*               x_path,
-             XPathVars const&          vars,
-             bool                      allow_empty = true );
+StrVec attrs( pugi::xml_node const& node,
+              char const*           x_path,
+              XPathVars const&      vars,
+              bool                  allow_empty = true );
 
-StrVec texts( pugi::xml_document const& doc,
-              const char*               x_path,
-              xml::XPathVars const&     vars,
-              bool                      allow_empty = true,
-              bool                      strip       = true );
+// Same as above  by  enforces  that  there  be  only  one result.
+OptStr attr( pugi::xml_node const& node,
+             char const*           x_path,
+             XPathVars const&      vars,
+             bool                  allow_empty = true );
+
+StrVec texts( pugi::xml_node const& node,
+              const char*           x_path,
+              xml::XPathVars const& vars,
+              bool                  allow_empty = true,
+              bool                  strip       = true );
 
 // Just likes texts() but will  return  nullopt  if the number of
 // results is zero and will throw  if number of results is larger
 // than one.
-OptStr text( pugi::xml_document const& doc,
-             const char*               x_path,
-             xml::XPathVars const&     vars,
-             bool                      allow_empty = true,
-             bool                      strip       = true );
+OptStr text( pugi::xml_node const& doc,
+             const char*           x_path,
+             xml::XPathVars const& vars,
+             bool                  allow_empty = true,
+             bool                  strip       = true );
 
 } // namespace xml

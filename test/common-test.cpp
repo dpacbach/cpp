@@ -97,3 +97,13 @@ void run_single_test( size_t      line,
 }
 
 } // namespace testing
+
+// This is the entrypoint for the unit test executable.
+int main_( int, char** )
+{
+    util::Logger::enabled = false;
+
+    testing::run_all_tests();
+
+    return 0;
+}

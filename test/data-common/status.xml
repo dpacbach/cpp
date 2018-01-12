@@ -9,6 +9,9 @@
     <entry path="text_file.txt">
       <wc-status props="none" item="unversioned"> </wc-status>
     </entry>
+    <entry path="tc_d">
+      <wc-status props="none" item="modified" tree-conflicted="true"> </wc-status>
+    </entry>
     <entry path="another_external">
       <wc-status props="none" item="external"> </wc-status>
     </entry>

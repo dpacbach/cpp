@@ -1377,12 +1377,3 @@ TEST( lexically_relative_fast )
 }
 
 } // namespace testing
-
-int main_( int, char** )
-{
-    util::Logger::enabled = false;
-
-    testing::run_all_tests();
-
-    return 0;
-}
