@@ -12,6 +12,18 @@ using namespace std;
 
 namespace util {
 
+namespace {
+
+void validate( fs::path const& p ) {
+#ifdef _WIN32
+    ASSERT( p.has_root_name() == p.has_root_directory(),
+            "path " << p << " must either have both a root name "
+            "and a root directory, or must have neither." );
+#endif
+}
+
+}
+
 // This will put the path (which  may not exist) into normal form
 // and preserving absolute/relative nature.  Path must exist, and
 // will resolve symlinks.
@@ -62,8 +74,8 @@ fs::path absnormpath( fs::path const& p ) {
  */
 fs::path lexically_normal( fs::path const& p ) {
 
-    ASSERT( !p.has_root_name(), "path " << p << " has a root"
-                                "name which is not supported." );
+    validate( p );
+
     bool is_abs = p.is_absolute(), is_rel = p.is_relative();
     fs::path res;
     for( auto c : p ) {
@@ -88,8 +100,16 @@ fs::path lexically_normal( fs::path const& p ) {
                 // chance that the  filename  could  be .. (since
                 // those are allowed to accumulate at  the  start
                 // of  a  relative path), but which we don't want
-                // to remove.
-                if( res.filename() != ".." ) {
+                // to  remove.  Also, on Windows, it  is possible
+                // that res is a root  directory here because the
+                // root  directory will  also  be accompanied  by
+                // a root name, which gives it a non-empty parent
+                // path  (unlike on  Linux  where that  situation
+                // would  not have  passed through  the above  if
+                // statement);  therefore, we  need one  explicit
+                // check that res is not a root directory.
+                if( res.filename() != ".." &&
+                    !res.filename().has_root_directory() ) {
                     res = res.parent_path();
                     continue;
                 }
@@ -128,16 +148,15 @@ fs::path lexically_normal( fs::path const& p ) {
  *
  * Return value: empty path on error, result otherwise.
  *
- * NOTE: this function implementation does  not  normalize  paths
- * and will generally not return them in normal form, even if the
- * inputs are both in normal form.
+ * NOTE: both  arguments will  be normalized, and result returned
+ * will always be in normal form  unless an error (empty path) is
+ * returned.
  *
  * NOTE:  this function doesn't always work right in certain edge
- * cases involving the presence of dot-dot's in the base path and
- * dot-dot's immediately proceeding  a  root  folder...  it is ad-
- * vised to avoid supplying these  kinds  of arguments to be safe.
- * In  some  cases it tries to detect these scenarios and will re-
- * turn an error (empty  path),  but  it's  probably not reliable.
+ * cases involving both relative paths and the presence of double
+ * dots  in the base  path due to  the fact that  this is lexical.
+ * The function  tries to detect these scenarios  and will return
+ * an error (empty  path) in those cases.
  *
  * From en.cppreference.com/w/cpp/filesystem/path/lexically_normal
  * the algorithm is as follows:
@@ -166,12 +185,19 @@ fs::path lexically_normal( fs::path const& p ) {
  *   application of operator/= for each element in the  half-open
  *   range [a, end())
  */
-fs::path lexically_relative( fs::path const& p,
-                             fs::path const& base ) {
+fs::path lexically_relative( fs::path const& p_,
+                             fs::path const& base_ ) {
+
+    // These will also call validate so we don't need to here.
+    fs::path p    = lexically_normal( p_    );
+    fs::path base = lexically_normal( base_ );
+
     if( (p.root_name()   != base.root_name())   ||
         (p.is_absolute() != base.is_absolute()) ||
         (!p.has_root_directory() && base.has_root_directory()) )
          return {};
+
+    bool is_abs = p.is_absolute() /* == base.is_absolute() */;
 
     auto [a, b] = mismatch( begin( p ), end( p ),
                             begin( base ), end( base ) );
@@ -179,8 +205,7 @@ fs::path lexically_relative( fs::path const& p,
     auto n_dd = count( b, end( base ), ".." );
     auto n_d  = count( b, end( base ), "."  );
     auto dist = distance( b, end( base ) );
-    auto n_f  = dist - n_dd - n_d;
-    auto n_r  = n_f - n_dd;
+    auto n_r  = dist - 2*n_dd - n_d;
 
     ASSERT_( dist >= (n_d + n_dd) );
 
@@ -191,7 +216,7 @@ fs::path lexically_relative( fs::path const& p,
     //   lexically_relative( ".", "a/.." ) == "."; // ok
     //   lexically_relative( ".", "../a" ) == ???; // bad
     // Though this only arises with relative paths.
-    if( n_dd > 0 ) {
+    if( n_dd > 0 && !is_abs ) {
         auto norm = lexically_normal( path_( b, end( base ) ) );
         if( count( begin( norm ), end( norm ), ".." ) > 0 )
             return {};
@@ -207,34 +232,7 @@ fs::path lexically_relative( fs::path const& p,
     // Result, which at this  point  is  interpreted as "correct"
     // will be changed to normal form if it is empty, that way we
     // can use "empty" to mean "couldn't find solution".
-    return res.empty() ? "." : res;
-}
-
-// This  is  a  simplified version of lexically_relative which as-
-// sumes (assumptions are not verified for efficiency!) that both
-// input  paths  are  either  absolute or both are relative, that
-// both are in normal form, and that the base path has no  double
-// dots. If you call this function  with  those  assumptions  vio-
-// lated then it's not certain what you will  get.  NOTE:  perfor-
-// mance of this has  not  actually  been  measured,  so it's not
-// clear if it's really faster (it may well not be).
-fs::path lexically_relative_fast( fs::path const& p,
-                                  fs::path const& base ) {
-
-    auto [a, b] = mismatch( begin( p ), end( p ),
-                            begin( base ), end( base ) );
-
-    fs::path res;
-    for( auto i = b; i != end( base ); ++i )
-        res /= fs::path( ".." );
-
-    for( auto i = a; i != end( p ); ++i )
-        res /= *i;
-
-    // Result, which at this  point  is  interpreted as "correct"
-    // will be changed to normal form if it is empty, that way we
-    // can use "empty" to mean "couldn't find solution".
-    return res.empty() ? "." : res;
+    return lexically_normal( res );
 }
 
 // Flip any backslashes to foward slashes.
@@ -313,7 +311,7 @@ bool path_equals( fs::path const& a,
 void touch( fs::path p ) {
 
     if( !fs::exists( p ) ) {
-        ofstream o( p, ios_base::out | ios_base::app );
+        ofstream o( p.string(), ios_base::out | ios_base::app );
         // This can fail if a parent folder does not exist, so we
         // really need to check.
         ASSERT( o.good(), "failed to create " << p );

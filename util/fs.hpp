@@ -46,17 +46,6 @@ fs::path lexically_normal( fs::path const& p );
 fs::path lexically_relative( fs::path const& p,
                              fs::path const& base );
 
-// This  is  a  simplified version of lexically_relative which as-
-// sumes (assumptions are not verified for efficiency!) that both
-// input  paths  are  either  absolute or both are relative, that
-// both are in normal form, and that the base path has no  double
-// dots. If you call this function  with  those  assumptions  vio-
-// lated then it's not certain what you will  get.  NOTE:  perfor-
-// mance of this has  not  actually  been  measured,  so it's not
-// clear if it's really faster (it may well not be).
-fs::path lexically_relative_fast( fs::path const& p,
-                                  fs::path const& base );
-
 // Flip any backslashes to forward slashes.
 std::string fwd_slashes( std::string_view in );
 
