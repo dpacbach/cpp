@@ -146,11 +146,11 @@ namespace util {
 
 template<>
 string to_string( svn::Status const& s ) {
-    return string( "(" ) +
+    return string( "Status( " ) +
         "path="   + to_string( s.path          ) + ", " +
         "change=" + to_string( s.change        ) + ", " +
         "tc="     + to_string( s.tree_conflict ) +
-    ")";
+    " )";
 }
 
 template<>
