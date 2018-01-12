@@ -106,6 +106,9 @@ typename BiMapFixed<KeyT, ValT>::const_iterator end(
 template<typename KeyT, typename ValT>
 void BiMapFixed<KeyT, ValT>::initialize( bool sorted ) {
 
+    m_by_key.reserve( m_data.size() );
+    m_by_val.reserve( m_data.size() );
+
     // First we sort m_data by key. This  way,  when  we  iterate
     // through m_data it will  appear  in  order  sorted  by  key,
     // which is nice.
@@ -141,9 +144,6 @@ BiMapFixed<KeyT, ValT>::BiMapFixed(
     std::vector<value_type>&& data,
     bool sorted ) : m_by_key(), m_by_val(), m_data( move( data ) )
 {
-    m_by_key.reserve( m_data.size() );
-    m_by_val.reserve( m_data.size() );
-
     initialize( sorted );
 }
 
