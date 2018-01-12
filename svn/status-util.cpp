@@ -155,7 +155,7 @@ string to_string( svn::Status const& s ) {
 
 template<>
 string to_string( svn::Status::ChangeType const& s ) {
-    return string( "\"" ) + svn::g_change.key( s ) + "\"";
+    return svn::g_change.key( s );
 }
 
 } // namespace util
