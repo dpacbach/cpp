@@ -52,8 +52,14 @@ struct err_location {
 
 err_location offset_to_line( int offset, fs::path file );
 
-void parse( pugi::xml_document& doc, fs::path const& file );
+void parse( pugi::xml_document& doc, fs::path    const& file );
 void parse( pugi::xml_document& doc, std::string const& s );
+
+// This variant allows taking an error  message that will be used
+// as a prefix in the event of a parsing error.
+void parse( pugi::xml_document& doc,
+            std::istream&       in,
+            std::string const&  err_msg = "" );
 
 /****************************************************************
 * XPath Wrappers

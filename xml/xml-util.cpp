@@ -60,10 +60,9 @@ void throw_parse_error( pugi::xml_parse_result const& res,
     throw runtime_error( out.str() );
 }
 
-void parse( pugi::xml_document& doc, fs::path const& file ) {
-
-    ifstream in( file.string() );
-    ASSERT( in.good(), "failed to read file " << file );
+void parse( pugi::xml_document& doc,
+            istream&            in,
+            string const&       err_msg ) {
 
     pugi::xml_parse_result res = doc.load( in );
 
@@ -74,20 +73,22 @@ void parse( pugi::xml_document& doc, fs::path const& file ) {
     // ginning again to find line of error.
     in.clear(); in.seekg( 0 );
 
-    throw_parse_error( res, in,
-                       string( "failed to parse xml file " ) +
-                       util::to_string( file ) );
+    throw_parse_error( res, in, err_msg );
+}
+
+void parse( pugi::xml_document& doc, fs::path const& file ) {
+
+    ifstream in( file.string() );
+    ASSERT( in.good(), "failed to read file " << file );
+
+    parse( doc, in, string( "failed to parse xml file " )
+           + util::to_string( file ) );
 }
 
 void parse( pugi::xml_document& doc, string const& s ) {
 
-    pugi::xml_parse_result res = doc.load_string( s.c_str() );
-
-    if( res )
-        return;
-
     istringstream in( s );
-    throw_parse_error( res, in, "failed to parse xml string" );
+    parse( doc, in, "failed to parse xml string" );
 }
 
 /****************************************************************

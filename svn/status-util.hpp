@@ -50,7 +50,8 @@ extern CTMap g_change;
 // command and parse it,  then  extract  enough information to re-
 // turn a list Status descriptors. Throws  on  error  or  if  the
 // structure of the xml is not exactly as expected.
-auto parse_status_xml( std::string xml ) -> std::vector<Status>;
+std::vector<Status> parse_status_xml( std::string const& xml );
+std::vector<Status> parse_status_xml( std::istream&      in  );
 
 bool operator< ( Status const& lhs, Status const& rhs );
 bool operator==( Status const& lhs, Status const& rhs );

@@ -55,11 +55,11 @@ CTMap g_change{
 // command and parse it,  then  extract  enough information to re-
 // turn a list Status descriptors. Throws  on  error  or  if  the
 // structure of the xml is not exactly as expected.
-auto parse_status_xml( string xml ) -> vector<Status> {
+vector<Status> parse_status_xml( istream& in_xml ) {
 
     pugi::xml_document doc;
 
-    xml::parse( doc, xml );
+    xml::parse( doc, in_xml );
 
     vector<Status> res;
 
@@ -105,6 +105,15 @@ auto parse_status_xml( string xml ) -> vector<Status> {
     // good reason, so do it since it won't hurt.
     util::uniq_sort( res );
     return res;
+}
+
+// Take a string holding  the  output  of  the `svn status --xml`
+// command and parse it,  then  extract  enough information to re-
+// turn a list Status descriptors. Throws  on  error  or  if  the
+// structure of the xml is not exactly as expected.
+vector<Status> parse_status_xml( string const& xml ) {
+    istringstream ss( xml );
+    return parse_status_xml( ss );
 }
 
 // For convenience.
