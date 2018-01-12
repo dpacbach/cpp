@@ -19,6 +19,8 @@ void validate( fs::path const& p ) {
     ASSERT( p.has_root_name() == p.has_root_directory(),
             "path " << p << " must either have both a root name "
             "and a root directory, or must have neither." );
+#else
+    (void)p;
 #endif
 }
 
