@@ -79,6 +79,13 @@ bool path_equals( fs::path const& a,
                   fs::path const& b,
                   CaseSensitive   sen = CaseSensitive::DEFAULT );
 
+// This function tries to  emulate  the  system  touch command in
+// that it will a) create an  empty  file with current time stamp
+// if one does not exist, b) will  update the time stamp on an ex-
+// isting file or folder without changing contents, and  c)  will
+// throw if any of the parent folders don't exist.
+void touch( fs::path p );
+
 } // namespace util
 
 // It seems that, at the time of this writing, std::hash has  not

@@ -6,6 +6,7 @@
 #include "string-util.hpp"
 
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -302,6 +303,26 @@ bool path_equals( fs::path const& a,
     return equal( begin( a_n ), end( a_n ),
                   begin( b_n ), end( b_n ),
                   predicate );
+}
+
+// This function tries to  emulate  the  system  touch command in
+// that it will a) create an  empty  file with current time stamp
+// if one does not exist, b) will  update the time stamp on an ex-
+// isting file or folder without changing contents, and  c)  will
+// throw if any of the parent folders don't exist.
+void touch( fs::path p ) {
+
+    if( !fs::exists( p ) ) {
+        ofstream o( p, ios_base::out | ios_base::app );
+        // This can fail if a parent folder does not exist, so we
+        // really need to check.
+        ASSERT( o.good(), "failed to create " << p );
+        return;
+    }
+
+    // The path exists, and may be either a file  or  folder,  so
+    // just update the timestamp.
+    fs::last_write_time( p, fs::file_time_type::clock::now() );
 }
 
 } // util

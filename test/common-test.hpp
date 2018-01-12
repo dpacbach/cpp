@@ -117,7 +117,10 @@ struct skipped_exception : public std::exception {};
     TRUE( threw, "expression: " #a " did not throw." );  \
 }
 
-// This is used to create a unit test function.
+// This  is  used  to  create a unit test function. The anonymous
+// namespace is surrounding STARTUP() to  prevent  duplicate  sym-
+// bols  from  appearing  publicly  due  to different translation
+// units declaring TEST macros  on  the  same  source  file  line.
 #define TEST( a )                                               \
     void STRING_JOIN( __test_, a )();                           \
     void STRING_JOIN( test_, a )() {                            \
@@ -125,7 +128,9 @@ struct skipped_exception : public std::exception {};
                                   TO_STRING( a ),               \
                                   STRING_JOIN( __test_, a ) );  \
     }                                                           \
-    STARTUP() {                                                 \
-        test_list().push_back( STRING_JOIN( test_, a ) );       \
+    namespace {                                                 \
+        STARTUP() {                                             \
+            test_list().push_back( STRING_JOIN( test_, a ) );   \
+        }                                                       \
     }                                                           \
     void STRING_JOIN( __test_, a )()

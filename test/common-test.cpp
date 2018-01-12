@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "precomp.hpp"
 #include "common-test.hpp"
+#include "main.hpp"
 
 #include <iostream>
 #include <string>
