@@ -1,0 +1,18 @@
+* Take list of key/value strings and URL-encode them
+
+* read/write UTC time to sqlite database; must be a time
+  type that can be compared to file times.  Must look like
+  this for compatibility: 2018-01-10 09:26:24.550760700-05:00
+  possibly also because it can be compared lexicographically.
+
+* dos2unix and unix2dos; option to not change time stamp if
+  no changes need to be made.
+
+* add/remove -- add or remove a file from proj/filters file.
+    ==> rewriting xmls in general
+
+* conversion from ascii to UTF16 with BOM and vice versa
+
+* path globbing
+
+* flip slashes win
