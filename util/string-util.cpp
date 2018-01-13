@@ -111,6 +111,9 @@ string to_string<std::string_view>( string_view const& s ) {
     return to_string( string( s ) );
 }
 
+template<>
+std::string to_string<Error>( Error const& e ) { return e.msg; }
+
 // NOTE:  This  puts  quotes around the string! Also, it is not a
 // template  specialization  because  for  some reason gcc always
 // wants to select the version for ints/floats below  instead  of

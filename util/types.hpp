@@ -30,6 +30,12 @@ using PathVec     = std::vector<fs::path>;
 using PathCRefVec = std::vector<PathCRef>;
 
 template<typename T>
+using Ref = std::reference_wrapper<T>;
+
+template<typename T>
+using CRef = std::reference_wrapper<T const>;
+
+template<typename T>
 using OptRef  = std::optional<std::reference_wrapper<T>>;
 
 template<typename T>

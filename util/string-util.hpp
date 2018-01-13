@@ -169,21 +169,18 @@ std::string to_string<fs::path>( fs::path const& p );
 
 // Simply delegate to the wrapped type.
 template<typename T>
-std::string to_string( std::reference_wrapper<T> const& rw ) {
-    return util::to_string( rw.get() );
-}
+std::string to_string( Ref<T> const& rw );
 
 // Not  sure if this one is also needed, but doesn't seem to hurt.
 template<typename T>
-std::string to_string( std::reference_wrapper<T const> const& rw ) {
-    return util::to_string( rw.get() );
-}
+std::string to_string( CRef<T> const& rw );
 
 template<typename T>
-std::string to_string( std::optional<T> const& opt ) {
-    return opt ? util::to_string( *opt )
-               : std::string( "nullopt" );
-}
+std::string to_string( std::optional<T> const& opt );
+
+// Will do JSON-like notation. E.g. (1,2,3)
+template<typename... Args>
+std::string to_string( std::tuple<Args...> const& tp );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -194,20 +191,11 @@ std::string to_string( std::optional<T> const& opt ) {
 // volving the index_sequence.
 template<typename Tuple, size_t... Indexes>
 StrVec tuple_elems_to_string( Tuple const& tp,
-                              std::index_sequence<Indexes...> ) {
-    StrVec res; res.reserve( std::tuple_size_v<Tuple> );
-    // Unary right fold of template parameter pack.
-    ((res.push_back( util::to_string( std::get<Indexes>( tp ) ))), ...);
-    return res;
-}
+                              std::index_sequence<Indexes...> );
 
 // Will do JSON-like notation. E.g. (1,2,3)
 template<typename... Args>
-std::string to_string( std::tuple<Args...> const& tp ) {
-    auto is = std::make_index_sequence<sizeof...(Args)>();
-    auto v = tuple_elems_to_string( tp, is );
-    return "(" + join( v, "," ) + ")";
-}
+std::string to_string( std::tuple<Args...> const& tp );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -216,62 +204,40 @@ std::string to_string( std::tuple<Args...> const& tp ) {
 template<typename Variant, size_t... Indexes>
 std::string variant_elems_to_string(
         Variant const& v,
-        std::index_sequence<Indexes...> ) {
-    std::string res;
-    // Unary right fold of template parameter pack.
-    (( res += (Indexes == v.index())
-            ? util::to_string( std::get<Indexes>( v ) ) : ""
-    ), ...);
-    return res;
-}
+        std::index_sequence<Indexes...> );
 
 template<typename... Args>
-std::string to_string( std::variant<Args...> const& v ) {
-    auto is = std::make_index_sequence<sizeof...(Args)>();
-    return variant_elems_to_string( v, is );
-}
+std::string to_string( std::variant<Args...> const& v );
 
 template<>
-inline std::string to_string<Error>( Error const& e )
-    { return e.msg; }
+std::string to_string<Error>( Error const& e );
 
 // Will do JSON-like notation. E.g. (1,"hello")
 template<typename U, typename V>
-std::string to_string( std::pair<U, V> const& p ) {
-    return "(" + util::to_string( p.first )  + ","
-               + util::to_string( p.second ) + ")";
-}
+std::string to_string( std::pair<U, V> const& p );
 
 // Prints in JSON style notation. E.g. [1,2,3]
 template<typename T>
-std::string to_string( std::vector<T> const& v ) {
-
-    std::vector<std::string> res( v.size() );
-    // We  need  this lambda to help std::transform with overload
-    // resolution of to_string.
-    auto f = []( T const& e ){ return util::to_string( e ); };
-    std::transform( std::begin( v   ), std::end( v ),
-                    std::begin( res ), f );
-    return "[" + join( res, "," ) + "]";
-}
+std::string to_string( std::vector<T> const& v );
 
 // Default  version uses std::to_string which is only defined for
 // a few primitive types.
 template<typename T>
-std::string to_string( T const& arg ) {
-    return std::to_string( arg );
-}
+std::string to_string( T const& arg );
 
 template<typename T>
 std::ostream& operator<<( std::ostream&         out,
-                          std::vector<T> const& v ) {
-    return (out << util::to_string( v ));
-}
+                          std::vector<T> const& v );
 
 template<typename U, typename V>
 std::ostream& operator<<( std::ostream&          out,
-                          std::pair<U, V> const& p ) {
-    return (out << util::to_string( p ));
-}
+                          std::pair<U, V> const& p );
 
 }
+
+// Implementations of template  function  bodies  in  here. We do
+// this  not only for organizational purposes, but in order for a
+// to_string method to be able to call any other to_string method
+// (say, if we have a tuple nested within a tuple) then must  all
+// be declared first before the function bodies  are  encountered.
+#include "string-util.inl"
