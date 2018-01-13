@@ -10,9 +10,9 @@ fs::path const data_common = "../test/data-common";
 fs::path const data_local  = "../test/data-local";
 
 // Utility macro used to wrap string literals containing absolute
-// paths;  on windows it  will attach a  root name to them (since
-// our path manipulation  functions do not  support paths  with a
-// root  directory but not a root name) and does nothing on Linux.
+// paths; on windows it will attach a root name  to  them  (since
+// our path manipulation functions  do  not  support paths with a
+// root directory but not a root  name) and does nothing on Linux.
 #ifdef _WIN32
 #    define A( s ) "C:" s
 #else

@@ -73,7 +73,7 @@ bool path_equals( fs::path const& a,
 // if one does not exist, b) will  update the time stamp on an ex-
 // isting file or folder without changing contents, and  c)  will
 // throw if any of the parent folders don't exist.
-void touch( fs::path p );
+void touch( fs::path const& p );
 
 } // namespace util
 

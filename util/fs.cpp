@@ -102,13 +102,13 @@ fs::path lexically_normal( fs::path const& p ) {
                 // chance that the  filename  could  be .. (since
                 // those are allowed to accumulate at  the  start
                 // of  a  relative path), but which we don't want
-                // to  remove.  Also, on Windows, it  is possible
-                // that res is a root  directory here because the
-                // root  directory will  also  be accompanied  by
-                // a root name, which gives it a non-empty parent
-                // path  (unlike on  Linux  where that  situation
-                // would  not have  passed through  the above  if
-                // statement);  therefore, we  need one  explicit
+                // to remove. Also, on Windows,  it  is  possible
+                // that res is a root directory here because  the
+                // root directory will also  be  accompanied by a
+                // root name, which gives it a  non-empty  parent
+                // path (unlike  on  Linux  where  that situation
+                // would  not  have  passed  through the above if
+                // statement);  therefore,  we  need one explicit
                 // check that res is not a root directory.
                 if( res.filename() != ".." &&
                     !res.filename().has_root_directory() ) {
@@ -150,7 +150,7 @@ fs::path lexically_normal( fs::path const& p ) {
  *
  * Return value: empty path on error, result otherwise.
  *
- * NOTE: both  arguments will  be normalized, and result returned
+ * NOTE: both arguments will  be  normalized, and result returned
  * will always be in normal form  unless an error (empty path) is
  * returned.
  *
@@ -310,7 +310,7 @@ bool path_equals( fs::path const& a,
 // if one does not exist, b) will  update the time stamp on an ex-
 // isting file or folder without changing contents, and  c)  will
 // throw if any of the parent folders don't exist.
-void touch( fs::path p ) {
+void touch( fs::path const& p ) {
 
     if( !fs::exists( p ) ) {
         ofstream o( p.string(), ios_base::out | ios_base::app );
