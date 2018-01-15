@@ -7,6 +7,7 @@
 #include "fs.hpp"
 #include "graph.hpp"
 #include "io.hpp"
+#include "line-endings.hpp"
 #include "macros.hpp"
 #include "md5-util.hpp"
 #include "non-copyable.hpp"

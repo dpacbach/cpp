@@ -21,6 +21,72 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( dos2unix )
+{
+    using namespace std::chrono_literals;
+
+    // This  must be a time delta that is small, but large enough
+    // to appear in file time stamps.
+    auto const delta = 10ms;
+
+    // Test dos2unix( vector )
+    auto unix = util::read_file( data_common / "lines-unix.txt" );
+    auto win  = util::read_file( data_common / "lines-win.txt"  );
+
+    // Sanity check to make  sure  the  files have different line
+    // endings  to  begin  with (e.g., that the repository hasn't
+    // auto converted them for us which we don't want).
+    TRUE_( win.size() > unix.size() );
+
+    auto unix_to_unix = unix; util::dos2unix( unix_to_unix );
+    auto win_to_unix  = unix; util::dos2unix( win_to_unix  );
+
+    EQUALS( unix_to_unix, unix );
+    EQUALS( win_to_unix,  unix );
+
+    // Test dos2unix( path )
+    EQUALS( unix.size(), 53 );
+    fs::path win_inp  = "lines-win.txt";
+    fs::path unix_inp = "lines-unix.txt";
+    auto win_tmp  = fs::temp_directory_path()/win_inp;
+    auto unix_tmp = fs::temp_directory_path()/unix_inp;
+    fs::remove( win_tmp );
+    fs::remove( unix_tmp );
+    fs::copy_file( data_common/win_inp,  win_tmp  );
+    fs::copy_file( data_common/unix_inp, unix_tmp );
+
+    auto time_0 = fs::last_write_time( win_tmp );
+    fs::last_write_time( unix_tmp, time_0 );
+
+    TRUE_( fs::last_write_time( win_tmp  ) ==
+           fs::last_write_time( unix_tmp ) );
+
+    EQUALS( fs::file_size( win_tmp  ), 64 );
+    EQUALS( fs::file_size( unix_tmp ), 53 );
+
+    this_thread::sleep_for( delta );
+    util::dos2unix( win_tmp,  true );
+    util::dos2unix( unix_tmp, true );
+
+    EQUALS( fs::file_size( win_tmp  ), 53 );
+    EQUALS( fs::file_size( unix_tmp ), 53 );
+
+    TRUE_( fs::last_write_time( unix_tmp ) == time_0 );
+    TRUE_( fs::last_write_time( win_tmp )  >  time_0 );
+
+    auto time_1 = fs::last_write_time( win_tmp );
+
+    this_thread::sleep_for( delta );
+    util::dos2unix( win_tmp  );
+    util::dos2unix( unix_tmp );
+
+    EQUALS( fs::file_size( win_tmp  ), 53 );
+    EQUALS( fs::file_size( unix_tmp ), 53 );
+
+    TRUE_( fs::last_write_time( win_tmp )  > time_1 );
+    TRUE_( fs::last_write_time( unix_tmp ) > time_1 );
+}
+
 TEST( touch )
 {
     auto p = fs::temp_directory_path();
