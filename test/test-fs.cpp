@@ -50,8 +50,8 @@ TEST( dos2unix )
     fs::path unix_inp = "lines-unix.txt";
     auto win_tmp  = fs::temp_directory_path()/win_inp;
     auto unix_tmp = fs::temp_directory_path()/unix_inp;
-    fs::remove( win_tmp );
-    fs::remove( unix_tmp );
+    util::remove_if_exists( win_tmp );
+    util::remove_if_exists( unix_tmp );
     fs::copy_file( data_common/win_inp,  win_tmp  );
     fs::copy_file( data_common/unix_inp, unix_tmp );
 
@@ -96,8 +96,7 @@ TEST( touch )
     fs::path t1 = p / "AbCdEfGhIjK";
     fs::path t2 = p / "bCdEfGhIjKl/MnOp";
 
-    if( fs::exists( t1 ) )
-        fs::remove( t1 );
+    util::remove_if_exists( t1 );
 
     ASSERT_( !fs::exists( t1 ) );
 
@@ -136,8 +135,7 @@ TEST( read_write_file )
     vector<char> v3{ 3, 4, 5, 6, 7 };
 
     auto p = fs::temp_directory_path() / "34567";
-    if( fs::exists( p ) )
-        fs::remove( p );
+    util::remove_if_exists( p );
 
     util::write_file( p, v3 );
     TRUE_( fs::exists( p ) );

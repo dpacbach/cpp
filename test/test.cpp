@@ -666,8 +666,7 @@ TEST( preprocessor )
 
     base = util::absnormpath( base );
 
-    if( fs::exists( cl_read ) )
-        fs::remove( cl_read );
+    util::remove_if_exists( cl_read );
 
     pr::run_preprocessor(
          base,              // base folder for relative paths

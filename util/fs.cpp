@@ -325,4 +325,15 @@ void touch( fs::path const& p ) {
     fs::last_write_time( p, fs::file_time_type::clock::now() );
 }
 
+// It seems that the fs::remove function is supposed to not throw
+// an error if the file in question does not exist, but at  least
+// at the time of writing, libstdc++'s implementation does, so we
+// use this wrapper to avoid throwing in that case.
+void remove_if_exists( fs::path const& p ) {
+    if( !fs::exists( p ) )
+        return;
+    fs::remove( p );
+}
+
+
 } // util
