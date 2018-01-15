@@ -21,13 +21,37 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
-TEST( dos2unix )
+TEST( dos_to_from_unix )
 {
     using namespace std::chrono_literals;
 
     // This  must be a time delta that is small, but large enough
     // to appear in file time stamps.
     auto const delta = 10ms;
+
+    // First test some edge cases with dos2unix.
+    vector<char> v1{}, v2{ 0x0A }, v3{ 0x0D }, v4{ 0x0D, 0x0A };
+    vector<char> v5{ 0x0A, 0x0D };
+    util::dos2unix( v1 ); util::dos2unix( v2 );
+    util::dos2unix( v3 ); util::dos2unix( v4 );
+    util::dos2unix( v5 );
+    EQUALS( v1, (vector<char>{ }) );
+    EQUALS( v2, (vector<char>{ 0x0A }) );
+    EQUALS( v3, (vector<char>{ }) );
+    EQUALS( v4, (vector<char>{ 0x0A }) );
+    EQUALS( v5, (vector<char>{ 0x0A }) );
+
+    // Now test some edge cases with unix2dos.
+    vector<char> v6{}, v7{ 0x0A }, v8{ 0x0D }, v9{ 0x0D, 0x0A };
+    vector<char> v10{ 0x0A, 0x0D };
+    util::unix2dos( v6 ); util::unix2dos( v7 );
+    util::unix2dos( v8 ); util::unix2dos( v9 );
+    util::unix2dos( v10 );
+    EQUALS( v6,  (vector<char>{ }) );
+    EQUALS( v7,  (vector<char>{ 0x0D, 0x0A }) );
+    EQUALS( v8,  (vector<char>{ 0x0D }) );
+    EQUALS( v9,  (vector<char>{ 0x0D, 0x0A }) );
+    EQUALS( v10, (vector<char>{ 0x0D, 0x0A, 0x0D }) );
 
     // Test dos2unix( vector )
     auto unix = util::read_file( data_common / "lines-unix.txt" );
@@ -43,6 +67,16 @@ TEST( dos2unix )
 
     EQUALS( unix_to_unix, unix );
     EQUALS( win_to_unix,  unix );
+
+    // Test dos2unix( string )
+    string win_str( &win[0], win.size() );
+    auto win_str_tmp = win_str;
+    EQUALS( win_str.size(), 64 );
+    util::dos2unix( win_str );
+    EQUALS( win_str.size(), 53 );
+    util::unix2dos( win_str );
+    EQUALS( win_str.size(), 64 );
+    EQUALS( win_str, win_str_tmp );
 
     // Test dos2unix( path )
     EQUALS( unix.size(), 53 );
@@ -85,6 +119,18 @@ TEST( dos2unix )
 
     TRUE_( fs::last_write_time( win_tmp )  > time_1 );
     TRUE_( fs::last_write_time( unix_tmp ) > time_1 );
+
+    auto time_2 = fs::last_write_time( unix_tmp );
+
+    this_thread::sleep_for( delta );
+    util::unix2dos( win_tmp  );
+    util::unix2dos( unix_tmp );
+
+    EQUALS( fs::file_size( win_tmp  ), 64 );
+    EQUALS( fs::file_size( unix_tmp ), 64 );
+
+    TRUE_( fs::last_write_time( win_tmp )  > time_2 );
+    TRUE_( fs::last_write_time( unix_tmp ) > time_2 );
 }
 
 TEST( touch )

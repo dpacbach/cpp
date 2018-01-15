@@ -11,11 +11,49 @@
 namespace util {
 
 // This function will simply remove and 0x0D characters from  the
-// input (mutating the argument). The new size of the vector will
-// therefore always be less or equal to its original size.
+// input  (mutating  the argument). The new size of the container
+// will therefore always be less or equal to  its  original  size.
 template<typename Container>
-void dos2unix( Container&& c ) {
+void dos2unix( Container& c ) {
     util::remove_if( c, L( _ == 0x0d ) );
+}
+
+// This  function  will  simply search for any 0x0A character and
+// insert a 0x0D character before it unless there is already such
+// a character before it in which case it will be left alone. The
+// new size of the container will  therefore always be greater or
+// equal  to  that of the original. Note that this function sends
+// the altered contents to a new container and  then  moves  into
+// the input container, effectively replacing the contents of the
+// input. NOTE: if the input container  does  not  contain  valid
+// unix (e.g., if it contains solitary CR's) then the output  may
+// not contain valid DOS line endings.
+template<typename Container>
+void unix2dos( Container& in ) {
+
+    // Some quick experiments suggest that the average ascii text
+    // file will grow about 3-4% in size after this operation, so
+    // we will reserve an additional 5%  to  try to avoid an addi-
+    // tional allocation.  However,  this  is  of  course  just a
+    // heuristic which will not be optimal or even helpful in all
+    // cases.
+    size_t estimate = in.size() + (in.size() / 20);
+    Container out; out.reserve( estimate );
+
+    for( auto i = std::begin( in ); i != std::end( in ); ++i ) {
+        if( *i == 0x0A ) {
+            // We have encountered an  LF character, so therefore
+            // we need to insert a CR character before  this  one
+            // either if we're at the beginning or if there isn't
+            // already a CR character before this one.
+            if( i == std::begin( in ) || *(i-1) != 0x0D )
+                out.push_back( 0x0D );
+        }
+        out.push_back( *i );
+    }
+
+    // Replace input with new container.
+    in = std::move( out );
 }
 
 // Open the given path and edit  it to remove all 0x0D characters.
@@ -25,5 +63,16 @@ void dos2unix( Container&& c ) {
 // the event that the  file  contains  no  0x0D characters. By de-
 // fault, the timestamp will always be touched.
 void dos2unix( fs::path p, bool keep_date = false );
+
+// Open  the given path and edit it to change LF to CRLF. This at-
+// tempts to emulate the command line utility of  the  same  name.
+// As with the command, the `keep_date`  flag  indicates  whether
+// the timestamp on the file should remain unchanged in the event
+// that  the  file already contains only CRLF line endings. By de-
+// fault, the timestamp  will  always  be  touched.  NOTE: if the
+// input container does not contain valid unix (e.g., if  it  con-
+// tains solitary CR's) then the output may not contain valid DOS
+// line endings.
+void unix2dos( fs::path p, bool keep_date = false );
 
 }
