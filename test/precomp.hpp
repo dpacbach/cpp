@@ -10,6 +10,7 @@
 #include "line-endings.hpp"
 #include "macros.hpp"
 #include "md5-util.hpp"
+#include "net-util.hpp"
 #include "non-copyable.hpp"
 #include "opt-util.hpp"
 #include "preprocessor.hpp"

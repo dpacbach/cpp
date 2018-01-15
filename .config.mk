@@ -9,7 +9,7 @@ crypto.deps    = md5
 svn.deps       = xml util
 
 # Must be in order of dependencies.
-top-level-folders = util xml sqlite project crypto svn test
+top-level-folders = util xml sqlite project crypto svn net test
 
 main.deps = $(top-level-folders)
 test.deps = $(filter-out test,$(top-level-folders))
