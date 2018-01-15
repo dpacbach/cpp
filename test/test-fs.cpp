@@ -49,7 +49,7 @@ TEST( touch )
     THROWS( util::touch( t2 ) );
 }
 
-TEST( read_file )
+TEST( read_write_file )
 {
     auto f = data_common / "3-lines.txt";
 
@@ -65,6 +65,20 @@ TEST( read_file )
 
     // Test a random byte in the file.
     EQUALS( v2[0x6c0], char( 0x6b ) );
+
+    // Now write to a file and read it back in to verify.
+    vector<char> v3{ 3, 4, 5, 6, 7 };
+
+    auto p = fs::temp_directory_path() / "34567";
+    if( fs::exists( p ) )
+        fs::remove( p );
+
+    util::write_file( p, v3 );
+    TRUE_( fs::exists( p ) );
+    EQUALS( fs::file_size( p ), v3.size() );
+
+    auto v4 = util::read_file( p );
+    EQUALS( v3, v4 );
 }
 
 TEST( filesystem )

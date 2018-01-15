@@ -23,9 +23,11 @@ vector<char> read_file( fs::path p ) {
     vector<char> res( size );
 
     FILE* fp = fopen( p.string().c_str(), "rb" );
+    ASSERT( fp, "failed to open file " << p );
+
     // Read the bytes.
     size_t read = fread( (void*)&res[0], 1, size, fp );
-    // Close the file before checking for errors (which might
+    // Close the file before checking  for  errors  (which  might
     // throw an exception).
     fclose( fp );
 
@@ -35,6 +37,23 @@ vector<char> read_file( fs::path p ) {
                           " read " << read << " bytes." );
 
     return res;
+}
+
+// Open the file, truncate it,  and  write  given  vector  to  it.
+void write_file( fs::path const& p, vector<char> const& v ) {
+
+    FILE* fp = fopen( p.string().c_str(), "wb" );
+    ASSERT( fp, "failed to open or create file " << p );
+
+    size_t size = v.size();
+
+    size_t written = fwrite( (void*)&v[0], 1, size, fp );
+    // Close the file before checking  for  errors  (which  might
+    // throw an exception).
+    fclose( fp );
+
+    ASSERT( written == size, "failed to write all " << size <<
+                             " bytes of vector to file " << p );
 }
 
 // Read a text file into a string in its entirety.

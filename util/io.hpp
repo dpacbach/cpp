@@ -14,6 +14,9 @@ namespace util {
 // don't actually need.
 std::vector<char> read_file( fs::path p );
 
+// Open the file, truncate it,  and  write  given  vector  to  it.
+void write_file( fs::path const& p, std::vector<char> const& v );
+
 // Read a text file into a string in its entirety.
 std::string read_file_str( fs::path p );
 
