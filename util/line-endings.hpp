@@ -58,24 +58,23 @@ void unix2dos( Container& in ) {
 
 // Open the given path and edit  it to remove all 0x0D characters.
 // This  attempts to emulate the command line utility of the same
-// name. As with  the  command,  the  `keep_date`  flag indicates
-// whether the timestamp on the  file  should remain unchanged in
-// the event that the  file  contains  no  0x0D characters. By de-
-// fault, the timestamp will always be touched. Bool return value
-// indicates whether file contents  were  changed  or not (regard-
-// less of timestamp).
-bool dos2unix( fs::path p, bool keep_date = false );
+// name.  As  with  the  command,  the  `keepdate` flag indicates
+// whether the timestamp on the  file should remain unchanged. By
+// default, the timestamp will be  touched  if any changes to the
+// file are made. Bool return value indicates  whether  file  con-
+// tents were changed or not (regardless of timestamp).
+bool dos2unix( fs::path p, bool keepdate = false );
 
 // Open  the given path and edit it to change LF to CRLF. This at-
 // tempts to emulate the command line utility of  the  same  name.
-// As with the command, the `keep_date`  flag  indicates  whether
-// the timestamp on the file should remain unchanged in the event
-// that  the  file already contains only CRLF line endings. By de-
-// fault, the timestamp  will  always  be  touched.  NOTE: if the
-// input container does not contain valid unix (e.g., if  it  con-
-// tains solitary CR's) then the output may not contain valid DOS
-// line endings. Bool return value  indicates  whether  file  con-
-// tents were changed or not (regardless of timestamp).
-bool unix2dos( fs::path p, bool keep_date = false );
+// As with the command, the `keepdate` flag indicates whether the
+// timestamp on the file should remain unchanged. By default, the
+// timestamp will be touched if any  changes to the file are made.
+// NOTE:  if  the  input  container  does  not contain valid unix
+// (e.g.,  if  it contains solitary CR's) then the output may not
+// contain  valid  DOS  line endings. Bool return value indicates
+// whether file contents were changed  or not (regardless of time-
+// stamp).
+bool unix2dos( fs::path p, bool keepdate = false );
 
 }

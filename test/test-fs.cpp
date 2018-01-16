@@ -106,7 +106,7 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( unix_tmp ), 53 );
 
     TRUE_( fs::last_write_time( unix_tmp ) == time_0 );
-    TRUE_( fs::last_write_time( win_tmp )  >  time_0 );
+    TRUE_( fs::last_write_time( win_tmp )  == time_0 );
 
     auto time_1 = fs::last_write_time( win_tmp );
 
@@ -117,8 +117,8 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( win_tmp  ), 53 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
 
-    TRUE_( fs::last_write_time( win_tmp )  > time_1 );
-    TRUE_( fs::last_write_time( unix_tmp ) > time_1 );
+    TRUE_( fs::last_write_time( win_tmp )  == time_1 );
+    TRUE_( fs::last_write_time( unix_tmp ) == time_1 );
 
     auto time_2 = fs::last_write_time( unix_tmp );
 
