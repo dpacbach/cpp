@@ -67,20 +67,20 @@ string fmt_time_point( SystemTimePoint p, bool utc ) {
     // These functions do  the  same  thing,  apart from timezone.
     auto* tm = utc ? std::gmtime( &t ) : std::localtime( &t );
 
-    ostringstream ss;
+    ostringstream ss; ss.fill( '0' );
 
     // The  %z outputs nothing if there is no time zone in the tm,
     // but  that  should  not  happen here because we're starting
     // from a time point. Though if for some reason it does, then
     // it will cause the resulting string  to be shorter and will
     // then trigger the  assertion  on  the  string  length below.
-    ss << put_time( tm, "%Y-%m-%d %T" ) << "." << ns.count()
-       << put_time( tm, "%z" );
+    ss << put_time( tm, "%Y-%m-%d %T" ) << "." << setw( 9 )
+       << ns.count() << put_time( tm, "%z" );
 
     string res = ss.str();
 
     ASSERT( res.size() == 34, "formatted string " << res <<
-                              "has unexpected length." );
+                              " has unexpected length." );
     return res;
 }
 
