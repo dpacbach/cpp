@@ -86,8 +86,8 @@ TEST( dos_to_from_unix )
     auto unix_tmp = fs::temp_directory_path()/unix_inp;
     util::remove_if_exists( win_tmp );
     util::remove_if_exists( unix_tmp );
-    fs::copy_file( data_common/win_inp,  win_tmp  );
-    fs::copy_file( data_common/unix_inp, unix_tmp );
+    util::copy_file( data_common/win_inp,  win_tmp  );
+    util::copy_file( data_common/unix_inp, unix_tmp );
 
     auto time_0 = fs::last_write_time( win_tmp );
     fs::last_write_time( unix_tmp, time_0 );
@@ -189,6 +189,10 @@ TEST( read_write_file )
 
     auto v4 = util::read_file( p );
     EQUALS( v3, v4 );
+
+    auto copy = fs::temp_directory_path()/"3-lines.txt";
+    util::copy_file( data_common/"3-lines.txt", copy );
+    EQUALS( fs::file_size( copy ), 21 );
 }
 
 TEST( filesystem )
