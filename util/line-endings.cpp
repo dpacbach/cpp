@@ -19,8 +19,9 @@ using Changer = void( vector<char>& );
 // back  out. The keep_date flag is used to determine whether the
 // timestamp on the file should always be touched (false)  or  if
 // it should only be touched  in  the  contents  of the file were
-// modified (true).
-void change_le( Changer* f, fs::path p, bool keep_date ) {
+// modified  (true). Bool return value indicates whether file con-
+// tents were changed or not (regardless of timestamp).
+bool change_le( Changer* f, fs::path p, bool keep_date ) {
 
     auto v    = read_file( p );
     auto size = v.size();
@@ -44,12 +45,13 @@ void change_le( Changer* f, fs::path p, bool keep_date ) {
             // this seems more efficient and is (hopefully)
             // equivalent.
             touch( p );
-        return;
+        return false;
     }
 
     // Some  line  endings were changed, so rewrite the file; new
     // file size will be different at this point.
     write_file( p, v );
+    return true;
 }
 
 } // anonymous namespace
@@ -59,9 +61,11 @@ void change_le( Changer* f, fs::path p, bool keep_date ) {
 // name. As with  the  command,  the  `keep_date`  flag indicates
 // whether the timestamp on the  file  should remain unchanged in
 // the event that the  file  contains  no  0x0D characters. By de-
-// fault, the timestamp will always be touched.
-void dos2unix( fs::path p, bool keep_date ) {
-    change_le( dos2unix, p, keep_date );
+// fault, the timestamp will always be touched. Bool return value
+// indicates whether file contents  were  changed  or not (regard-
+// less of timestamp).
+bool dos2unix( fs::path p, bool keep_date ) {
+    return change_le( dos2unix, p, keep_date );
 }
 
 // Open  the given path and edit it to change LF to CRLF. This at-
@@ -72,9 +76,10 @@ void dos2unix( fs::path p, bool keep_date ) {
 // fault, the timestamp  will  always  be  touched.  NOTE: if the
 // input container does not contain valid unix (e.g., if  it  con-
 // tains solitary CR's) then the output may not contain valid DOS
-// line endings.
-void unix2dos( fs::path p, bool keep_date ) {
-    change_le( unix2dos, p, keep_date );
+// line endings. Bool return value  indicates  whether  file  con-
+// tents were changed or not (regardless of timestamp).
+bool unix2dos( fs::path p, bool keep_date ) {
+    return change_le( unix2dos, p, keep_date );
 }
 
 }

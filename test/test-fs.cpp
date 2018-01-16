@@ -99,8 +99,8 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( unix_tmp ), 53 );
 
     this_thread::sleep_for( delta );
-    util::dos2unix( win_tmp,  true );
-    util::dos2unix( unix_tmp, true );
+    EQUALS( util::dos2unix( win_tmp,  true ), true  );
+    EQUALS( util::dos2unix( unix_tmp, true ), false );
 
     EQUALS( fs::file_size( win_tmp  ), 53 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
@@ -111,8 +111,8 @@ TEST( dos_to_from_unix )
     auto time_1 = fs::last_write_time( win_tmp );
 
     this_thread::sleep_for( delta );
-    util::dos2unix( win_tmp  );
-    util::dos2unix( unix_tmp );
+    EQUALS( util::dos2unix( win_tmp  ), false );
+    EQUALS( util::dos2unix( unix_tmp ), false );
 
     EQUALS( fs::file_size( win_tmp  ), 53 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
@@ -123,8 +123,8 @@ TEST( dos_to_from_unix )
     auto time_2 = fs::last_write_time( unix_tmp );
 
     this_thread::sleep_for( delta );
-    util::unix2dos( win_tmp  );
-    util::unix2dos( unix_tmp );
+    EQUALS( util::unix2dos( win_tmp  ), true );
+    EQUALS( util::unix2dos( unix_tmp ), true );
 
     EQUALS( fs::file_size( win_tmp  ), 64 );
     EQUALS( fs::file_size( unix_tmp ), 64 );
