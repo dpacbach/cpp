@@ -3,6 +3,7 @@
 #include "algo.hpp"
 #include "algo-par.hpp"
 #include "bimap.hpp"
+#include "datetime.hpp"
 #include "error.hpp"
 #include "fs.hpp"
 #include "graph.hpp"

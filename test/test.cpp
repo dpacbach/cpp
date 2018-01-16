@@ -13,6 +13,21 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( datetime )
+{
+    auto t = util::fmt_time_point( chrono::system_clock::now() );
+
+    // Parenthesis in regex are for raw string, not capture.
+    auto rx =
+      R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9}[+-]\d{4})";
+
+    smatch m;
+
+    TRUE( regex_match( t, m, regex( rx ) ), "string " <<
+          quoted( t ) << " did not match regex " <<
+          quoted( rx ) );
+}
+
 TEST( opt_util )
 {
     vector<optional<int>> v{
