@@ -16,7 +16,7 @@ namespace util {
 // times for it will be deleted.
 void StopWatch::start( string_view name ) {
     string n( name );
-    start_times[n] = chrono::system_clock::now();
+    start_times[n] = clock_type::now();
     if( has_key( end_times, n ) )
         end_times.erase( n );
 }
@@ -26,7 +26,7 @@ void StopWatch::start( string_view name ) {
 void StopWatch::stop( string_view name ) {
     string n( name );
     ASSERT_( has_key( start_times, n ) );
-    end_times[n] = chrono::system_clock::now();
+    end_times[n] = clock_type::now();
 }
 
 // Get results for an even in the given units. If either a  start

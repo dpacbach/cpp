@@ -50,8 +50,8 @@ public:
     std::vector<result_pair> results() const;
 
 private:
-    using clock        = std::chrono::system_clock;
-    using time_point   = std::chrono::time_point<clock>;
+    using clock_type   = std::chrono::steady_clock;
+    using time_point   = std::chrono::time_point<clock_type>;
     using events_timer = std::map<std::string, time_point>;
 
     bool event_complete( std::string_view name ) const;
