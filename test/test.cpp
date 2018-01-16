@@ -335,6 +335,10 @@ TEST( to_string )
 
     fs::path p = "A/B/C";
     EQUALS( util::to_string( p ), "\"A/B/C\"" );
+
+    auto now = chrono::system_clock::now();
+    auto now_str = util::to_string( now );
+    EQUALS( now_str.size(), 34 );
 }
 
 TEST( sqlite )
@@ -651,6 +655,23 @@ TEST( sqlite )
     EQUALS( std::get<1>( v5[0] ), "hello" );
     EQUALS( std::get<1>( v5[1] ), nullopt );
     EQUALS( std::get<1>( v5[2] ), nullopt );
+
+    db << "INSERT INTO user (age, name) VALUES (?, ?)"
+       << 987 << chrono::system_clock::now();
+
+    vector<tuple<int, SystemTimePoint>> rows4{
+        { 987, chrono::system_clock::now() }
+    };
+
+    sqlite::insert_many_fast( db, rows4,
+        "INSERT INTO user (age, name) VALUES" );
+
+    auto v6 = sqlite::select1<string>( db,
+        "SELECT name FROM user WHERE age=987" );
+
+    EQUALS( v6.size(), 2 );
+    EQUALS( v6[0].size(), 34 );
+    EQUALS( v6[1].size(), 34 );
 }
 
 TEST( preprocessor )

@@ -6,6 +6,7 @@
 #include "fs.hpp"
 #include "sqlite_modern_cpp.h"
 #include "string-util.hpp"
+#include "types.hpp"
 
 #include <algorithm>
 #include <tuple>
@@ -43,9 +44,9 @@ void insert_tuple_impl( Receiver&    db,
 // for us) in order  to  manually  construct  queries that insert
 // many values in a single shot. Furthermore, the reason we don't
 // use  util::to_string  to do the conversion is that we need spe-
-// cialized  behavior  for  std::optional (and tuples thereof) be-
-// cause, just like the  sqlite_modern_cpp  wrapper,  we want our
-// API to support using std::optional  types to represent columsn
+// cialized behavior for a few types (and  tuples  thereof).  For
+// example, just like the sqlite_modern_cpp  wrapper, we want our
+// API to support using std::optional types to  represent  column
 // that can be null, in which case std::nullopt represents a null
 // values, which is then converted to  NULL in the query (with no
 // quotes). Important: we must use these  impl::to_string  family
@@ -54,8 +55,8 @@ void insert_tuple_impl( Receiver&    db,
 //
 // In  what  follows  we  create  just  enough specializations of
 // to_string  to support all of the to_string conversions that we
-// might make here and in which  we'd need to worry about std::op-
-// tional.
+// need to handle differently than the default implementation  in
+// util::to_string.
 template<typename T>
 std::string to_string( T const& what ) {
     // Default case, just delegate.
@@ -69,6 +70,12 @@ std::string to_string( std::optional<T> const& what ) {
         return "NULL";
     return util::to_string( *what );
 }
+
+// We  need  special  SQL-specifc behavior for the time points in
+// that  we  need them surrounded in quotes because we will store
+// them in the sqlite database as strings.
+template<>
+std::string to_string( SystemTimePoint const& p );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -112,6 +119,17 @@ std::string exception_msg( sqlite_exception const& e );
 // the path to a standard string.
 sqlite::database_binder& operator<<( sqlite::database_binder& db,
                                      fs::path const& path );
+
+// This allows us to insert  time  points  from the chrono system
+// clock,  which  we  do by just converting them to a string in a
+// standard  format:  2018-01-15  21:30:01.396823389-0000  (which
+// will  always  be  in UTC, hence offset 0000 at the end). We do
+// this because SQLite  doesn't  really  have  a proper date/time
+// data type. Note that strings in this format are useful because
+// their time ordering can  be  determined  by  lexicographically
+// comparing their string representations.
+sqlite::database_binder& operator<<( sqlite::database_binder& db,
+                                     SystemTimePoint const& p );
 
 // This  is a pair used to hold information about additional data-
 // bases  that should be added into the connection beyond the pri-

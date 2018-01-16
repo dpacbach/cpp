@@ -48,6 +48,30 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
     return (db << path.string());
 }
 
+// This allows us to insert  time  points  from the chrono system
+// clock,  which  we  do by just converting them to a string in a
+// standard  format:  2018-01-15  21:30:01.396823389-0000  (which
+// will  always  be  in UTC, hence offset 0000 at the end). We do
+// this because SQLite  doesn't  really  have  a proper date/time
+// data type. Note that strings in this format are useful because
+// their time ordering can  be  determined  by  lexicographically
+// comparing their string representations.
+sqlite::database_binder& operator<<( sqlite::database_binder& db,
+                                     SystemTimePoint const& p ) {
+    // Here we don't use sqlite::impl::to_string because we don't
+    // want quotes around this; we just convert to a string, then
+    // the sqlite c++ wrapper will handle the quotes.
+    return (db << util::to_string( p ));
+}
+
+// We  need  special  SQL-specifc behavior for the time points in
+// that  we  need them surrounded in quotes because we will store
+// them in the sqlite database as strings.
+template<>
+std::string impl::to_string( SystemTimePoint const& p ) {
+    return string( "\"" ) + util::to_string( p ) + "\"";
+}
+
 // Attach to an existing connection.
 void attach( sqlite::database& db, DBDescVec const& dbs ) {
 

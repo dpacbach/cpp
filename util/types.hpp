@@ -9,6 +9,7 @@
 // Aliases here are made in the global namespace and  are  simply
 // to save typing.
 
+#include <chrono>
 #include <experimental/filesystem>
 #include <functional>
 #include <optional>
@@ -43,3 +44,5 @@ using OptCRef = std::optional<std::reference_wrapper<T const>>;
 
 template<typename U, typename V>
 using PairVec = std::vector<std::pair<U, V>>;
+
+using SystemTimePoint = std::chrono::system_clock::time_point;

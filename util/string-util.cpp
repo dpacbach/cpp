@@ -1,6 +1,7 @@
 /****************************************************************
 * String utilities
 ****************************************************************/
+#include "datetime.hpp"
 #include "string-util.hpp"
 
 #include <algorithm>
@@ -141,6 +142,13 @@ string to_string<char>( char const& s ) {
 template<>
 string to_string<fs::path>( fs::path const& p ) {
    return "\"" + p.string() + "\"";
+}
+
+// Will output UTC time in format:
+//   2018-01-15 21:30:01.396823389-0000
+template<>
+string to_string( SystemTimePoint const& p ) {
+    return util::fmt_time_point( p, true );
 }
 
 }

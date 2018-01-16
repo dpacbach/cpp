@@ -3,6 +3,8 @@
 ****************************************************************/
 #pragma once
 
+#include "types.hpp"
+
 #include <chrono>
 #include <mutex>
 #include <string>
@@ -14,9 +16,6 @@ namespace util {
 // since  apparently  those  functions  are not thread safe since
 // they may mutate a global structure  and return a pointer to it.
 extern std::mutex tm_mtx;
-
-// Just to save typing.
-using SystemTimePoint = std::chrono::system_clock::time_point;
 
 // Formats a time_point with the following format:
 //
