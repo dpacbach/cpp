@@ -13,6 +13,7 @@
 #endif
 
 using namespace std;
+using namespace chrono;
 
 namespace util {
 
@@ -21,6 +22,69 @@ namespace util {
 // since  apparently  those  functions  are not thread safe since
 // they may mutate a global structure  and return a pointer to it.
 mutex tm_mtx;
+
+// Return  the  offset in seconds from the local time zone to UTC.
+seconds tz_local() {
+
+#ifndef _WIN32
+    // The value of this variable matters not  because  we're  in-
+    // terested in the current time (we will only be sampling the
+    // tm_gmtoff field from the result  which  is a function only
+    // of timezone offset)  but  instead  because the localtime_r
+    // function will decide based on the current time which phase
+    // of daylight savings time  we  are  in  which will be added
+    // into tm_gmtoff.
+    time_t time = ::time( NULL );
+    // This will be populated by localtime_r.
+    tm local;
+    // localtime_r is a threadsafe version  of localtime since it
+    // does  not  mutate  any  global  data, though it may not be
+    // fully portable.
+    localtime_r( &time, &local );
+
+    return seconds( local.tm_gmtoff );
+#else
+    TIME_ZONE_INFORMATION lpTimeZoneInformation;
+    auto ds = GetTimeZoneInformation(
+                  &lpTimeZoneInformation );
+    // Bias is difference in minutes between UTC and local.
+    auto offset_min = lpTimeZoneInformation.Bias;
+    if( ds == TIME_ZONE_ID_DAYLIGHT )
+        offset_min += lpTimeZoneInformation.DaylightBias;
+    return seconds( -60*offset_min );
+#endif
+
+}
+
+// Returns  a string representation of the offset between UTC and
+// local  time in the format (+/-)hhmm, e.g. "-0500" for New York,
+// "+0000"  for  UTC.  NOTE:  the reason that we are implementing
+// this ourselves is because it seems that the strftime  (and  re-
+// lated  methods)  are not able to correctly emit this string on
+// Windows under MinGW, which they  do  on  Linux with the %z for-
+// matter.
+string tz_hhmm() {
+    auto secs = tz_local();
+    ostringstream ss; ss.fill( '0' );
+    auto sign = (secs < seconds( 0 )) ? '-' : '+';
+    secs      = (secs < seconds( 0 )) ? -secs : secs;
+    // Since secs is supposed  to  represent  the total number of
+    // seconds in a time zone offset, it must be less than  24hrs
+    // as a sanity check.
+    ASSERT_( secs < hours( 24 ) );
+    // This will round down to hours.
+    auto hrs  = duration_cast<hours>( secs );
+    // Total number of residual minutes after all multiples of 60
+    // minutes (i.e., 1hr) are subtracted. Note that secs  is  al-
+    // ways >=0 at this point.
+    auto mins = duration_cast<minutes>( secs - hrs );
+    ss << sign << setw( 2 ) << hrs.count()
+               << setw( 2 ) << mins.count();
+    auto res = ss.str();
+    ASSERT( res.size() == 5, "timezone offset " << res << " has "
+                             "unexpected length (not 5)." );
+    return res;
+}
 
 // Formats a time_point with the following format:
 //

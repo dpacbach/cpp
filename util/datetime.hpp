@@ -17,6 +17,18 @@ namespace util {
 // they may mutate a global structure  and return a pointer to it.
 extern std::mutex tm_mtx;
 
+// Return  the  offset in seconds from the local time zone to UTC.
+std::chrono::seconds tz_local();
+
+// Returns  a string representation of the offset between UTC and
+// local  time in the format (+/-)hhmm, e.g. "-0500" for New York,
+// "+0000"  for  UTC.  NOTE:  the reason that we are implementing
+// this ourselves is because it seems that the strftime  (and  re-
+// lated  methods)  are not able to correctly emit this string on
+// Windows under MinGW, which they  do  on  Linux with the %z for-
+// matter.
+std::string tz_hhmm();
+
 // Formats a time_point with the following format:
 //
 //   2018-01-15 20:52:48.421397398-0500
