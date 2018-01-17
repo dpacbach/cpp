@@ -15,7 +15,8 @@ namespace testing {
 
 TEST( datetime )
 {
-    auto t = util::fmt_time_point( chrono::system_clock::now() );
+    auto t = util::fmt_time_point(
+                 chrono::system_clock::now(), true );
 
     // Parenthesis in regex are for raw string, not capture.
     auto rx =

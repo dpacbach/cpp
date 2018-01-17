@@ -312,6 +312,10 @@ bool path_equals( fs::path const& a,
 // throw if any of the parent folders don't exist.
 void touch( fs::path const& p ) {
 
+    ASSERT( false, "need to reimplement touch() with native OS "
+                   "functions in the case that the target of "
+                   "the touch already exists." );
+
     if( !fs::exists( p ) ) {
         ofstream o( p.string(), ios_base::out | ios_base::app );
         // This can fail if a parent folder does not exist, so we
@@ -322,7 +326,9 @@ void touch( fs::path const& p ) {
 
     // The path exists, and may be either a file  or  folder,  so
     // just update the timestamp.
-    fs::last_write_time( p, fs::file_time_type::clock::now() );
+    // FIXME: below doesn't work right on windows. Need to supply
+    // windows specific API calls here.
+    //fs::last_write_time( p, fs::file_time_type::clock::now() );
 }
 
 // It seems that the fs::remove function is supposed to not throw
