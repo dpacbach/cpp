@@ -311,11 +311,9 @@ bool path_equals( fs::path const& a,
 // isting file or folder without changing contents, and  c)  will
 // throw if any of the parent folders don't exist.
 void touch( fs::path const& p ) {
-
-    ASSERT( false, "need to reimplement touch() with native OS "
-                   "functions in the case that the target of "
-                   "the touch already exists." );
-
+#ifdef _WIN32
+    ASSERT( false, "need to test this on windows, may not work" );
+#endif
     if( !fs::exists( p ) ) {
         ofstream o( p.string(), ios_base::out | ios_base::app );
         // This can fail if a parent folder does not exist, so we
@@ -326,9 +324,9 @@ void touch( fs::path const& p ) {
 
     // The path exists, and may be either a file  or  folder,  so
     // just update the timestamp.
-    // FIXME: below doesn't work right on windows. Need to supply
-    // windows specific API calls here.
-    //fs::last_write_time( p, fs::file_time_type::clock::now() );
+    LocalTimePoint ltp( fs::file_time_type::clock::now() );
+    ZonedTimePoint ztp( ltp, tz_utc() );
+    timestamp( p, ztp );
 }
 
 // It seems that the fs::remove function is supposed to not throw
@@ -341,5 +339,58 @@ void remove_if_exists( fs::path const& p ) {
     fs::remove( p );
 }
 
+// Unfortunately we need this  function  because the function pro-
+// vided  in the filesystem library (last_write_time) seems to re-
+// turn time points with different interpretations  on  different
+// platforms.  At  the  time of writing, it is observed that that
+// function returns a UTC  chrono  system  time  point whereas on
+// Windows (under MinGW) it returns  a  time  point  representing
+// local  time. So in this library we always try to call this one
+// which should always return the  same  type with the same inter-
+// pretation (ZonedTimePoint).
+//
+// NOTE: the different behavior of  this function under different
+// platforms could be a bug that would eventually be  fixed,  but
+// not sure.
+ZonedTimePoint timestamp( fs::path const& p ) {
+
+    LocalTimePoint ltp( fs::last_write_time( p ) );
+
+    // In this next block we choose the time zone based on  obser-
+    // vations  made  of  the  behavior  of the implementation of
+    // last_write_time on the various platforms.
+#ifdef __MINGW32__
+    // MinGW
+    auto zone = tz_local();
+#else
+#ifdef _WIN32
+    // MSVC
+    #error "not tested on MSVC; need to determine what kind of "
+           "time point MSVC returns and write this code "
+           "accordingly."
+#else
+    // *nix
+    auto zone = tz_utc();
+#endif
+#endif
+
+    // Now construct an absolute  time  point by interpreting the
+    // result of last_write_time with  the  time zone represented
+    // by `zone`.
+    return ZonedTimePoint( ltp, zone );
+}
+
+// Set  timestamp;  the  various  platforms'  implementations  of
+// last_write_time for *setting* timestamps  seem  to  agree,  so
+// this one just forwards the call to last_write_time.
+void timestamp( fs::path const& p, ZonedTimePoint const& ztp ) {
+#ifdef _WIN32
+    ASSERT( false, "need to test this on windows, may not work" );
+#endif
+    // It seems that all the platforms  accept  a  chrono  system
+    // time  point  and interpret it as UTC time when setting the
+    // timestamp.
+    fs::last_write_time( p, ztp.to_local( tz_utc() ) );
+}
 
 } // util

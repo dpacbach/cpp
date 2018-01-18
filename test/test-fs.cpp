@@ -97,11 +97,11 @@ TEST( dos_to_from_unix )
     util::copy_file( data_common/win_inp,  win_tmp  );
     util::copy_file( data_common/unix_inp, unix_tmp );
 
-    auto time_0 = fs::last_write_time( win_tmp );
-    fs::last_write_time( unix_tmp, time_0 );
+    auto time_0 = util::timestamp( win_tmp );
+    util::timestamp( unix_tmp, time_0 );
 
-    TRUE_( fs::last_write_time( win_tmp  ) ==
-           fs::last_write_time( unix_tmp ) );
+    TRUE_( util::timestamp( win_tmp  ) ==
+           util::timestamp( unix_tmp ) );
 
     EQUALS( fs::file_size( win_tmp  ), 64 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
@@ -113,10 +113,10 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( win_tmp  ), 53 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
 
-    TRUE_( fs::last_write_time( unix_tmp ) == time_0 );
-    TRUE_( fs::last_write_time( win_tmp )  == time_0 );
+    TRUE_( util::timestamp( unix_tmp ) == time_0 );
+    TRUE_( util::timestamp( win_tmp )  == time_0 );
 
-    auto time_1 = fs::last_write_time( win_tmp );
+    auto time_1 = util::timestamp( win_tmp );
 
     this_thread::sleep_for( delta );
     EQUALS( util::dos2unix( win_tmp  ), false );
@@ -125,10 +125,10 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( win_tmp  ), 53 );
     EQUALS( fs::file_size( unix_tmp ), 53 );
 
-    TRUE_( fs::last_write_time( win_tmp )  == time_1 );
-    TRUE_( fs::last_write_time( unix_tmp ) == time_1 );
+    TRUE_( util::timestamp( win_tmp )  == time_1 );
+    TRUE_( util::timestamp( unix_tmp ) == time_1 );
 
-    auto time_2 = fs::last_write_time( unix_tmp );
+    auto time_2 = util::timestamp( unix_tmp );
 
     this_thread::sleep_for( delta );
     EQUALS( util::unix2dos( win_tmp  ), true );
@@ -137,18 +137,15 @@ TEST( dos_to_from_unix )
     EQUALS( fs::file_size( win_tmp  ), 64 );
     EQUALS( fs::file_size( unix_tmp ), 64 );
 
-    TRUE_( fs::last_write_time( win_tmp )  > time_2 );
-    TRUE_( fs::last_write_time( unix_tmp ) > time_2 );
+    TRUE_( util::timestamp( win_tmp )  > time_2 );
+    TRUE_( util::timestamp( unix_tmp ) > time_2 );
 }
 
-/*
- * FIXME: fix the touch() implementation then reenable
- *        this test.
 TEST( touch )
 {
     auto p = fs::temp_directory_path();
     util::log << "temp folder: " << p << "\n";
-    auto base_time = fs::last_write_time( p );
+    auto base_time = util::timestamp( p );
 
     fs::path t1 = p / "AbCdEfGhIjK";
     fs::path t2 = p / "bCdEfGhIjKl/MnOp";
@@ -163,14 +160,13 @@ TEST( touch )
     // Check  that  the time stamp on the file we just touched is
     // later  than  the original timestamp on temp folder (before
     // we created the file in it).
-    bool gt = fs::last_write_time( t1 ) > base_time;
+    bool gt = util::timestamp( t1 ) > base_time;
     EQUALS( gt, true );
 
     // Check that an attempt to touch a file  in  a  non-existent
     // folder will throw.
     THROWS( util::touch( t2 ) );
 }
-*/
 
 TEST( read_write_file )
 {

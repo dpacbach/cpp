@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "datetime.hpp"
 #include "types.hpp"
 
 #include <experimental/filesystem>
@@ -80,6 +81,26 @@ void touch( fs::path const& p );
 // at the time of writing, libstdc++'s implementation does, so we
 // use this wrapper to avoid throwing in that case.
 void remove_if_exists( fs::path const& p );
+
+// Unfortunately we need this  function  because the function pro-
+// vided  in the filesystem library (last_write_time) seems to re-
+// turn time points with different interpretations  on  different
+// platforms.  At  the  time of writing, it is observed that that
+// function returns a UTC  chrono  system  time  point whereas on
+// Windows (under MinGW) it returns  a  time  point  representing
+// local  time. So in this library we always try to call this one
+// which should always return the  same  type with the same inter-
+// pretation (ZonedTimePoint).
+//
+// NOTE: the different behavior of  this function under different
+// platforms could be a bug that would eventually be  fixed,  but
+// not sure.
+ZonedTimePoint timestamp( fs::path const& p );
+
+// Set  timestamp;  the  various  platforms'  implementations  of
+// last_write_time for *setting* timestamps  seem  to  agree,  so
+// this one just forwards the call to last_write_time.
+void timestamp( fs::path const& p, ZonedTimePoint const& ztp );
 
 } // namespace util
 

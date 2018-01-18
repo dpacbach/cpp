@@ -40,13 +40,13 @@ bool change_le( Changer* f, fs::path p, bool keepdate ) {
 
     // Get the pre-modification time stamp on the file in case we
     // need to restore it (i.e., keepdate == true).
-    auto t0 = fs::last_write_time( p );
+    auto t0 = util::timestamp( p );
 
     write_file( p, v ); // Will always touch time stamp
 
     if( keepdate )
         // restore time stamp
-        fs::last_write_time( p, t0 );
+        util::timestamp( p, t0 );
 
     return true; // true means that we changed the file contents.
 }

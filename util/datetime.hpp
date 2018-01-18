@@ -70,6 +70,20 @@ public:
     operator point_t const&() const { return tp; }
 };
 
+// Not  good to compare two local times since they could represet
+// different time zones, so we just delete this.
+template<typename Clock>
+bool operator==( local_time_point<Clock>,
+                 local_time_point<Clock> ) = delete;
+
+template<typename Clock>
+bool operator>( local_time_point<Clock>,
+                local_time_point<Clock> ) = delete;
+
+template<typename Clock>
+bool operator<( local_time_point<Clock>,
+                local_time_point<Clock> ) = delete;
+
 using LocalTimePoint = local_time_point<std::chrono::system_clock>;
 
 // This is just a trivial wrapper around a time_point  that  tags
@@ -97,7 +111,32 @@ public:
 
     LocalTimePoint to_local( TZOffset off ) const
         { return local_t( tp.get() + off ); }
+
 };
+
+// Note we didn't provide equality or  comparison  operators  for
+// local time points because it probably isn't right  to  be  com-
+// paring those since they don't have time zone.
+template<typename Clock>
+bool operator==( zoned_time_point<Clock> lhs,
+                 zoned_time_point<Clock> rhs ) {
+    return lhs.to_local( tz_utc() ).get() ==
+           rhs.to_local( tz_utc() ).get();
+}
+
+template<typename Clock>
+bool operator<( zoned_time_point<Clock> lhs,
+                zoned_time_point<Clock> rhs ) {
+    return lhs.to_local( tz_utc() ).get() <
+           rhs.to_local( tz_utc() ).get();
+}
+
+template<typename Clock>
+bool operator>( zoned_time_point<Clock> lhs,
+                zoned_time_point<Clock> rhs ) {
+    return lhs.to_local( tz_utc() ).get() >
+           rhs.to_local( tz_utc() ).get();
+}
 
 using ZonedTimePoint = zoned_time_point<std::chrono::system_clock>;
 
