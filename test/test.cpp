@@ -15,18 +15,15 @@ namespace testing {
 
 TEST( datetime )
 {
-    auto t = util::fmt_time_point(
-                 chrono::system_clock::now(), true );
+    // Parenthesis in regex's are for raw string, not capture.
 
-    // Parenthesis in regex are for raw string, not capture.
-    auto rx =
-      R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9}[+-]\d{4})";
+    // time_t overload
+    auto s1 = util::fmt_time( time( NULL ) );
+    MATCHES( s1, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})" );
 
-    smatch m;
-
-    TRUE( regex_match( t, m, regex( rx ) ), "string " <<
-          quoted( t ) << " did not match regex " <<
-          quoted( rx ) );
+    // SysTimePoint overload
+    auto t = util::fmt_time( chrono::system_clock::now() );
+    MATCHES( t, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9})" );
 }
 
 TEST( opt_util )
@@ -339,7 +336,7 @@ TEST( to_string )
 
     auto now = chrono::system_clock::now();
     auto now_str = util::to_string( now );
-    EQUALS( now_str.size(), 34 );
+    EQUALS( now_str.size(), 29 );
 }
 
 TEST( sqlite )
@@ -660,7 +657,7 @@ TEST( sqlite )
     db << "INSERT INTO user (age, name) VALUES (?, ?)"
        << 987 << chrono::system_clock::now();
 
-    vector<tuple<int, SystemTimePoint>> rows4{
+    vector<tuple<int, SysTimePoint>> rows4{
         { 987, chrono::system_clock::now() }
     };
 
@@ -671,8 +668,8 @@ TEST( sqlite )
         "SELECT name FROM user WHERE age=987" );
 
     EQUALS( v6.size(), 2 );
-    EQUALS( v6[0].size(), 34 );
-    EQUALS( v6[1].size(), 34 );
+    EQUALS( v6[0].size(), 29 );
+    EQUALS( v6[1].size(), 29 );
 }
 
 TEST( preprocessor )

@@ -101,6 +101,15 @@ struct skipped_exception : public std::exception {};
         throw failed_exception( ss.str() );                   \
     } }
 
+// Checks that the string a fully  matches the regex rx, where rx
+// is just a regex string (not regex object).
+#define MATCHES( a, rx ) {                               \
+    smatch m;                                            \
+    TRUE( regex_match( a, m, regex( rx ) ), "string " << \
+          quoted( a ) << " did not match regex " <<      \
+          quoted( rx ) );                                \
+}
+
 // This  is  a  bit messy because we want to throw just after the
 // `a` gets executed, but we can't throw there because  otherwise
 // it  would  get  caught  by the catch block, so instead we just

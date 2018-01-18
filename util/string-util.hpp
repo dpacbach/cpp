@@ -220,10 +220,13 @@ std::string to_string( std::pair<U, V> const& p );
 template<typename T>
 std::string to_string( std::vector<T> const& v );
 
-// Will output UTC time in format:
-//   2018-01-15 21:30:01.396823389-0000
+// Will output a time with format:
+//
+//   2018-01-15 21:30:01.396823389
+//
+// i.e., with no time zone or assumptions thereabout.
 template<>
-std::string to_string( SystemTimePoint const& p );
+std::string to_string( SysTimePoint const& p );
 
 // Default  version uses std::to_string which is only defined for
 // a few primitive types.

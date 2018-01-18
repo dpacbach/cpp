@@ -6,16 +6,9 @@
 #include "types.hpp"
 
 #include <chrono>
-#include <mutex>
 #include <string>
 
 namespace util {
-
-// This is a mutex that this  module uses whenever calling a func-
-// tion that returns a pointer to an internal  std::tm  structure,
-// since  apparently  those  functions  are not thread safe since
-// they may mutate a global structure  and return a pointer to it.
-extern std::mutex tm_mtx;
 
 // Return  the  offset in seconds from the local time zone to UTC.
 std::chrono::seconds tz_local();
@@ -29,23 +22,43 @@ std::chrono::seconds tz_local();
 // matter.
 std::string tz_hhmm();
 
+// Formats a time_t with the following format, which is the  stan-
+// dard format used by this library:
+//
+//   2018-01-15 20:52:48
+//
+// Neither  assuming nor attaching information about time zone to
+// the time. Strings of this form can  be  compared  lexicographi-
+// cally for he purposes of comparing by time ordering.
+std::string fmt_time( time_t t );
+
 // Formats a time_point with the following format:
 //
-//   2018-01-15 20:52:48.421397398-0500
+//   2018-01-15 20:52:48.421397398
 //
-// The output will always be precisely 34  characters  long.  The
-// timezone offset at the end will default to local,  unless  the
-// utc  flag  is true in which case it will be +0000 and the rest
-// of the time adjusted accordingly.
+// The output will always be precisely 29 characters long; if the
+// time point given to the function does  not  have  nano  second
+// precision then latter digits may just be  padded  with  zeroes.
+// This  function does not interpret the time as referring to any
+// particular  time  zone and will not make any assumptions about
+// time  zone  in  general.  The time is taken "as is"; what this
+// means is that  the  `duration`  object  held  inside  the time
+// point, which by de-factor  standard  (though not official stan-
+// dard)  refers  to  the  amount  of time elapsed since the Unix
+// Epoch Time, will be interpreted as the amount of time  elapsed
+// since a time point obtained by taking the Unix Epoch time  and
+// replacing its UTC qualifier with  whatever the local time zone
+// is. Though his is  done  implicitely;  this  function does not
+// know what the local time zone is.
 //
 // Note  that  strings  of  this form are useful because two such
 // strings can be compared  lexicographically to compare ordering,
-// though this only works when  the  time zone offsets (last four
-// digits) are the same.
+// though  of  course  this only works when the times are with re-
+// spect to the same time one.
 //
 // This function takes a particular kind of  time  point  because
 // apparently the system clock time point is the  only  one  that
 // can  be  converted to time_t, which we need to do to output it.
-std::string fmt_time_point( SystemTimePoint p, bool utc = false );
+std::string fmt_time( SysTimePoint p );
 
 } // namespace util

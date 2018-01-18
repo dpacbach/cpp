@@ -75,7 +75,7 @@ std::string to_string( std::optional<T> const& what ) {
 // that  we  need them surrounded in quotes because we will store
 // them in the sqlite database as strings.
 template<>
-std::string to_string( SystemTimePoint const& p );
+std::string to_string( SysTimePoint const& p );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -129,7 +129,7 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
 // their time ordering can  be  determined  by  lexicographically
 // comparing their string representations.
 sqlite::database_binder& operator<<( sqlite::database_binder& db,
-                                     SystemTimePoint const& p );
+                                     SysTimePoint const& p );
 
 // This  is a pair used to hold information about additional data-
 // bases  that should be added into the connection beyond the pri-
