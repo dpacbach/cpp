@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "datetime.hpp"
 #include "fs.hpp"
 #include "sqlite_modern_cpp.h"
 #include "string-util.hpp"
@@ -75,7 +76,9 @@ std::string to_string( std::optional<T> const& what ) {
 // that  we  need them surrounded in quotes because we will store
 // them in the sqlite database as strings.
 template<>
-std::string to_string( SysTimePoint const& p );
+std::string to_string( LocalTimePoint const& p );
+template<>
+std::string to_string( ZonedTimePoint const& p );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -85,9 +88,10 @@ template<typename Tuple, size_t... Indexes>
 StrVec tuple_elems_to_string( Tuple const& tp,
                               std::index_sequence<Indexes...> ) {
     StrVec res; res.reserve( std::tuple_size_v<Tuple> );
+    namespace N = ::sqlite::impl;
     // Unary  right  fold  of  template parameter pack. NOTE: the
     // to_string  method  used  here  is  the  one in this module.
-    ((res.push_back( to_string( std::get<Indexes>( tp ) ))), ...);
+    ((res.push_back( N::to_string( std::get<Indexes>( tp ) ))), ...);
     return res;
 }
 
@@ -98,7 +102,7 @@ StrVec tuple_elems_to_string( Tuple const& tp,
 template<typename... Args>
 std::string to_string( std::tuple<Args...> const& tp ) {
     auto is = std::make_index_sequence<sizeof...(Args)>();
-    auto v = tuple_elems_to_string( tp, is );
+    auto v = ::sqlite::impl::tuple_elems_to_string( tp, is );
     return "(" + util::join( v, "," ) + ")";
 }
 
@@ -120,16 +124,19 @@ std::string exception_msg( sqlite_exception const& e );
 sqlite::database_binder& operator<<( sqlite::database_binder& db,
                                      fs::path const& path );
 
-// This allows us to insert  time  points  from the chrono system
-// clock,  which  we  do by just converting them to a string in a
-// standard  format:  2018-01-15  21:30:01.396823389-0000  (which
-// will  always  be  in UTC, hence offset 0000 at the end). We do
-// this because SQLite  doesn't  really  have  a proper date/time
-// data type. Note that strings in this format are useful because
-// their time ordering can  be  determined  by  lexicographically
-// comparing their string representations.
+// This allows us to insert local or zoned time points  which  we
+// do  by  just converting them to a string in a standard format:
+// 2018-01-15 21:30:01.396823389[-0000] (local time will have not
+// time zone at the end, while zoned time will always be  in  UTC
+// with a +0000 at the  end).  We  do this because SQLite doesn't
+// really have a proper date/time data type. Note that strings in
+// this format are useful because  their  time ordering can be de-
+// termined by lexicographically comparing  their string represen-
+// tations (but only if time zones are the same).
 sqlite::database_binder& operator<<( sqlite::database_binder& db,
-                                     SysTimePoint const& p );
+                                     LocalTimePoint const& p );
+sqlite::database_binder& operator<<( sqlite::database_binder& db,
+                                     ZonedTimePoint const& p );
 
 // This  is a pair used to hold information about additional data-
 // bases  that should be added into the connection beyond the pri-

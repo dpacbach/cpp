@@ -3,6 +3,7 @@
 ****************************************************************/
 #pragma once
 
+#include "datetime.hpp"
 #include "error.hpp"
 #include "util.hpp"
 #include "types.hpp"
@@ -226,7 +227,16 @@ std::string to_string( std::vector<T> const& v );
 //
 // i.e., with no time zone or assumptions thereabout.
 template<>
-std::string to_string( SysTimePoint const& p );
+std::string to_string( LocalTimePoint const& p );
+
+// Will output an absolute time with format:
+//
+//   2018-01-15 21:30:01.396823389+0000
+//
+// where the date and time are adjusted so as to output it in the
+// UTC time zone (hence the +0000 at the end).
+template<>
+std::string to_string( ZonedTimePoint const& p );
 
 // Default  version uses std::to_string which is only defined for
 // a few primitive types.

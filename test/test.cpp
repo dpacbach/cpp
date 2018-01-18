@@ -21,9 +21,24 @@ TEST( datetime )
     auto s1 = util::fmt_time( time( NULL ) );
     MATCHES( s1, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})" );
 
-    // SysTimePoint overload
-    auto t = util::fmt_time( chrono::system_clock::now() );
+    // LocalTimePoint overload
+    auto l = LocalTimePoint( chrono::system_clock::now() );
+    auto t = util::fmt_time( l );
     MATCHES( t, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9})" );
+
+    // LocalTimePoint overload
+    auto z = ZonedTimePoint( l, util::tz_utc() );
+    t = util::fmt_time( z );
+    MATCHES( t,
+        R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9}[-+]\d{4})" );
+    t = util::fmt_time( z, util::tz_utc() );
+    MATCHES( t,
+        R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9}\+0000)" );
+
+    auto hhmm = util::tz_hhmm();
+    EQUALS( hhmm.size(), 5 );
+    auto hhmm_utc = util::tz_hhmm( util::tz_utc() );
+    EQUALS( hhmm_utc, "+0000" );
 }
 
 TEST( opt_util )
@@ -334,9 +349,12 @@ TEST( to_string )
     fs::path p = "A/B/C";
     EQUALS( util::to_string( p ), "\"A/B/C\"" );
 
-    auto now = chrono::system_clock::now();
+    auto now = LocalTimePoint( chrono::system_clock::now() );
     auto now_str = util::to_string( now );
     EQUALS( now_str.size(), 29 );
+    auto now_zoned = ZonedTimePoint( now, util::tz_utc() );
+    auto now_zoned_str = util::to_string( now_zoned );
+    EQUALS( now_zoned_str.size(), 34 );
 }
 
 TEST( sqlite )
@@ -654,12 +672,12 @@ TEST( sqlite )
     EQUALS( std::get<1>( v5[1] ), nullopt );
     EQUALS( std::get<1>( v5[2] ), nullopt );
 
-    db << "INSERT INTO user (age, name) VALUES (?, ?)"
-       << 987 << chrono::system_clock::now();
+    LocalTimePoint now( chrono::system_clock::now() );
 
-    vector<tuple<int, SysTimePoint>> rows4{
-        { 987, chrono::system_clock::now() }
-    };
+    db << "INSERT INTO user (age, name) VALUES (?, ?)"
+       << 987 << now;
+
+    vector<tuple<int, LocalTimePoint>> rows4{ { 987, now } };
 
     sqlite::insert_many_fast( db, rows4,
         "INSERT INTO user (age, name) VALUES" );
@@ -670,6 +688,23 @@ TEST( sqlite )
     EQUALS( v6.size(), 2 );
     EQUALS( v6[0].size(), 29 );
     EQUALS( v6[1].size(), 29 );
+
+    ZonedTimePoint now_zoned( now, util::tz_utc() );
+
+    db << "INSERT INTO user (age, name) VALUES (?, ?)"
+       << 988 << now_zoned;
+
+    vector<tuple<int, ZonedTimePoint>> rows5{ { 988, now_zoned } };
+
+    sqlite::insert_many_fast( db, rows5,
+        "INSERT INTO user (age, name) VALUES" );
+
+    auto v7 = sqlite::select1<string>( db,
+        "SELECT name FROM user WHERE age=988" );
+
+    EQUALS( v7.size(), 2 );
+    EQUALS( v7[0].size(), 34 );
+    EQUALS( v7[1].size(), 34 );
 }
 
 TEST( preprocessor )

@@ -44,5 +44,3 @@ using OptCRef = std::optional<std::reference_wrapper<T const>>;
 
 template<typename U, typename V>
 using PairVec = std::vector<std::pair<U, V>>;
-
-using SysTimePoint = std::chrono::system_clock::time_point;

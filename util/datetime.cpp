@@ -19,8 +19,7 @@ using namespace chrono;
 namespace util {
 
 // Return  the  offset in seconds from the local time zone to UTC.
-seconds tz_local() {
-
+TZOffset tz_local() {
 #ifndef _WIN32
     // The value of this variable matters not  because  we're  in-
     // terested in the current time (we will only be sampling the
@@ -57,9 +56,9 @@ seconds tz_local() {
 // lated  methods)  are not able to correctly emit this string on
 // Windows under MinGW, which they  do  on  Linux with the %z for-
 // matter.
-string tz_hhmm() {
+string tz_hhmm( TZOffset off ) {
 
-    auto secs = tz_local();
+    auto secs = off;
     ostringstream ss; ss.fill( '0' );
     auto sign = (secs < seconds( 0 )) ? '-' : '+';
     secs      = (secs < seconds( 0 )) ? -secs : secs;
@@ -121,7 +120,7 @@ string fmt_time( time_t t ) {
 //     2018-01-15 20:52:48.421397398
 //
 // i.e., with no assumptions or  interpretations  about  timezone.
-string fmt_time( SysTimePoint p ) {
+string fmt_time( LocalTimePoint const& p ) {
 
     using namespace literals::chrono_literals;
 
@@ -142,7 +141,7 @@ string fmt_time( SysTimePoint p ) {
     // can  have  an  arbitrary  quantity  of  nanoseconds  corre-
     // sponding to a duration longer than a second).
     chrono::nanoseconds ns =
-        p - std::chrono::system_clock::from_time_t( t );
+        p.get() - std::chrono::system_clock::from_time_t( t );
 
     // The following is not guaranteed by the types, but we  know
     // it must be true in this function, so do  it  as  a  sanity
@@ -160,6 +159,23 @@ string fmt_time( SysTimePoint p ) {
     ASSERT( res.size() == 29, "formatted string " << res <<
                               " has unexpected length." );
     return res;
+}
+
+// Formats the string as for the LocalTimePoint but also attaches
+// a  timezone  offset  since  that information is available. Fur-
+// thermore  the  timezone  with  respect  to which the result is
+// written  can  be  specified in the second argument. The output
+// will always be precisely 34 characters  long and will have the
+// format:
+//
+//     2018-01-15 15:52:48.421397398-0500
+// or
+//     2018-01-15 20:52:48.421397398+0000
+//
+// NOTE: these strings cannot be  compared  lexicographically  un-
+// less the timezones are the same.
+string fmt_time( ZonedTimePoint const& p, TZOffset off ) {
+    return fmt_time( p.to_local( off ) ) + tz_hhmm( off );
 }
 
 } // util

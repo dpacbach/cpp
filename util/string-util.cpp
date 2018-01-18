@@ -150,8 +150,19 @@ string to_string<fs::path>( fs::path const& p ) {
 //
 // i.e., with no time zone or assumptions thereabout.
 template<>
-string to_string( SysTimePoint const& p ) {
+string to_string( LocalTimePoint const& p ) {
     return util::fmt_time( p );
+}
+
+// Will output an absolute time with format:
+//
+//   2018-01-15 21:30:01.396823389+0000
+//
+// where the date and time are adjusted so as to output it in the
+// UTC time zone (hence the +0000 at the end).
+template<>
+string to_string( ZonedTimePoint const& p ) {
+    return util::fmt_time( p, util::tz_utc() );
 }
 
 }
