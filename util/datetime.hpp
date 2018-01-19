@@ -22,6 +22,7 @@ using TZOffset = std::chrono::seconds;
 
 // Return  the  offset in seconds from the local time zone to UTC.
 TZOffset tz_local();
+
 // This one is to enable readability.
 inline TZOffset tz_utc() { return TZOffset( 0 ); }
 
@@ -35,17 +36,37 @@ inline TZOffset tz_utc() { return TZOffset( 0 ); }
 std::string tz_hhmm( TZOffset off = tz_local() );
 
 /****************************************************************
-* Type-safe zoned time point type
+* Represenations of times
 ****************************************************************/
-// This is just a trivial wrapper around a time_point  that  tags
-// it has having an interpretation of referring  to  an  absolute
-// point in time. An object  of  this type represents an explicit
-// expression on the part of the  creator as to the precise defin-
-// ition of the  epoch  time  with  respect  to  with the wrapped
-// time_point  is  understood.  Of importance is that it does not
-// allow construction or  conversion  to  or  from the underlying
-// chrono time point  without  the  involvement  of  a  time zone
-// offset that must be specified by the caller.
+// Introduction:
+//
+// In this library, by default, we measure points in time  as  du-
+// rations of time since an Epoch time of Jan 1  1970,  but  this
+// Epoch time carries no time zone  qualifier  -- time zone is un-
+// specified. Even such types as  time_t or chrono time_point are
+// interpteted this way. As such, they do not specify an absolute
+// point  in time without being supplemented by a time zone quali-
+// fier. We refer to these  time  measures as "local Epoch time."
+// We can use any time type as a local Epoch time, such as
+// time_t, chrono seconds, chrono  time  points,  chrono  minutes,
+// etc.
+//
+// There  is  only one type that is used to represent an absolute
+// time, and that is the zt_point ("zoned time point"). See below
+// for more info on that class. Essentially, it is just a trivial
+// wrapper around some local Epoch  time  that exists in order to
+// force the user to be explicit about the time zone with respect
+// to which the local Epoch time is interpreted.
+
+// Zoned Time Point. This is just  a  trivial  wrapper  around  a
+// time_point  that tags it has having an interpretation of refer-
+// ring  to an absolute point in time. An object of this type rep-
+// resents an explicit expression on the part of the instantiator
+// as to the precise definition of the epoch time with respect to
+// which  the  wrapped time_point is understood. Of importance is
+// that it does not allow construction or conversion to  or  from
+// the  underlying chrono time point without the involvement of a
+// time zone offset that must be specified by the caller.
 template<typename DurationT>
 struct zt_point {
 
@@ -61,10 +82,10 @@ struct zt_point {
     // Construct a zoned (absolute) time point given a local time
     // time point and its offset from UTC.
     zt_point( DurationT const& in_tp, TZOffset off )
-        : tp( in_tp - off ) {}
+        : tp( in_tp + off ) {}
 
     DurationT to_local( TZOffset off ) const
-        { return tp + off; }
+        { return tp - off; }
 
     bool operator==( zt_point<DurationT> const& rhs ) const
         { return tp == rhs.tp; }
@@ -82,31 +103,12 @@ using ZonedTimePoint = zt_point<SysTimePoint>;
 /****************************************************************
 * Time formatting
 ****************************************************************/
-// Introduction:
-//
-// In this library, by default, we measure points in time  as  du-
-// rations of time since an Epoch time of Jan 1  1970,  but  this
-// Epoch time carries no time zone  qualifier  -- time zone is un-
-// specified. Even such types as  time_t or chrono time_point are
-// interpteted this way. As such, they do not specify an absolute
-// point in time without a  supplemental  time zone qualifier. We
-// refer to these time measures as "local Epoch time." We can use
-// any time type as a local Epoch time, such  as  time_t,  chrono
-// seconds, chrono time points, chrono minutes, etc.
-//
-// There  is  only one type that is used to represent an absolute
-// time, and that is  the  zoned_time_point.  See  above for more
-// info on that class. Essentially, it is just a trivial  wrapper
-// around some local Epoch time that exists in order to force the
-// creator  to  be  explicit  about the time zone with respect to
-// which the local Epoch time is interpreted.
-//
-// Hence, among the time formatting  functions that we have below,
-// the only formatting function that will emit  time  zone  quali-
-// fiers  when  formatting  times  is  the  overload that takes a
-// zoned_time_point. All of the other  overloads  will  format  a
-// time with as much precision as  that  type allows, but will al-
-// ways stop short of attaching a time zone qualifier.
+// Among the time formatting functions that we  have  below,  the
+// only formatting function that will emit time  zone  qualifiers
+// when  formatting  times  is  the  overload that takes a zoned_-
+// time_point. All of the other overloads will format a time with
+// as  much  precision  as that type allows, but will always stop
+// short of attaching a time zone qualifier.
 
 // To start off, we  explicitly  delete  the  overload that takes
 // time_t  because  we want to discourage using it in general. If
