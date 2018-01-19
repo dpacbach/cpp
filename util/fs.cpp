@@ -328,9 +328,6 @@ bool path_equals( fs::path const& a,
 // isting file or folder without changing contents, and  c)  will
 // throw if any of the parent folders don't exist.
 void touch( fs::path const& p ) {
-#ifdef _WIN32
-    ASSERT( false, "need to test this on windows, may not work" );
-#endif
     if( !fs::exists( p ) ) {
         ofstream o( p.string(), ios_base::out | ios_base::app );
         // This can fail if a parent folder does not exist, so we
@@ -402,12 +399,20 @@ ZonedTimePoint timestamp( fs::path const& p ) {
 // this one just forwards the call to last_write_time.
 void timestamp( fs::path const& p, ZonedTimePoint const& ztp ) {
 #ifdef _WIN32
-    ASSERT( false, "need to test this on windows, may not work" );
+    // Somehow on the MinGW  implementation  (or  maybe its a Win-
+    // dows thing, not sure) the last_write_time  function  takes
+    // the time that we give it  and  interprets it as local time,
+    // as  opposed  to  Linux which interprets it as UTC time, so
+    // when we are converting the zoned time  to  local  time  we
+    // must do so with different offsets.
+    auto off = tz_local();
+#else
+    auto off = tz_utc();
 #endif
     // It seems that all the platforms  accept  a  chrono  system
     // time  point  and interpret it as UTC time when setting the
     // timestamp.
-    fs::last_write_time( p, ztp.to_local( tz_utc() ) );
+    fs::last_write_time( p, ztp.to_local( off ) );
 }
 
 } // util

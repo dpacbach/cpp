@@ -18,6 +18,8 @@ using namespace chrono;
 
 namespace util {
 
+namespace impl {
+
 // Return  the  offset in seconds from the local time zone to UTC.
 TZOffset tz_local() {
 #ifndef _WIN32
@@ -47,6 +49,19 @@ TZOffset tz_local() {
         offset_min += lpTimeZoneInformation.DaylightBias;
     return seconds( -60*offset_min );
 #endif
+}
+
+}
+
+// Return  the  offset in seconds from the local time zone to UTC.
+// Note  that  the  result of this function will be memoized in a
+// static variable for efficiency,  so  it  should  not be called
+// from a process that runs for longer than a day on the day when
+// daylight savings time changes (seems to to be a  big  deal  in
+// practice).
+TZOffset tz_local() {
+    static TZOffset __tz_local = impl::tz_local();
+    return __tz_local;
 }
 
 // Returns  a string representation of the offset between UTC and
@@ -93,7 +108,11 @@ string fmt_time( seconds time ) {
     // of  seconds  since  the  epoch  time to calendar date. The
     // epoch time traditionally refers to UTC time zone, but this
     // is not relevant here.
+#ifdef _WIN32
+    tm cal_time; gmtime_s( &cal_time, &t );
+#else
     tm cal_time; gmtime_r( &t, &cal_time );
+#endif
 
     // Place to put the  result.  Size  of  result including null
     // zero; compute it from template  to  avoid magic numbers in

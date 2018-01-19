@@ -21,6 +21,10 @@ namespace util {
 using TZOffset = std::chrono::seconds;
 
 // Return  the  offset in seconds from the local time zone to UTC.
+// Note that the result of this  function will be memoized for ef-
+// ficiency, so it should not be called from a process that  runs
+// for longer than a day on the day when  daylight  savings  time
+// changes (seems to to be a big deal in practice).
 TZOffset tz_local();
 
 // This one is to enable readability.
@@ -82,10 +86,10 @@ struct zt_point {
     // Construct a zoned (absolute) time point given a local time
     // time point and its offset from UTC.
     zt_point( DurationT const& in_tp, TZOffset off )
-        : tp( in_tp + off ) {}
+        : tp( in_tp - off ) {}
 
     DurationT to_local( TZOffset off ) const
-        { return tp - off; }
+        { return tp + off; }
 
     bool operator==( zt_point<DurationT> const& rhs ) const
         { return tp == rhs.tp; }
