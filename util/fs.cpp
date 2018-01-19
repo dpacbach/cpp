@@ -324,7 +324,7 @@ void touch( fs::path const& p ) {
 
     // The path exists, and may be either a file  or  folder,  so
     // just update the timestamp.
-    LocalTimePoint ltp( fs::file_time_type::clock::now() );
+    auto ltp = fs::file_time_type::clock::now();
     ZonedTimePoint ztp( ltp, tz_utc() );
     timestamp( p, ztp );
 }
@@ -354,7 +354,7 @@ void remove_if_exists( fs::path const& p ) {
 // not sure.
 ZonedTimePoint timestamp( fs::path const& p ) {
 
-    LocalTimePoint ltp( fs::last_write_time( p ) );
+    auto ltp = fs::last_write_time( p );
 
     // In this next block we choose the time zone based on  obser-
     // vations  made  of  the  behavior  of the implementation of

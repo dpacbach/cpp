@@ -80,15 +80,14 @@ string tz_hhmm( TZOffset off ) {
     return res;
 }
 
-// Formats a time_t with the following format, which is the  stan-
-// dard format used by this library:
-//
-//   2018-01-15 20:52:48
-//
-// Neither  assuming nor attaching information about time zone to
-// the time. Strings of this form can  be  compared  lexicographi-
-// cally for he purposes of comparing by time ordering.
-string fmt_time( time_t t ) {
+// Formats  a  local  epoch  time specified in seconds in the fol-
+// lowing format: "2018-01-15 20:52:48". Strings of this form can
+// be compared lexicographically for he  purposes of comparing by
+// time ordering.
+string fmt_time( seconds time ) {
+
+    // Not great, but we have to dip into C here...
+    time_t t = time.count();
 
     // Populate a tm struct with the results of converting number
     // of  seconds  since  the  epoch  time to calendar date. The
@@ -114,19 +113,20 @@ string fmt_time( time_t t ) {
     return string( start, cs.size()-1 );
 }
 
-// See header file for more  in-depth explanation. In short, this
-// function formats  a  time_point  with  the  following  format:
-//
-//     2018-01-15 20:52:48.421397398
-//
-// i.e., with no assumptions or  interpretations  about  timezone.
-string fmt_time( LocalTimePoint const& p ) {
+// Formats a local epoch time represented by a system clock  time
+// point in  the  format:  "2018-01-15  20:52:48.421397398".  The
+// output will always be precisely 29  characters  long;  if  the
+// time point given to the function does  not  have  nano  second
+// precision then latter digits may just be  padded  with  zeroes.
+// Note that strings of  this  form  can be compared lexicographi-
+// cally to compare ordering.
+string fmt_time( system_clock::time_point const& p ) {
 
     using namespace literals::chrono_literals;
 
     // Get a time_t from the time_point. Note  that  time_t  will
     // lose all sub-second resolution.
-    auto t = std::chrono::system_clock::to_time_t( p );
+    auto t = system_clock::to_time_t( p );
 
     // Now convert the time_t back  to  a time_point and subtract
     // it from the original time point,  effectively  leaving  us
@@ -140,8 +140,7 @@ string fmt_time( LocalTimePoint const& p ) {
     // happens  to be the case here, but not in general, since we
     // can  have  an  arbitrary  quantity  of  nanoseconds  corre-
     // sponding to a duration longer than a second).
-    chrono::nanoseconds ns =
-        p.get() - std::chrono::system_clock::from_time_t( t );
+    nanoseconds ns = p - system_clock::from_time_t( t );
 
     // The following is not guaranteed by the types, but we  know
     // it must be true in this function, so do  it  as  a  sanity
@@ -150,32 +149,20 @@ string fmt_time( LocalTimePoint const& p ) {
 
     ostringstream ss; ss.fill( '0' );
 
+    // These conversions are not ideal, but we have to work  with
+    // time_t unfortunately because that's how  system_clock  sup-
+    // ports outputting times.
+    seconds secs( t );
+
     // Start with the date/time  base  which  we can extract from
     // the time_t, then add in nanoseconds.
-    ss << fmt_time( t ) << "." << setw( 9 ) << ns.count();
+    ss << fmt_time( secs ) << "." << setw( 9 ) << ns.count();
 
     string res = ss.str();
 
     ASSERT( res.size() == 29, "formatted string " << res <<
                               " has unexpected length." );
     return res;
-}
-
-// Formats the string as for the LocalTimePoint but also attaches
-// a  timezone  offset  since  that information is available. Fur-
-// thermore  the  timezone  with  respect  to which the result is
-// written  can  be  specified in the second argument. The output
-// will always be precisely 34 characters  long and will have the
-// format:
-//
-//     2018-01-15 15:52:48.421397398-0500
-// or
-//     2018-01-15 20:52:48.421397398+0000
-//
-// NOTE: these strings cannot be  compared  lexicographically  un-
-// less the timezones are the same.
-string fmt_time( ZonedTimePoint const& p, TZOffset off ) {
-    return fmt_time( p.to_local( off ) ) + tz_hhmm( off );
 }
 
 } // util

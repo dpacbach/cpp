@@ -144,13 +144,14 @@ string to_string<fs::path>( fs::path const& p ) {
    return "\"" + p.string() + "\"";
 }
 
-// Will output a time with format:
+// Will output a local time with format:
 //
 //   2018-01-15 21:30:01.396823389
 //
-// i.e., with no time zone or assumptions thereabout.
+// where there is no information  about  time  zone assumed or at-
+// tached to the result.
 template<>
-string to_string( LocalTimePoint const& p ) {
+string to_string( SysTimePoint const& p ) {
     return util::fmt_time( p );
 }
 

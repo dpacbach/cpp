@@ -18,15 +18,15 @@ TEST( datetime )
     // Parenthesis in regex's are for raw string, not capture.
 
     // time_t overload
-    auto s1 = util::fmt_time( time( NULL ) );
+    auto s1 = util::fmt_time( chrono::seconds( time( NULL ) ) );
     MATCHES( s1, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})" );
 
-    // LocalTimePoint overload
-    auto l = LocalTimePoint( chrono::system_clock::now() );
+    // chrono::system_clock::time_point overload
+    auto l = chrono::system_clock::now();
     auto t = util::fmt_time( l );
     MATCHES( t, R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{9})" );
 
-    // LocalTimePoint overload
+    // ZonedTimePoint overload
     auto z = ZonedTimePoint( l, util::tz_utc() );
     t = util::fmt_time( z );
     MATCHES( t,
@@ -349,7 +349,7 @@ TEST( to_string )
     fs::path p = "A/B/C";
     EQUALS( util::to_string( p ), "\"A/B/C\"" );
 
-    auto now = LocalTimePoint( chrono::system_clock::now() );
+    auto now = chrono::system_clock::now();
     auto now_str = util::to_string( now );
     EQUALS( now_str.size(), 29 );
     auto now_zoned = ZonedTimePoint( now, util::tz_utc() );
@@ -672,12 +672,12 @@ TEST( sqlite )
     EQUALS( std::get<1>( v5[1] ), nullopt );
     EQUALS( std::get<1>( v5[2] ), nullopt );
 
-    LocalTimePoint now( chrono::system_clock::now() );
+    auto now = chrono::system_clock::now();
 
     db << "INSERT INTO user (age, name) VALUES (?, ?)"
        << 987 << now;
 
-    vector<tuple<int, LocalTimePoint>> rows4{ { 987, now } };
+    vector<tuple<int, SysTimePoint>> rows4{ { 987, now } };
 
     sqlite::insert_many_fast( db, rows4,
         "INSERT INTO user (age, name) VALUES" );

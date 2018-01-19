@@ -58,7 +58,7 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
 // termined by lexicographically comparing  their string represen-
 // tations (but only if time zones are the same).
 sqlite::database_binder& operator<<( sqlite::database_binder& db,
-                                     LocalTimePoint const& p ) {
+                                     SysTimePoint const& p ) {
     // Here we don't use sqlite::impl::to_string because we don't
     // want quotes around this; we just convert to a string, then
     // the sqlite c++ wrapper will handle the quotes.
@@ -77,7 +77,7 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
 // that  we  need them surrounded in quotes because we will store
 // them in the sqlite database as strings.
 template<>
-std::string impl::to_string( LocalTimePoint const& p ) {
+std::string impl::to_string( SysTimePoint const& p ) {
     return string( "\"" ) + util::to_string( p ) + "\"";
 }
 

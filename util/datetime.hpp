@@ -35,166 +35,126 @@ inline TZOffset tz_utc() { return TZOffset( 0 ); }
 std::string tz_hhmm( TZOffset off = tz_local() );
 
 /****************************************************************
-* Type-safe time point types
+* Type-safe zoned time point type
 ****************************************************************/
 // This is just a trivial wrapper around a time_point  that  tags
-// it has having the interpretation of referring to a local time;
-// this means that it cannot be interpreted as an absolute  point
-// in  time  without the additional piece of information of which
-// time zone it refers to (which it does not contain).
-template<typename Clock> struct local_time_point {
+// it has having an interpretation of referring  to  an  absolute
+// point in time. An object  of  this type represents an explicit
+// expression on the part of the  creator as to the precise defin-
+// ition of the  epoch  time  with  respect  to  with the wrapped
+// time_point  is  understood.  Of importance is that it does not
+// allow construction or  conversion  to  or  from the underlying
+// chrono time point  without  the  involvement  of  a  time zone
+// offset that must be specified by the caller.
+template<typename DurationT>
+struct zt_point {
 
-public:
-    // Time Point Type
-    using point_t = typename Clock::time_point;
-
-private:
-    point_t tp;
-
-public:
-    // This constructor says "interpret  the  given time point pa-
-    // rameter as a local time." We don't require that  this  con-
-    // structor be explicit because it  is  fine  for a caller to
-    // pass a point_t to  a  function  expecting  a local time be-
-    // cause in this library  chrono  time points are interpreted
-    // as local times.
-    local_time_point( point_t const& in_tp ) : tp( in_tp ) {}
-
-    // Get underlying chrono time  point  which,  in this library,
-    // we also interpret as a local time.
-    point_t const& get() const { return tp; }
-
-    // Since in this library chrono time points  are  interpreted
-    // as local times, it is  fine  to allow automatic conversion
-    // of this to a chrono time point.
-    operator point_t const&() const { return tp; }
-};
-
-// Not  good to compare two local times since they could represet
-// different time zones, so we just delete this.
-template<typename Clock>
-bool operator==( local_time_point<Clock>,
-                 local_time_point<Clock> ) = delete;
-
-template<typename Clock>
-bool operator>( local_time_point<Clock>,
-                local_time_point<Clock> ) = delete;
-
-template<typename Clock>
-bool operator<( local_time_point<Clock>,
-                local_time_point<Clock> ) = delete;
-
-using LocalTimePoint = local_time_point<std::chrono::system_clock>;
-
-// This is just a trivial wrapper around a time_point  that  tags
-// it has having an interpretation  of  referring to UTC time. Of
-// importance is that it  does  not  allow construction or conver-
-// sion to or from the underlying chrono time point.
-template<typename Clock> struct zoned_time_point {
-
-    // Local time Point Type
-    using local_t = local_time_point<Clock>;
-
-    local_t tp;
+    DurationT tp;
 
     // Delete any constructors that don't force user to specify a
     // a time zone with which to interpret the time point. We  ex-
-    // plicitely delete these for documentation purposes.
-    zoned_time_point() = delete;
-    zoned_time_point( local_t const& p ) = delete;
+    // plicitely  delete  these so that they will cause the appro-
+    // priate diagnostic messages to appear to the user.
+    zt_point() = delete;
+    zt_point( DurationT const& ) = delete;
 
-public:
     // Construct a zoned (absolute) time point given a local time
     // time point and its offset from UTC.
-    zoned_time_point( local_t const& in_tp, TZOffset off )
-        : tp( in_tp.get() - off ) {}
+    zt_point( DurationT const& in_tp, TZOffset off )
+        : tp( in_tp - off ) {}
 
-    LocalTimePoint to_local( TZOffset off ) const
-        { return local_t( tp.get() + off ); }
+    DurationT to_local( TZOffset off ) const
+        { return tp + off; }
 
+    bool operator==( zt_point<DurationT> const& rhs ) const
+        { return tp == rhs.tp; }
+
+    bool operator<( zt_point<DurationT> const& rhs ) const
+        { return tp < rhs.tp; }
+
+    bool operator>( zt_point<DurationT> const& rhs ) const
+        { return tp > rhs.tp; }
 };
 
-// Note we didn't provide equality or  comparison  operators  for
-// local time points because it probably isn't right  to  be  com-
-// paring those since they don't have time zone.
-template<typename Clock>
-bool operator==( zoned_time_point<Clock> lhs,
-                 zoned_time_point<Clock> rhs ) {
-    return lhs.to_local( tz_utc() ).get() ==
-           rhs.to_local( tz_utc() ).get();
-}
-
-template<typename Clock>
-bool operator<( zoned_time_point<Clock> lhs,
-                zoned_time_point<Clock> rhs ) {
-    return lhs.to_local( tz_utc() ).get() <
-           rhs.to_local( tz_utc() ).get();
-}
-
-template<typename Clock>
-bool operator>( zoned_time_point<Clock> lhs,
-                zoned_time_point<Clock> rhs ) {
-    return lhs.to_local( tz_utc() ).get() >
-           rhs.to_local( tz_utc() ).get();
-}
-
-using ZonedTimePoint = zoned_time_point<std::chrono::system_clock>;
+// Standard/default specialization used in this library.
+using ZonedTimePoint = zt_point<SysTimePoint>;
 
 /****************************************************************
 * Time formatting
 ****************************************************************/
-// Formats a time_t with the following format, which is the  stan-
-// dard format used by this library:
+// Introduction:
 //
-//   2018-01-15 20:52:48
+// In this library, by default, we measure points in time  as  du-
+// rations of time since an Epoch time of Jan 1  1970,  but  this
+// Epoch time carries no time zone  qualifier  -- time zone is un-
+// specified. Even such types as  time_t or chrono time_point are
+// interpteted this way. As such, they do not specify an absolute
+// point in time without a  supplemental  time zone qualifier. We
+// refer to these time measures as "local Epoch time." We can use
+// any time type as a local Epoch time, such  as  time_t,  chrono
+// seconds, chrono time points, chrono minutes, etc.
 //
-// Neither  assuming nor attaching information about time zone to
-// the time. Strings of this form can  be  compared  lexicographi-
-// cally for he purposes of comparing by time ordering.
-std::string fmt_time( time_t t );
+// There  is  only one type that is used to represent an absolute
+// time, and that is  the  zoned_time_point.  See  above for more
+// info on that class. Essentially, it is just a trivial  wrapper
+// around some local Epoch time that exists in order to force the
+// creator  to  be  explicit  about the time zone with respect to
+// which the local Epoch time is interpreted.
+//
+// Hence, among the time formatting  functions that we have below,
+// the only formatting function that will emit  time  zone  quali-
+// fiers  when  formatting  times  is  the  overload that takes a
+// zoned_time_point. All of the other  overloads  will  format  a
+// time with as much precision as  that  type allows, but will al-
+// ways stop short of attaching a time zone qualifier.
 
-// Formats a time_point with the following format:
-//
-//   2018-01-15 20:52:48.421397398
-//
-// The output will always be precisely 29 characters long; if the
+// To start off, we  explicitly  delete  the  overload that takes
+// time_t  because  we want to discourage using it in general. If
+// you need to format a time_t then what you should do is  explic-
+// itly construct a chrono::seconds  and  call  the next overload.
+std::string fmt_time( time_t time ) = delete;
+
+// Formats  a  local  epoch  time specified in seconds in the fol-
+// lowing format: "2018-01-15 20:52:48". Strings of this form can
+// be compared lexicographically for he  purposes of comparing by
+// time ordering.
+std::string fmt_time( std::chrono::seconds time );
+
+// Formats a local epoch time represented by a system clock  time
+// point in  the  format:  "2018-01-15  20:52:48.421397398".  The
+// output will always be precisely 29  characters  long;  if  the
 // time point given to the function does  not  have  nano  second
 // precision then latter digits may just be  padded  with  zeroes.
-// This  function does not interpret the time as referring to any
-// particular  time zone and so will not perform any offset compu-
-// tations  or  attach  any time zone labels. In other words, one
-// can  imagine  that the time zone passed in will be interpreted
-// as an offset from the Unix Time Epoch, which is then formatted
-// as a string but without its UTC time zone indicator.
-//
-// Note  that  strings  of  this form are useful because two such
-// strings can be compared  lexicographically to compare ordering,
-// though  of  course  this only works when the times are with re-
-// spect to the same time one.
-//
-// This function takes a particular kind of  time  point  because
-// apparently the system clock time point is the  only  one  that
-// can  be  converted to time_t, which we need to do to output it.
-std::string fmt_time( LocalTimePoint const& p );
+// Note that strings of  this  form  can be compared lexicographi-
+// cally to compare ordering.
+std::string fmt_time( SysTimePoint const& p );
 
-// Formats the string as for the LocalTimePoint but also attaches
-// a  timezone  offset  since  that information is available. Fur-
-// thermore  the  timezone  with  respect  to which the result is
-// written  can  be  specified in the second argument. The output
+// Formats a zoned time point by first adjusting its duration  ac-
+// cording  to the time zone offset given, then formatting the du-
+// ration type as a local epoch time  using one of the other fmt_-
+// time functions, then finally attaching a time  zone  qualifier.
+// The length of the output depends on the duration type on which
+// zt_point is parametrized,  since  that  depends which fmt_time
+// function  gets called to format that duration. However, if the
+// DurationT  is a chrono system_clock time point then the output
 // will always be precisely 34 characters  long and will have the
-// format:
+// formats, for example:
 //
 //     2018-01-15 15:52:48.421397398-0500
-// or
 //     2018-01-15 20:52:48.421397398+0000
 //
 // NOTE: these strings cannot be  compared  lexicographically  un-
 // less the timezones are the same.
-std::string fmt_time( ZonedTimePoint const& p,
-                      TZOffset off = tz_local() );
+template<typename DurationT>
+std::string fmt_time( zt_point<DurationT> const& p,
+                      TZOffset off = tz_local() ) {
+
+    // Which  overload  of fmt_time gets called depends on the du-
+    // ration type.
+    return fmt_time( p.to_local( off ) ) + tz_hhmm( off );
+}
 
 } // namespace util
 
-// For convenience, dump these  two  into  the  global  namespace.
-using util::LocalTimePoint;
+// For  convenience,  dump  this  two  into  the global namespace.
 using util::ZonedTimePoint;
