@@ -265,6 +265,23 @@ fs::path path_( fs::path::const_iterator b,
     return res;
 }
 
+// Flip any forward slashes to back slashes.
+string back_slashes( string_view in ) {
+    string out( in );
+    replace( begin( out ), end( out ), '/', '\\' );
+    return out;
+}
+
+// Flip any forward slashes to back slashes.
+StrVec back_slashes( StrVec const& v ) {
+    vector<string> res( v.size() );
+    auto resolve = []( string_view sv ) {
+        return back_slashes( sv );
+    };
+    transform( begin( v ), end( v ), begin( res ), resolve );
+    return res;
+}
+
 // The purpose of this function  is  to  compare two paths lexico-
 // graphically  with the option of case insensitivity. On Windows,
 // the comparison will  default  to  being  case  insensitive. On

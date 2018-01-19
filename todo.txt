@@ -1,13 +1,6 @@
-* read/write UTC time to sqlite database; must be a time
-  type that can be compared to file times.  Must look like
-  this for compatibility: 2018-01-10 09:26:24.550760700-05:00
-  possibly also because it can be compared lexicographically.
-
 * add/remove -- add or remove a file from proj/filters file.
     ==> rewriting xmls in general
 
 * conversion from ascii to UTF16 with BOM and vice versa
 
 * path globbing
-
-* flip slashes win

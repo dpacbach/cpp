@@ -53,6 +53,12 @@ std::string fwd_slashes( std::string_view in );
 // Flip any backslashes to forward slashes.
 StrVec fwd_slashes( StrVec const& v );
 
+// Flip any forward slashes to back slashes.
+std::string back_slashes( std::string_view in );
+
+// Flip any forward slashes to back slashes.
+StrVec back_slashes( StrVec const& v );
+
 // Constructs  a path from a pair of iterators to path components.
 // Didn't see this available in  the  standard,  but  could  have
 // missed it. The name is meant  for  it  to look like a construc-

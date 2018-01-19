@@ -21,6 +21,24 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( slashes )
+{
+    EQUALS( util::fwd_slashes( "" ), "" );
+    EQUALS( util::back_slashes( "" ), "" );
+
+    EQUALS( util::fwd_slashes( "/"), "/" );
+    EQUALS( util::back_slashes( "\\" ), "\\" );
+
+    EQUALS( util::fwd_slashes( "////" ), "////" );
+    EQUALS( util::back_slashes( "\\\\\\\\" ), "\\\\\\\\" );
+
+    EQUALS( util::back_slashes( "////" ), "\\\\\\\\" );
+    EQUALS( util::fwd_slashes( "\\\\\\\\" ), "////" );
+
+    EQUALS( util::back_slashes( "1/a/b/c/d" ), "1\\a\\b\\c\\d" );
+    EQUALS( util::fwd_slashes( "1\\2\\3\\4\\5" ), "1/2/3/4/5" );
+}
+
 TEST( dos_to_from_unix )
 {
     using namespace std::chrono_literals;
