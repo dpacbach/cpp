@@ -252,7 +252,16 @@ template<typename U, typename V>
 std::ostream& operator<<( std::ostream&          out,
                           std::pair<U, V> const& p );
 
-}
+/****************************************************************
+* From-String utilities
+****************************************************************/
+
+// This is to replace std::stoi -- it will enforce that the input
+// string is not empty and  that  the parsing consumes the entire
+// string.
+int stoi( std::string const& s, int base = 10 );
+
+} // namespace util
 
 // Implementations of template  function  bodies  in  here. We do
 // this  not only for organizational purposes, but in order for a

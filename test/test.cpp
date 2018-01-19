@@ -13,6 +13,19 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( from_string )
+{
+    THROWS( util::stoi( "" ) );
+
+    EQUALS( util::stoi( "0"      ),  0   );
+    EQUALS( util::stoi( "1"      ),  1   );
+    EQUALS( util::stoi( "222"    ),  222 );
+    EQUALS( util::stoi( "0",  16 ),  0   );
+    EQUALS( util::stoi( "10", 16 ),  16  );
+    EQUALS( util::stoi( "-10"    ), -10  );
+    EQUALS( util::stoi( "-0"     ),  0   );
+}
+
 TEST( datetime )
 {
     // Parenthesis in regex's are for raw string, not capture.
