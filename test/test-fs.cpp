@@ -49,10 +49,10 @@ TEST( dos_to_from_unix )
     // time points we get from file time stamps don't contain any
     // sub-second  information,  so we need to make it at least a
     // second on that platform.
-#ifdef _WIN32
-    auto const delta = 1001ms;
-#else
+#ifdef OS_LINUX
     auto const delta = 10ms;
+#else
+    auto const delta = 1001ms;
 #endif
 
     // First test some edge cases with dos2unix.
