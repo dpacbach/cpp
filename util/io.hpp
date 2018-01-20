@@ -12,7 +12,7 @@ namespace util {
 // be a bit less efficient than possible because the vector, when
 // created, will initialize all of its bytes  to  zero  which  we
 // don't actually need.
-std::vector<char> read_file( fs::path p );
+std::vector<char> read_file( fs::path const& p );
 
 // Open the file, truncate it,  and  write  given  vector  to  it.
 void write_file( fs::path const& p, std::vector<char> const& v );

@@ -15,7 +15,7 @@ namespace util {
 // be a bit less efficient than possible because the vector, when
 // created, will initialize all of its bytes  to  zero  which  we
 // don't actually need.
-vector<char> read_file( fs::path p ) {
+vector<char> read_file( fs::path const& p ) {
 
     ASSERT( fs::exists( p ), "file " << p << " does not exist" );
 

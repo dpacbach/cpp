@@ -1,6 +1,4 @@
 * add/remove -- add or remove a file from proj/filters file.
     ==> rewriting xmls in general
 
-* conversion from ascii to UTF16 with BOM and vice versa
-
 * path globbing
