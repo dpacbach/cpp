@@ -26,8 +26,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <string.h>
+#include <string>
 #include <string_view>
 #include <thread>
 #include <tuple>

@@ -5,8 +5,8 @@
 #include "common-test.hpp"
 #include "main.hpp"
 
-#include <iostream>
-#include <string>
+#include "logger.hpp"
+#include "types.hpp"
 
 using namespace std;
 

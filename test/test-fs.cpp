@@ -4,6 +4,13 @@
 #include "precomp.hpp"
 #include "common-test.hpp"
 
+#include "fs.hpp"
+#include "line-endings.hpp"
+#include "logger.hpp"
+#include "io.hpp"
+#include "string-util.hpp"
+#include "util.hpp"
+
 using namespace std;
 
 fs::path const data_common = "../test/data-common";
