@@ -1,7 +1,6 @@
 /****************************************************************
 * Helpers for unit tests
 ****************************************************************/
-#include "precomp.hpp"
 #include "common-test.hpp"
 #include "main.hpp"
 

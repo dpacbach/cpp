@@ -1,7 +1,6 @@
 /****************************************************************
 * Unit tests for filesystem-related code
 ****************************************************************/
-#include "precomp.hpp"
 #include "common-test.hpp"
 
 #include "fs.hpp"

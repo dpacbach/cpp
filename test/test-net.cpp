@@ -1,7 +1,6 @@
 /****************************************************************
 * Unit tests for network functionality
 ****************************************************************/
-#include "precomp.hpp"
 #include "common-test.hpp"
 
 #include "bimap.hpp"

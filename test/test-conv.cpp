@@ -1,7 +1,6 @@
 /****************************************************************
 * Unit tests for encoding conversions
 ****************************************************************/
-#include "precomp.hpp"
 #include "common-test.hpp"
 
 #include "conv-util.hpp"
