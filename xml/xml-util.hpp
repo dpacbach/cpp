@@ -126,4 +126,18 @@ OptStr text( pugi::xml_node const& doc,
              bool                  allow_empty = true,
              bool                  strip       = true );
 
+// Run an xpath query that should result in  a  single  node;  if
+// zero or >1 nodes are found then it will return nullopt.
+std::optional<pugi::xml_node> node_safe(
+    pugi::xml_node const& doc,
+    const char*           x_path,
+    xml::XPathVars const& vars = {}
+);
+
+// Like node_safe except it will throw an exception if  precisely
+// one node is not found.
+pugi::xml_node node( pugi::xml_node const& doc,
+                     const char*           x_path,
+                     xml::XPathVars const& vars = {} );
+
 } // namespace xml

@@ -161,4 +161,26 @@ OptStr text( pugi::xml_node const& node,
     return OptStr( move( res[0] ) );
 }
 
+// Run an xpath query that should result in  a  single  node;  if
+// zero or >1 nodes are found then it will return nullopt.
+optional<pugi::xml_node> node_safe( pugi::xml_node const& doc,
+                                    const char*           x_path,
+                                    xml::XPathVars const& vars ) {
+    auto node_set = xpath( x_path, doc, vars );
+    if( node_set.size() != 1 )
+        return nullopt;
+    return node_set[0].node();
+}
+
+// Like node_safe except it will throw an exception if  precisely
+// one node is not found.
+pugi::xml_node node( pugi::xml_node const& doc,
+                     const char*           x_path,
+                     xml::XPathVars const& vars ) {
+    auto res = node_safe( doc, x_path, vars );
+    ASSERT( res, "XPath query " << x_path << " did not result in "
+                 "precisely one node result, as was expected." );
+    return *res;
+}
+
 } // namespace xml
