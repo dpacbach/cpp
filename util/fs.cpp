@@ -26,15 +26,29 @@ void validate( fs::path const& p ) {
 
 }
 
-// This will put the path (which  may not exist) into normal form
-// and preserving absolute/relative nature.  Path must exist, and
-// will resolve symlinks.
+// This function joins two paths, but if the path on the rhs side
+// qualifies as absolute than we  use  it as the result, ignoring
+// the lhs. We shouldn't need this function  since  the  standard
+// `/`  and  `/=` operators (which join paths) are supposed to do
+// this for us, but  the  libstdc++ implementation doesn't appear
+// to be working right at the moment.
+fs::path slash( fs::path const& lhs, fs::path const& rhs ) {
+    return rhs.is_absolute() ? rhs : (lhs/rhs);
+}
+
+// This will put the path into  normal  form  and  preserving  ab-
+// solute/relative nature. Path must exist,  and will resolve sym-
+// links.  The version of this function that does not require the
+// file  to  exist  (and won't resolve links) is lexically_normal.
 fs::path normpath( fs::path const& p ) {
     return fs::canonical( p );
 }
 
 // This  is  like normpath except that it makes the path absolute
-// (relative to cwd) if it is not already).
+// if it is not already (if it is relative, it  is  assumed  rela-
+// tive to CWD. The version of this function  that  does  not  re-
+// quire the file to exist  (and  won't resolve links) is lexical-
+// ly_absolute.
 fs::path absnormpath( fs::path const& p ) {
     return fs::canonical( fs::absolute( p ) );
 }
@@ -134,6 +148,15 @@ fs::path lexically_normal( fs::path const& p ) {
     }
     // Result will never be empty.
     return res.empty() ? "." : res;
+}
+
+// This  is  like  absnormpath  except that it will not query the
+// file system. If the path p is relative  then  it  will  be  ap-
+// pended  to  the  CWD  and  the result normalized using lexical-
+// ly_normal. Result is an absolute path in  normal  for  without
+// links resolved and which may not exist.
+fs::path lexically_absolute( fs::path const& p ) {
+    return lexically_normal( slash( fs::current_path(), p ) );
 }
 
 /* Implemenation of the  lexically_relative  function.  Find  the

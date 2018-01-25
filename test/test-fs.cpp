@@ -300,6 +300,41 @@ TEST( lexically_normal )
     EQUALS( f( "aa/bb/cc/./../x/y" ), "aa/bb/x/y" );
 }
 
+TEST( lexically_absolute )
+{
+    auto f = util::lexically_absolute;
+
+    // Absolute paths. This behavior should  be identical to just
+    // passing to lexically_normal, so  we  just copy those tests
+    // from above, even though it might be overkill.
+    EQUALS( f( A( "/"                  )  ), A( "/"          )  );
+    EQUALS( f( A( "/a"                 )  ), A( "/a"         )  );
+    EQUALS( f( A( "/.."                )  ), A( "/"          )  );
+    EQUALS( f( A( "/../"               )  ), A( "/"          )  );
+    EQUALS( f( A( "/../../../"         )  ), A( "/"          )  );
+    EQUALS( f( A( "/..//../c/."        )  ), A( "/c"         )  );
+    EQUALS( f( A( "/.//../../."        )  ), A( "/"          )  );
+    EQUALS( f( A( "/a/b/c/../../c"     )  ), A( "/a/c"       )  );
+    EQUALS( f( A( "/a/b/c/../../../"   )  ), A( "/"          )  );
+    EQUALS( f( A( "/a/b/../../../../"  )  ), A( "/"          )  );
+    EQUALS( f( A( "/aa/bb/cc/./../x/y" )  ), A( "/aa/bb/x/y" )  );
+
+    // Relative paths
+    auto cp = fs::current_path();
+
+    EQUALS( f( ""    ), cp         );
+    EQUALS( f( "a"   ), cp/"a"     );
+    EQUALS( f( "."   ), cp         );
+    EQUALS( f( "a/b" ), cp/"a"/"b" );
+
+    // Test the slash() function
+    EQUALS( util::slash( A( "/"     ),  ( "."     ) ), A( "/."         ) );
+    EQUALS( util::slash(  ( "."     ), A( "/"     ) ), A( "/"          ) );
+    EQUALS( util::slash(  ( "a/b/c" ), A( "/d/e"  ) ), A( "/d/e"       ) );
+    EQUALS( util::slash( A( "/d/e"  ),  ( "a/b/c" ) ), A( "/d/e/a/b/c" ) );
+    EQUALS( util::slash(  ( "a/b/c" ),  ( "d/e"   ) ),  ( "a/b/c/d/e"  ) );
+}
+
 TEST( lexically_relative )
 {
     auto f = util::lexically_relative;

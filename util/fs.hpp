@@ -16,34 +16,52 @@ namespace util {
 // when comparing paths.
 enum class CaseSensitive { DEFAULT, YES, NO };
 
-// This will put the path (which  may not exist) into normal form
-// and preserving absolute/relative nature.  Path must exist, and
-// will resolve symlinks.
+// This function joins two paths, but if the path on the rhs side
+// qualifies as absolute than we  use  it as the result, ignoring
+// the lhs. We shouldn't need this function  since  the  standard
+// `/`  and  `/=` operators (which join paths) are supposed to do
+// this for us, but  the  libstdc++ implementation doesn't appear
+// to be working right at the moment.
+fs::path slash( fs::path const& lhs, fs::path const& rhs );
+
+// This will put the path into  normal  form  and  preserving  ab-
+// solute/relative nature. Path must exist,  and will resolve sym-
+// links.  The version of this function that does not require the
+// file  to  exist  (and won't resolve links) is lexically_normal.
 fs::path normpath( fs::path const& p );
 
 // This  is  like normpath except that it makes the path absolute
-// (relative to cwd) if it is not already). Path must  exist  and
-// will resolve symlinks.
+// if it is not already (if it is relative, it  is  assumed  rela-
+// tive to CWD. The version of this function  that  does  not  re-
+// quire the file to exist  (and  won't resolve links) is lexical-
+// ly_absolute.
 fs::path absnormpath( fs::path const& p );
 
-/* Put  a  path into normal form without regard to whether or not
- * it  exists  (and  do so without touching the filesystem at all.
- * The C++17 filesystem library has this  method as a member func-
- * tion of the path class, but it has not yet been implemented in
- * gcc at the time of this writing.  Once gcc 8 is released, then
- * this  function  can  be  deleted and the usage of it can be re-
- * placed with p.lexicaly_normal(). */
+// Put  a  path into normal form without regard to whether or not
+// it  exists  (and  do so without touching the filesystem at all.
+// The C++17 filesystem library has this  method as a member func-
+// tion of the path class, but it has not yet been implemented in
+// gcc at the time of this writing.  Once gcc 8 is released, then
+// this  function  can  be  deleted and the usage of it can be re-
+// placed with p.lexicaly_normal().
 fs::path lexically_normal( fs::path const& p );
 
-/* Implemenation of the  lexically_relative  function.  Find  the
- * relative  path between the given path and base path without re-
- * gard  to  whether or not it exists (and do so without touching
- * the  filesystem  at  all; hence we also don't follow symlinks).
- * The C++17 filesystem library has this  method as a member func-
- * tion of the path class, but it has not yet been implemented in
- * gcc at the time of this writing.  Once gcc 8 is released, then
- * this function can probably be deleted and the usage of it  can
- * be replaced with p.lexicaly_relative(). */
+// This  is  like  absnormpath  except that it will not query the
+// file system. If the path p is relative  then  it  will  be  ap-
+// pended  to  the  CWD  and  the result normalized using lexical-
+// ly_normal. Result is an absolute path in  normal  for  without
+// links resolved and which may not exist.
+fs::path lexically_absolute( fs::path const& p );
+
+// Implemenation of the  lexically_relative  function.  Find  the
+// relative  path between the given path and base path without re-
+// gard  to  whether or not it exists (and do so without touching
+// the  filesystem  at  all; hence we also don't follow symlinks).
+// The C++17 filesystem library has this  method as a member func-
+// tion of the path class, but it has not yet been implemented in
+// gcc at the time of this writing.  Once gcc 8 is released, then
+// this function can probably be deleted and the usage of it  can
+// be replaced with p.lexicaly_relative().
 fs::path lexically_relative( fs::path const& p,
                              fs::path const& base );
 
