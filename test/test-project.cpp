@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "common-test.hpp"
 
+#include "add-remove.hpp"
 #include "io.hpp"
 #include "opt-util.hpp"
 #include "preprocessor.hpp"
@@ -14,8 +15,52 @@ namespace pr = project;
 
 fs::path const data_common = "../test/data-common";
 fs::path const data_local  = "../test/data-local";
+fs::path const tmp         = fs::temp_directory_path();
 
 namespace testing {
+
+TEST( add_remove )
+{
+    auto sub_dir = tmp/"proj";
+
+    fs::create_directory( sub_dir );
+
+    auto proj = sub_dir/"sample.vcxproj";
+
+    util::remove_if_exists( proj );
+
+    // Copy project file since we'll be modifying it.
+    util::copy_file( data_common/"sample.vcxproj", proj );
+
+    // Doesn't have to exist for what we're about to do.
+    fs::path p1 = tmp/"xyz.cpp";
+
+    // Project file should not refer to xyz.cpp
+    TRUE_( !util::contains( util::read_file_str( proj ), "xyz" ) );
+
+    // Trying to remove xyz.cpp  should  fail  since  it  is  not
+    // present in the project file.
+    THROWS( pr::rm_from( proj, p1 ) );
+
+    pr::add_2_vcxproj( proj, p1 );
+
+    // The project file should now refer to xyz.cpp in a specific
+    // way.
+    TRUE_( util::contains( util::read_file_str( proj ), "..\\xyz.cpp" ) );
+
+    // Trying to add the same source file again should fail.
+    THROWS( pr::add_2_vcxproj( proj, p1 ) );
+
+    pr::rm_from( proj, p1 );
+    // Trying  to remove the the same source file twice should al-
+    // ways fail, even if  originally  there  were multiple refer-
+    // ences to that file in the project file.
+    THROWS( pr::rm_from( proj, p1 ) );
+
+    // The project file  should  not  contain  any  references to
+    // xyz.cpp in any form.
+    TRUE_( !util::contains( util::read_file_str( proj ), "xyz" ) );
+}
 
 TEST( preprocessor )
 {
