@@ -65,6 +65,19 @@ bool match_src( fs::path const& prj,
                               util::CaseSensitive::NO );
 }
 
+// Same as match_src  except  it  cares  only  about matching the
+// parent folders of the files in question.
+bool match_src_folder( fs::path const& prj,
+                       fs::path const& p1,
+                       string   const& p2 ) {
+
+    return util::path_equals(
+            util::lexically_absolute( p1 ).parent_path(),
+            from_prj( prj, p2 ).parent_path(),
+            util::CaseSensitive::NO
+    );
+}
+
 // Starting from the given node, traverse the tree and look for a
 // reference to a  source  file  that  corresponds  to  the given
 // source  file  in the sense that the normalized, absolute paths
@@ -91,14 +104,13 @@ vector<xml_node> find_src( xml_node const& node,
 // file  already  exists in the project file (by case-insensitive
 // comparison) then an exception will be thrown. The source  file
 // does not need to exist.
-void add_2_vcxproj( fs::path const& prj,
-                    fs::path const& src_file ) {
+void add_2_vcxproj( fs::path const& prj, fs::path const& src ) {
 
     xml_document doc; xml::parse( doc, prj );
 
-    ASSERT( find_src( doc, prj, src_file ).empty(),
+    ASSERT( find_src( doc, prj, src ).empty(),
             "Project file " << prj << " already contains "
-            "source file "  << src_file );
+            "source file "  << src );
 
     // See if  there  is  already  an  ItemGroup  containing some
     // ClCompiles. If so then use it,  otherwise we will create a
@@ -115,18 +127,56 @@ void add_2_vcxproj( fs::path const& prj,
 
     // E.g., produces: <ClCompile Include="../../A.cpp" />
     parent.append_child( "ClCompile" )
-          .append_attribute( "Include" ) =
-           to_prj( prj, src_file ).c_str();
+      .append_attribute( "Include" ) = to_prj( prj, src ).c_str();
 
     // Rewrite the entire project file, with  the  new  ClCompile.
     ASSERT( doc.save_file( prj.string().c_str(), "  " ),
             "failed to save document to file " << prj );
 }
 
-void add_2_filters( fs::path const& filters_file,
-                    fs::path const& src_file ) {
-    (void)filters_file;
-    (void)src_file;
+// Open  the  filters  file and insert the given source file into
+// it. First we search the filters  file for any other files that
+// are  in the same folder as the given one and, if there are, we
+// will obtain the name of the filter in that way by choosing the
+// first filter that we encounter that contains at least one file
+// in the same folder as src. Otherwise, we will  use  the  first
+// filter  that  we  find.  The  source file, if it is a relative
+// path, is interpreted as being relative to CWD (not relative to
+// the project file location). If the source file already  exists
+// in the filters file (by case-insensitive comparison)  then  an
+// exception will be thrown. The source file does not need to  ex-
+// ist.
+void add_2_filters( fs::path const& flt, fs::path const& src ) {
+
+    xml_document doc; xml::parse( doc, flt );
+
+    ASSERT( find_src( doc, flt, src ).empty(),
+            "Filters file " << flt << " already contains "
+            "source file "  << src );
+
+    string filter_name = "...";
+
+    // See if  there  is  already  an  ItemGroup  containing some
+    // ClCompiles. If so then use it,  otherwise we will create a
+    // new ItemGroup.
+    auto ItemGroup = xml::xpath( "//ItemGroup[ClCompile]", doc );
+
+    // Whether we use an existing one or create a new one, get  a
+    // reference to the ItemGroup under which we will add the new
+    // source file.
+    xml_node parent = ItemGroup.empty()
+                    ? xml::node( doc, "/Project" )
+                      .append_child( "ItemGroup" )
+                    : ItemGroup[0].node();
+
+    // <ClCompile Include="..."/><Filter>...</Filter></ClCompile>
+    xml_node ClC = parent.append_child( "ClCompile" );
+    ClC.append_attribute( "Include" ) = to_prj( flt, src ).c_str();
+    ClC.append_child( "Filter" ).text().set( filter_name.c_str() );
+
+    // Rewrite the entire project file, with  the  new  ClCompile.
+    ASSERT( doc.save_file( flt.string().c_str(), "  " ),
+            "failed to save document to file " << flt );
 }
 
 // This  is simply for convenience; it will call add_2_project on
