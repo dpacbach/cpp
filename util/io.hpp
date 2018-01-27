@@ -35,4 +35,17 @@ std::string read_file_str( fs::path p );
 // it into lines.
 StrVec read_file_lines( fs::path p );
 
+// Take a path whose last  component  (file name) contains a glob
+// expression and  return  results  by  searching  the  directory
+// listing for all files (and folders if flag is true) that match
+// the glob pattern. Only *  and  ?  are supported, and those spe-
+// cial  characters  can only appear in the file name of the path.
+// The filename (with wildcard characters)  must match the entire
+// file name from start to finish. If one of the folders  in  the
+// path  does  not  exist, an exception is thrown. If the path is
+// relative then it is relative to CWD. Paths returned will  have
+// their  absolute/relative  nature  preserved  according  to the
+// input  p.  Also,  if input path is empty, it will return empty.
+PathVec wildcard( fs::path const& p, bool with_folders = true );
+
 } // namespace std

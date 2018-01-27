@@ -27,6 +27,33 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( wildcard )
+{
+    // Files only
+    EQUALS( util::wildcard( "",     false ), (PathVec{}) );
+    EQUALS( util::wildcard( ".",    false ), (PathVec{}) );
+    EQUALS( util::wildcard( "..",   false ), (PathVec{}) );
+    EQUALS( util::wildcard( "../",  false ), (PathVec{}) );
+    EQUALS( util::wildcard( "../a", false ), (PathVec{}) );
+    EQUALS( util::wildcard( "../test/tes*-?s.?pp", false ), (PathVec{"../test/test-fs.cpp"}) );
+
+    // Files and Folders
+    EQUALS( util::wildcard( "",     true ), (PathVec{})     );
+    EQUALS( util::wildcard( ".",    true ), (PathVec{"."})  );
+    EQUALS( util::wildcard( "..",   true ), (PathVec{".."}) );
+    EQUALS( util::wildcard( "../",  true ), (PathVec{".."}) );
+    EQUALS( util::wildcard( "../a", true ), (PathVec{})     );
+    EQUALS( util::wildcard( "../test/tes*-?s.?pp", true ), (PathVec{"../test/test-fs.cpp"}) );
+
+    auto abs1 = util::lexically_absolute( "../" );
+    auto abs2 = util::lexically_absolute( "../test" );
+    EQUALS( util::wildcard( abs1, true ), (PathVec{abs1}) );
+    EQUALS( util::wildcard( abs2/"tes*-?s.?pp", true ),
+            (PathVec{abs2/"test-fs.cpp"}) );
+
+    THROWS( util::wildcard( "x/y/z/*" ) );
+}
+
 TEST( slashes )
 {
     EQUALS( util::fwd_slashes( "" ), "" );

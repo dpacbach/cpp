@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 
@@ -117,6 +118,72 @@ StrVec read_file_lines( fs::path p ) {
         res.push_back( line );
 
     return res; // hoping for NRVO here
+}
+
+// Take a path whose last  component  (file name) contains a glob
+// expression and  return  results  by  searching  the  directory
+// listing for all files (and folders if flag is true) that match
+// the glob pattern. Only *  and  ?  are supported, and those spe-
+// cial  characters  can only appear in the file name of the path.
+// The filename (with wildcard characters)  must match the entire
+// file name from start to finish. If one of the folders  in  the
+// path  does  not  exist, an exception is thrown. If the path is
+// relative then it is relative to CWD. Paths returned will  have
+// their  absolute/relative  nature  preserved  according  to the
+// input  p.  Also,  if input path is empty, it will return empty.
+PathVec wildcard( fs::path const& p, bool with_folders ) {
+
+    if( p.empty() )
+        return {};
+
+    // We need to preserve relative/absolute nature of input when
+    // we  return  the  list  of output paths. Note that, just as
+    // with the input, relative paths in  the output will be rela-
+    // tive to CWD.
+    bool rel = p.is_relative();
+
+    PathVec res;
+
+    auto abs    = util::lexically_absolute( p );
+    auto folder = abs.parent_path();
+
+    // Convert  the  glob  pattern to a regex so we can use regex
+    // machinery  to  match  files. Note that here we are not sup-
+    // porting the full set  of  shell-style  glob symbols. As an
+    // example, the glob "*.?pp" will  be  transformed  into  the
+    // regex: ".*\..pp"
+    string rx_glob;
+    for( auto c : abs.filename().string() ) {
+        switch( c ) {
+            case '.': rx_glob += "\\."; break;
+            case '*': rx_glob += ".*";  break;
+            case '?': rx_glob += '.';   break;
+            default : rx_glob += c;     break;
+        };
+    }
+
+    auto cwd = fs::current_path();
+
+    // Regex  must  match  full filename, so we surround with ^$.
+    regex rx( string( "^" ) + rx_glob + "$" );
+    smatch m;
+
+    for( auto& i : fs::recursive_directory_iterator( folder ) ) {
+        if( fs::is_directory( i ) && !with_folders )
+            // Don't include folders if  caller doesn't want them.
+            continue;
+        // This must be an lvalue for regex_match.
+        auto fn = i.path().filename().string();
+        if( regex_match( fn, m, rx ) ) {
+            res.emplace_back(
+                // Match,  add  it to the list. But we need to be
+                // sure  to  preserve  absolute/relative   nature.
+                rel ? util::lexically_relative( i.path(), cwd )
+                    : fs::path( i )
+            );
+        }
+    }
+    return res;
 }
 
 } // util
