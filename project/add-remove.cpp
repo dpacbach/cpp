@@ -67,9 +67,9 @@ bool match_src( fs::path const& prj,
 
 // Same as match_src  except  it  cares  only  about matching the
 // parent folders of the files in question.
-bool match_src_folder( fs::path const& prj,
-                       fs::path const& p1,
-                       string   const& p2 ) {
+bool match_src_dir( fs::path const& prj,
+                    fs::path const& p1,
+                    string   const& p2 ) {
 
     return util::path_equals(
             util::lexically_absolute( p1 ).parent_path(),
@@ -90,6 +90,21 @@ vector<xml_node> find_src( xml_node const& node,
         auto Inc = xml::attr( n, "@Include" );
         return Inc && string( n.name() ) == "ClCompile" &&
                       match_src( prj, src, *Inc );
+    } );
+}
+
+// Starting from the given node, traverse the tree and look for a
+// reference to a source file that  resides in the same folder as
+// the  given  source file in the sense that the absolute, normal-
+// ized paths match in a case-insensitive fashion.
+vector<xml_node> find_src_dir( xml_node const& node,
+                               fs::path const& prj,
+                               fs::path const& src ) {
+
+    return xml::filter( node, [&]( xml_node n ) {
+        auto Inc = xml::attr( n, "@Include" );
+        return Inc && string( n.name() ) == "ClCompile" &&
+                      match_src_dir( prj, src, *Inc );
     } );
 }
 
@@ -154,7 +169,31 @@ void add_2_filters( fs::path const& flt, fs::path const& src ) {
             "Filters file " << flt << " already contains "
             "source file "  << src );
 
-    string filter_name = "...";
+    util::log << "adding " << src << " to " << flt << "\n";
+
+    string filter_name;
+    // Now we need to look at the full list of  source  files  in
+    // the filters file and find the first one in the same folder
+    // as  the new source file (src) and then use its filter name
+    // when  adding  the new src file. If we can't find any, then
+    // we  will just use the first filter that we find listed. If
+    // there  are  no  filters  listed  then  we will use 'Source
+    // Files'.
+    if( auto ns = find_src_dir( doc, flt, src ); !ns.empty() ) {
+        // We  found a src file in same folder, so use its filter.
+        auto opt = xml::text( ns[0], "Filter", {}, false, true );
+        ASSERT( opt, "missing filter node in " << flt );
+        filter_name = *opt;
+    } else {
+        // Can't find any source  files  in  the  same folder, so
+        // just  get  list  of all filter names and use first one.
+        util::log << "cannot find any matching source files\n";
+        auto xp_flt = "//ItemGroup[Filter]/Filter/@Include";
+        auto flts = xml::attrs( doc, xp_flt );
+        filter_name = flts.empty() ? "Source Files" : flts[0];
+    }
+
+    util::log << "using filter name: " << filter_name << "\n";
 
     // See if  there  is  already  an  ItemGroup  containing some
     // ClCompiles. If so then use it,  otherwise we will create a
@@ -224,6 +263,18 @@ void rm_from( fs::path const& file,
     // Rewrite the entire project file, with  the  new  ClCompile.
     ASSERT( doc.save_file( file.string().c_str(), "  " ),
             "failed to save document to file " << file );
+}
+
+// This is simply for convenience; it  will call rm_from with the
+// given  project  file,  then will construct the name of the fil-
+// ters file by appending .filters to the end of the project file
+// and then will call rm_from on that.
+void rm_from_project( fs::path const& prj, fs::path const& src ) {
+
+    rm_from( prj, src );
+    auto filters = prj;
+    filters += ".filters";
+    rm_from( filters, src );
 }
 
 } // namespace project

@@ -58,4 +58,11 @@ void add_2_project( fs::path const& project_file,
 void rm_from( fs::path const& file,
               fs::path const& src_file );
 
+// This is simply for convenience; it  will call rm_from with the
+// given  project  file,  then will construct the name of the fil-
+// ters file by appending .filters to the end of the project file
+// and then will call rm_from on that.
+void rm_from_project( fs::path const& project_file,
+                      fs::path const& src_file );
+
 } // namespace project
