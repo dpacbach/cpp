@@ -60,6 +60,47 @@ TEST( add_remove )
     // The project file  should  not  contain  any  references to
     // xyz.cpp in any form.
     TRUE_( !util::contains( util::read_file_str( proj ), "xyz" ) );
+
+    auto flt = sub_dir/"sample.vcxproj.filters";
+
+    util::remove_if_exists( flt );
+
+    // Copy filters file since we'll be modifying it.
+    util::copy_file( data_common/"sample.vcxproj.filters", flt );
+
+    // Project file should not refer to xyz.cpp
+    TRUE_( !util::contains( util::read_file_str( flt ), "xyz" ) );
+
+    // Trying to remove xyz.cpp  should  fail  since  it  is  not
+    // present in the project file.
+    THROWS( pr::rm_from( flt, p1 ) );
+
+    pr::add_2_filters( flt, p1 );
+
+    // The project file should now refer to xyz.cpp in a specific
+    // way.
+    TRUE_( util::contains( util::read_file_str( flt ), "..\\xyz.cpp" ) );
+
+    // Trying to add the same source file again should fail.
+    THROWS( pr::add_2_filters( flt, p1 ) );
+
+    pr::rm_from( flt, p1 );
+    // Trying  to remove the the same source file twice should al-
+    // ways fail, even if  originally  there  were multiple refer-
+    // ences to that file in the project file.
+    THROWS( pr::rm_from( flt, p1 ) );
+
+    // The project file  should  not  contain  any  references to
+    // xyz.cpp in any form.
+    TRUE_( !util::contains( util::read_file_str( flt ), "xyz" ) );
+
+    // Test add_2_project and rm_from_project
+    pr::add_2_project( proj, p1 );
+    TRUE_( util::contains( util::read_file_str( proj ), "..\\xyz.cpp" ) );
+    TRUE_( util::contains( util::read_file_str( flt  ), "..\\xyz.cpp" ) );
+    pr::rm_from_project( proj, p1 );
+    TRUE_( !util::contains( util::read_file_str( proj ), "..\\xyz.cpp" ) );
+    TRUE_( !util::contains( util::read_file_str( flt  ), "..\\xyz.cpp" ) );
 }
 
 TEST( preprocessor )
