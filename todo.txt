@@ -1,4 +1,0 @@
-* add/remove -- add or remove a file from proj/filters file.
-    ==> rewriting xmls in general
-
-* path globbing
