@@ -52,6 +52,12 @@ TEST( wildcard )
             (PathVec{abs2/"test-fs.cpp"}) );
 
     THROWS( util::wildcard( "x/y/z/*" ) );
+
+    // Test that wildcard must match full filename.
+    EQUALS( util::wildcard( "../test/e",  true ), (PathVec{}) );
+    EQUALS( util::wildcard( "../test/e*", true ), (PathVec{}) );
+    EQUALS( util::wildcard( "../test/test-fs.cp", true ), (PathVec{}) );
+    EQUALS( util::wildcard( "../test/test-fs.cpp", true ), (PathVec{"../test/test-fs.cpp"}) );
 }
 
 TEST( slashes )

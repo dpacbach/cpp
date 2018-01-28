@@ -131,6 +131,9 @@ StrVec read_file_lines( fs::path p ) {
 // relative then it is relative to CWD. Paths returned will  have
 // their  absolute/relative  nature  preserved  according  to the
 // input  p.  Also,  if input path is empty, it will return empty.
+// Note that, unlike some shells' globbing behavior, the wildcard
+// function does not give  any  special  treatment to files whose
+// names begin with a dot ("hidden files" on Linux).
 PathVec wildcard( fs::path const& p, bool with_folders ) {
 
     if( p.empty() )
@@ -164,17 +167,17 @@ PathVec wildcard( fs::path const& p, bool with_folders ) {
 
     auto cwd = fs::current_path();
 
-    // Regex  must  match  full filename, so we surround with ^$.
-    regex rx( string( "^" ) + rx_glob + "$" );
     smatch m;
 
-    for( auto& i : fs::recursive_directory_iterator( folder ) ) {
+    for( auto& i : fs::directory_iterator( folder ) ) {
         if( fs::is_directory( i ) && !with_folders )
             // Don't include folders if  caller doesn't want them.
             continue;
         // This must be an lvalue for regex_match.
         auto fn = i.path().filename().string();
-        if( regex_match( fn, m, rx ) ) {
+        // regex_match forces regex to match full filename. Regex
+        // must match full filename.
+        if( regex_match( fn, m, regex( rx_glob ) ) ) {
             res.emplace_back(
                 // Match,  add  it to the list. But we need to be
                 // sure  to  preserve  absolute/relative   nature.

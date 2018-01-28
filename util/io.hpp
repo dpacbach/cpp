@@ -46,6 +46,9 @@ StrVec read_file_lines( fs::path p );
 // relative then it is relative to CWD. Paths returned will  have
 // their  absolute/relative  nature  preserved  according  to the
 // input  p.  Also,  if input path is empty, it will return empty.
+// Note that, unlike some shells' globbing behavior, the wildcard
+// function does not give  any  special  treatment to files whose
+// names begin with a dot ("hidden files" on Linux).
 PathVec wildcard( fs::path const& p, bool with_folders = true );
 
 } // namespace std
