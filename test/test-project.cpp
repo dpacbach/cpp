@@ -101,6 +101,11 @@ TEST( add_remove )
     pr::rm_from_project( proj, p1 );
     TRUE_( !util::contains( util::read_file_str( proj ), "..\\xyz.cpp" ) );
     TRUE_( !util::contains( util::read_file_str( flt  ), "..\\xyz.cpp" ) );
+
+    // Now we're just going to add  the source file back into the
+    // temp files just so that we have it on disk and can inspect
+    // it manually if desired.
+    pr::add_2_project( proj, p1 );
 }
 
 TEST( preprocessor )

@@ -93,12 +93,13 @@ string read_file_str( fs::path p ) {
     }
 
     // Verify that our calculation was correct; if not,  then  we
-    // could pay  with  unnecessary  allocations.  We  allow  the
-    // string to potentially be  one  character  smaller than the
-    // computed size because the getline() function it seems will
-    // ignore a newline character in the  file  if it is the very
-    // last character.
-    ASSERT( res.size() == size || res.size() == (size-1),
+    // could pay with unnecessary allocations.  We  generally  re-
+    // quire that the pre-computed size exceed  the  actual  size.
+    // We don't require that it  be  identical because on Windows
+    // CRLF  line  endings will be collapsed to one byte and also
+    // sometimes the final line ending  can  be  dropped  by  get-
+    // line().
+    ASSERT( res.size() <= size,
             "estimate of string size incorrect; res.size()"
             " == " << res.size() << ", size == " << size );
 
