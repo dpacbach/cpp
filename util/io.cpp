@@ -159,6 +159,9 @@ PathVec wildcard( fs::path const& p, bool with_folders ) {
     string rx_glob;
     for( auto c : abs.filename().string() ) {
         switch( c ) {
+            case ']': rx_glob += "\\]"; break;
+            case '[': rx_glob += "\\["; break;
+            case '+': rx_glob += "\\+"; break;
             case '.': rx_glob += "\\."; break;
             case '*': rx_glob += ".*";  break;
             case '?': rx_glob += '.';   break;
