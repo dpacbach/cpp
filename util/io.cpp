@@ -151,6 +151,14 @@ PathVec wildcard( fs::path const& p, bool with_folders ) {
     auto abs    = util::lexically_absolute( p );
     auto folder = abs.parent_path();
 
+    // ECMAScript is the default if no flags are specified.
+    auto flags = regex::ECMAScript;
+#ifndef OS_LINUX
+    // On a non-Linux platform assume that  the  file  system  is
+    // case-insensitive.
+    flags |= std::regex::icase;
+#endif
+
     // Convert  the  glob  pattern to a regex so we can use regex
     // machinery  to  match  files. Note that here we are not sup-
     // porting the full set  of  shell-style  glob symbols. As an
@@ -181,7 +189,7 @@ PathVec wildcard( fs::path const& p, bool with_folders ) {
         auto fn = i.path().filename().string();
         // regex_match forces regex to match full filename. Regex
         // must match full filename.
-        if( regex_match( fn, m, regex( rx_glob ) ) ) {
+        if( regex_match( fn, m, regex( rx_glob, flags ) ) ) {
             res.emplace_back(
                 // Match,  add  it to the list. But we need to be
                 // sure  to  preserve  absolute/relative   nature.
