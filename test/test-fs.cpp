@@ -58,6 +58,13 @@ TEST( wildcard )
     EQUALS( util::wildcard( "../test/e*", true ), (PathVec{}) );
     EQUALS( util::wildcard( "../test/test-fs.cp", true ), (PathVec{}) );
     EQUALS( util::wildcard( "../test/test-fs.cpp", true ), (PathVec{"../test/test-fs.cpp"}) );
+
+#ifndef OS_LINUX
+    // Test that on non-linux  platforms  (which  we are assuming
+    // have case-insensitive filesystems) that  the wildcard func-
+    // tion   enables  case-insensitivity  when  matching   files.
+    EQUALS( util::wildcard( "../test/TEs*-?s.?pp", true ), (PathVec{"../test/test-fs.cpp"}) );
+#endif
 }
 
 TEST( slashes )
