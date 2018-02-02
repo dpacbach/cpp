@@ -187,7 +187,7 @@ Project Project::read( fs::path const& file,
 
     auto p = parse( file, platform );
 
-    auto abs_dir = util::absnormpath( file ).parent_path();
+    auto abs_dir = util::lexically_absolute( file ).parent_path();
 
     auto use_rel = !base.empty();
 

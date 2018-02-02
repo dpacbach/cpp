@@ -96,12 +96,12 @@ Solution Solution::read( istream&        in,
 
     SolutionFile sf = SolutionFile::read( in );
 
-    auto abs_dir = util::absnormpath( sln_parent );
+    auto abs_dir = util::lexically_absolute( sln_parent );
 
     map<fs::path, Project> m;
 
     for( auto const& path : sf.projects() ) {
-        auto abs = util::normpath( abs_dir / path );
+        auto abs = util::lexically_normal( abs_dir / path );
         auto rel = base.empty()
                  ? abs : util::lexically_relative( abs, base );
 

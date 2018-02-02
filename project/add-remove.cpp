@@ -30,7 +30,7 @@ string to_prj( fs::path const& prj, fs::path const& src ) {
     return util::back_slashes(
         util::lexically_relative(
             util::lexically_absolute( src ),
-            util::absnormpath( prj ).parent_path()
+            util::lexically_absolute( prj ).parent_path()
         ).string()
     );
 }
@@ -45,7 +45,7 @@ string to_prj( fs::path const& prj, fs::path const& src ) {
 fs::path from_prj( fs::path const& prj, string const& src_win ) {
 
     auto src = fs::path( util::fwd_slashes( src_win ) );
-    auto prj_dir = util::absnormpath( prj ).parent_path();
+    auto prj_dir = util::lexically_absolute( prj ).parent_path();
     return util::lexically_normal( util::slash( prj_dir, src ) );
 }
 
