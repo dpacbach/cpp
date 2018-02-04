@@ -106,7 +106,31 @@ std::string to_string( std::tuple<Args...> const& tp ) {
     return "(" + util::join( v, "," ) + ")";
 }
 
+// This is a helper function that accepts a tuple as an  (unused)
+// argument  to  allow  deduction of the tuple's field types into
+// the function template's variadic args. Those variadic args are
+// then used to construct a  lambda  function that takes one para-
+// meter for each of the tuple types and attempts to construct an
+// object of type T from  them  using brace initialization syntax.
+// Ultimately, this function  serves  the  end  goal of selecting
+// multiple  columns  from a database and constructing objects of
+// user-defined structs from them.
+template<typename T, typename... Args>
+std::vector<T> select_struct( sqlite::database_binder&& db,
+                              std::tuple<Args...> const& ) {
+
+    std::vector<T> res;
+
+    db >> [&]( Args&&... args ) {
+        // Using this emplace_back +  brace  initialization + RVO
+        // we are hoping to avoid any copying or moving.
+        res.emplace_back( T{ std::move( args )... } );
+    };
+
+    return res;
 }
+
+} // namespace impl
 
 // We use this to extract  the  message from the sqlite_exception
 // if we catch one  since  there  is  some additional information
@@ -158,6 +182,80 @@ sqlite::database open( DBDesc    const& primary,
 
 // Attach to an existing connection.
 void attach( sqlite::database& db, DBDescVec const& dbs );
+
+// This  function  is  used  when one wants to select rows from a
+// database  and  convert the contents of each row into an object
+// of a user-defined class instead  of  e.g. returning a tuple of
+// columns separately. The requirements for this to work are that
+// a) the class or struct T must have a type member  `tuple_type`
+// that  supplies  the  type  list of fields of the struct in the
+// form of a tuple (because  it  seems that with template metapro-
+// gramming alone, the C++ language does not allow  deducing  the
+// types of the fields of a  class),  and  b) the class or struct
+// needs  to  be  initializable using brace initialization syntax
+// when given a list of fields of the correct type.  For  example,
+// to make the `Complex`  struct  usable  with this function, one
+// would simply add the tuple_type as follows:
+//
+// struct Complex {
+//
+//     using tuple_type = std::tuple<double, double>;
+//
+//     double real;
+//     double imag;
+// };
+//
+// Then one could call:
+//
+//     vector<Complex> res = select_struct<Complex>( db,
+//         "SELECT real, imag FROM ComplexNumbers" );
+//
+// One  disadvantage  with  this  approach is that the tuple_type
+// must be kept in sync manually with the fields  of  the  struct.
+// This is prone to error,  however  it  turns out that this func-
+// tion is actually pretty good at triggering either  compile  er-
+// rors or at least warning when there is any  kind  of  mismatch
+// between the two. Unfortunately though, an error  that  is  not
+// properly caught is when a  new  field  is  added to the struct
+// (and  tuple  type)  but  the SQL queries are not updated to in-
+// clude  that  extra  field. The sqlite C++ wrapper we are using
+// will simply  supply  that  parameter  as  default  constructed.
+template<typename T>
+std::vector<T> select_struct( sqlite::database&  db,
+                              std::string const& query ) {
+
+    // The type T is required to have a type field tuple_type. We
+    // don't care about this tuple  per  se,  we just need to get
+    // the types of its elements, which are assumed to correspond
+    // to the types of the fields of  the  struct  (no  more,  no
+    // less, and in order).
+    using fields_t = typename T::tuple_type;
+    return impl::select_struct<T>( db << query, fields_t{} );
+}
+
+// This  macro  should be called just after the definition of any
+// class  that will be used with the select_struct function above,
+// i.e., one that has a tuple_type member. It will check that the
+// struct has that member and  will  also  check that the size of
+// the struct matches the size of the tuple type exactly in order
+// to catch situations where a field is added or removed from the
+// struct  by the tuple_type is not updated accordingly. The fact
+// that  these size should agree is probably implementation depen-
+// dant and so it may not be  good  practice to rely on this, but
+// it seems reasonable and it works with gcc.
+//
+// It seems that if the struct T  is  missing a field or if there
+// is a type mismatch between a field and the  corresponding  one
+// in  the  tuple_type  that the compiler would give an error any-
+// way;  however, there are cases (such as when the type T simply
+// has an extra field not present in the tuple) that the compiler
+// would only give a warning, and so this  will  ensure  that  it
+// triggers a compile error.
+#define CHECK_TUPLE_SIZE( T )                                   \
+    static_assert( sizeof( T ) == sizeof( T::tuple_type ),      \
+                  "fields of " #T "'s tuple_type must be kept " \
+                  "consistent with the number, order, and "     \
+                  "types of " #T " itself." );
 
 // With move and/or NRVO this should be  a  convenient  yet  effi-
 // cient way to select data from the  db.  This  variant  is  for

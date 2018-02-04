@@ -365,4 +365,46 @@ TEST( sqlite )
     EQUALS( v7[1].size(), 34 );
 }
 
+TEST( select_struct )
+{
+    struct S {
+        using tuple_type = tuple<int, int, string, double>;
+
+        int    a;
+        int    b;
+        string c;
+        double d;
+    };
+
+    // If this macro fails to compile and you  have  not  changed
+    // anything about the struct S above, then  it  could  be  an
+    // implementation-specific  thing  where  tuples  and structs
+    // with same fields are not the same size.
+    CHECK_TUPLE_SIZE( S )
+
+    auto db = sqlite::open( { ":memory:", "", false } );
+
+    db << "CREATE TABLE t (a int, b int, c text, d float)";
+
+    db << "INSERT INTO t (a, b, c, d) values (4, 3, 'hello', 2.3)";
+    db << "INSERT INTO t (a, b, c, d) values (3, 4, 'hxllo', 2.1)";
+
+    auto vs = sqlite::select_struct<S>( db, "SELECT a,b,c,d FROM t" );
+
+    bool correct_type = is_same_v<decltype( vs ), vector<S>>;
+    TRUE_( correct_type );
+
+    EQUALS( vs.size(), 2 );
+
+    EQUALS( vs[0].a, 4       );
+    EQUALS( vs[0].b, 3       );
+    EQUALS( vs[0].c, "hello" );
+    EQUALS( vs[0].d, 2.3     );
+
+    EQUALS( vs[1].a, 3       );
+    EQUALS( vs[1].b, 4       );
+    EQUALS( vs[1].c, "hxllo" );
+    EQUALS( vs[1].d, 2.1     );
+}
+
 } // namespace testing
