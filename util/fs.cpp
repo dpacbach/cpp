@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "macros.hpp"
 #include "fs.hpp"
+#include "logger.hpp"
 #include "string-util.hpp"
 
 #include <algorithm>
@@ -374,6 +375,31 @@ void remove_if_exists( fs::path const& p ) {
     if( !fs::exists( p ) )
         return;
     fs::remove( p );
+}
+
+// This utility will rename a file only if it exists. If it  does
+// not  exist  it  will  do nothing. If log is true, the function
+// will  log if the file is renamed, but will not log if the file
+// is not renamed. Return  value  indicates  whether the file was
+// renamed. Note that the renaming will happen via the fs::rename
+// method which will throw an exception if a rename is  attempted
+// but fails; therefore, a value a  false returned from this func-
+// tion indicates that the file did not exist.
+bool rename_if_exists( fs::path const& from,
+                       fs::path const& to,
+                       bool log ) {
+
+    if( !fs::exists( from ) )
+        return false;
+
+    // File exists, so we must attempt to rename it.
+    if( log )
+        util::log << "moving " << from << " to " << to << "\n";
+
+    // Should throw an exception on failure.
+    fs::rename( from, to );
+
+    return true;
 }
 
 // Unfortunately we need this  function  because the function pro-

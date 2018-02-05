@@ -106,6 +106,18 @@ void touch( fs::path const& p );
 // use this wrapper to avoid throwing in that case.
 void remove_if_exists( fs::path const& p );
 
+// This utility will rename a file only if it exists. If it  does
+// not  exist  it  will  do nothing. If log is true, the function
+// will  log if the file is renamed, but will not log if the file
+// is not renamed. Return  value  indicates  whether the file was
+// renamed. Note that the renaming will happen via the fs::rename
+// method which will throw an exception if a rename is  attempted
+// but fails; therefore, a value a  false returned from this func-
+// tion indicates that the file did not exist.
+bool rename_if_exists( fs::path const& from,
+                       fs::path const& to,
+                       bool log = false );
+
 // Unfortunately we need this  function  because the function pro-
 // vided  in the filesystem library (last_write_time) seems to re-
 // turn time points with different interpretations  on  different

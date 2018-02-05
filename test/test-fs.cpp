@@ -267,6 +267,39 @@ TEST( read_write_file )
     EQUALS( fs::file_size( copy ), 21 );
 }
 
+TEST( rename )
+{
+    auto f1 = fs::temp_directory_path()/"abcdefg";
+    auto f2 = fs::temp_directory_path()/"gabcdef";
+
+    util::remove_if_exists( f1 );
+    util::remove_if_exists( f2 );
+    EQUALS( fs::exists( f1 ), false );
+    EQUALS( fs::exists( f2 ), false );
+
+    // Should a) not throw, b) return false
+    EQUALS( util::rename_if_exists( f1, f2 ), false );
+
+    util::touch( f1 );
+
+    EQUALS( util::rename_if_exists( f1, f2 ), true );
+
+    EQUALS( fs::exists( f1 ), false );
+    EQUALS( fs::exists( f2 ), true  );
+
+    EQUALS( util::rename_if_exists( f1, f2 ), false );
+
+    EQUALS( fs::exists( f1 ), false );
+    EQUALS( fs::exists( f2 ), true  );
+
+    util::touch( f1 );
+
+    EQUALS( util::rename_if_exists( f1, f2 ), true );
+
+    EQUALS( fs::exists( f1 ), false );
+    EQUALS( fs::exists( f2 ), true  );
+}
+
 TEST( filesystem )
 {
     bool b;
