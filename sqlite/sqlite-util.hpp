@@ -221,8 +221,7 @@ void attach( sqlite::database& db, DBDescVec const& dbs );
 // clude  that  extra  field. The sqlite C++ wrapper we are using
 // will simply  supply  that  parameter  as  default  constructed.
 template<typename T>
-std::vector<T> select_struct( sqlite::database&  db,
-                              std::string const& query ) {
+std::vector<T> select_struct( sqlite::database_binder&& db ) {
 
     // The type T is required to have a type field tuple_type. We
     // don't care about this tuple  per  se,  we just need to get
@@ -230,7 +229,14 @@ std::vector<T> select_struct( sqlite::database&  db,
     // to the types of the fields of  the  struct  (no  more,  no
     // less, and in order).
     using fields_t = typename T::tuple_type;
-    return impl::select_struct<T>( db << query, fields_t{} );
+    return impl::select_struct<T>( std::move( db ), fields_t{} );
+}
+
+// Same as above but takes db and query for convenience.
+template<typename T>
+std::vector<T> select_struct( sqlite::database&  db,
+                              std::string const& query ) {
+    return select_struct<T>( db << query );
 }
 
 // This  macro  should be called just after the definition of any

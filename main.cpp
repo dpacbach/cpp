@@ -4,7 +4,6 @@
 #include "fs.hpp"
 #include "logger.hpp"
 #include "main.hpp"
-#include "sqlite-util.hpp"
 #include "string-util.hpp"
 #include "stopwatch.hpp"
 
