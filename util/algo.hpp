@@ -79,4 +79,12 @@ auto map( Func const& f, std::vector<In> const& in )
     return res;
 }
 
+// Applies  function to each element in vector, disgarding return
+// value.
+template<typename Func, typename In>
+void map_( Func const& f, std::vector<In> const& in ) {
+
+    for( auto const& e : in ) f( e );
+}
+
 } // namespace util

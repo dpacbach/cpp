@@ -53,6 +53,15 @@ TEST( map )
     EQUALS( v1_res[2].y, 1 );
     EQUALS( v1_res[3].x, 8 );
     EQUALS( v1_res[3].y, 2 );
+
+    vector<int> v2{ 2, 3, 4 };
+    int count = 0;
+
+    auto mod = [&]( int x ){ count += x; };
+
+    util::map_( mod, v2 );
+
+    EQUALS( count, 9 );
 }
 
 TEST( algo )
