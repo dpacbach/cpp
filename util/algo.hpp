@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iterator>
+#include <vector>
 
 namespace util {
 
@@ -57,6 +58,25 @@ auto lower_bound( Container const& c, UnaryFunc func )
             count = step;
     }
     return first;
+}
+
+// Applies a function to each element of a vector, yielding a new
+// vector with the results. Function will be applied serially and
+// in order of the elements. Vector returned  will  be  pre  allo-
+// cated  and  should  be  NRVO'd so this function should be effi-
+// cient.
+template<typename Func, typename In>
+auto map( Func const& f, std::vector<In> const& in )
+       -> std::vector<decltype( f( in[0] ) )> {
+
+    using RetType = decltype( f( in[0] ) );
+
+    std::vector<RetType> res; res.reserve( in.size() );
+
+    for( auto const& e : in )
+        res.emplace_back( f( e ) );
+
+    return res;
 }
 
 } // namespace util

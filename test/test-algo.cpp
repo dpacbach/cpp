@@ -14,6 +14,47 @@ fs::path const data_local  = "../test/data-local";
 
 namespace testing {
 
+TEST( map )
+{
+    vector<int> v0{ 9, 1, 8, 2, 7, 3, 6, 4, 5 };
+
+    auto v0_res = util::map( L( _ + 2 ), v0 );
+
+    EQUALS( v0_res.size(), v0.size() );
+
+    EQUALS( v0_res[0], 11 );
+    EQUALS( v0_res[1], 3  );
+    EQUALS( v0_res[2], 10 );
+    EQUALS( v0_res[3], 4  );
+    EQUALS( v0_res[4], 9  );
+    EQUALS( v0_res[5], 5  );
+    EQUALS( v0_res[6], 8  );
+    EQUALS( v0_res[7], 6  );
+    EQUALS( v0_res[8], 7  );
+
+    struct S {
+        int x;
+        int y;
+    };
+
+    auto make_S = []( int n ){ return S{ n*2, n/2 }; };
+
+    vector<int> v1{ 1, 2, 3, 4 };
+
+    auto v1_res = util::map( make_S, v1 );
+
+    EQUALS( v1_res.size(), v1.size() );
+
+    EQUALS( v1_res[0].x, 2 );
+    EQUALS( v1_res[0].y, 0 );
+    EQUALS( v1_res[1].x, 4 );
+    EQUALS( v1_res[1].y, 1 );
+    EQUALS( v1_res[2].x, 6 );
+    EQUALS( v1_res[2].y, 1 );
+    EQUALS( v1_res[3].x, 8 );
+    EQUALS( v1_res[3].y, 2 );
+}
+
 TEST( algo )
 {
     auto find_n = []( int n, int test ) { return test < n; };
