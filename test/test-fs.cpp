@@ -218,6 +218,21 @@ TEST( touch )
 
     ASSERT_( !fs::exists( t1 ) );
 
+    using namespace std::chrono_literals;
+
+    // Ideally, this must be  a  time  delta  that  is small, but
+    // large enough to appear in file time stamps. And  on  Linux
+    // that's what it is.  But  on  Windows,  it appears that the
+    // time points we get from file time stamps don't contain any
+    // sub-second  information,  so we need to make it at least a
+    // second on that platform.
+#ifdef OS_LINUX
+    auto const delta = 10ms;
+#else
+    auto const delta = 1001ms;
+#endif
+
+    this_thread::sleep_for( delta );
     util::touch( t1 );
     ASSERT( fs::exists( t1 ), t1 << " does not exist" );
 
