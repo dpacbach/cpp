@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <fstream>
 
-#ifndef POSIX
+#ifdef _WIN32
 #   include <windows.h>
 #endif
 
@@ -395,12 +395,12 @@ void rename( fs::path const& from, fs::path const& to ) {
     // (with replacement of  existing  files)  and  then  returns
     // something "true" on error.
     auto func =
-#ifdef POSIX
-        ::rename;
-#else
+#ifdef _WIN32
         []( char const* x, char const* y ) -> bool {
             return !MoveFileEx( x, y, MOVEFILE_REPLACE_EXISTING );
         };
+#else
+        ::rename;
 #endif
 
     // Now do the rename and check return code.
