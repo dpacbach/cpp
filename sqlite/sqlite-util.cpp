@@ -45,7 +45,7 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
     // (i.e., non-wide) string on all  platforms and will not sur-
     // round  the  string  with quotes (unlike fs::path's default
     // streaming operator).
-    return (db << path.string());
+    return (db << util::fwd_slashes( path.string() ));
 }
 
 // This allows us to insert local or zoned time points  which  we
@@ -93,7 +93,8 @@ void attach( sqlite::database& db, DBDescVec const& dbs ) {
         auto const& [path, name, exists] = desc;
         (void)exists;
         dbdesc_exists( desc );
-        db << "ATTACH DATABASE ? as ?" << path.string() << name;
+        db << "ATTACH DATABASE ? as ?"
+           << util::fwd_slashes( path.string() ) << name;
     }
 }
 

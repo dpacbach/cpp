@@ -241,13 +241,15 @@ TEST( sqlite )
     // to  a  string  without  quotes around it, which the util::-
     // to_string method would do (as well as fs::path's streaming
     // operator<<);  i.e.,  when we insert a path into the DB, we
-    // do not want quotes around  it.  By default  the path would
-    // just  get cast to a string which would fail on  Windows be-
-    // cause there paths  by default are  represented by wide str-
-    // ing, so we have provided  our own overload of the database
-    // binder streaming operator which will call path.string() to
-    // force it  to a standard string.  If the below compiles and
-    // passes then that mechanism is working.
+    // do  not  want  quotes around it. By default the path would
+    // just get cast to a string  which  would fail on Windows be-
+    // cause  there  paths  by  default  are  represented by wide
+    // string,  so  we have provided our own overload of the data-
+    // base binder streaming operator which  will call the string
+    // member function on the path to  force  it  to  a  standard
+    // string (and it will also convert  backslashes  to  forward
+    // slashes).  If the below compiles and passes then that mech-
+    // anism is working.
     db << "INSERT INTO user (age, name) VALUES (?, ?)"
        << 765 << fs::path( "A/B/C" );
 
