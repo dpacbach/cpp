@@ -3,8 +3,6 @@
 ****************************************************************/
 #pragma once
 
-#include "logger.hpp"
-
 #include <chrono>
 #include <iostream>
 #include <map>
@@ -71,7 +69,9 @@ public:
 
     ~ScopedWatch() {
         watch.stop( name );
-        util::log << name << " time: " << watch.human( name )
+        // Must  go  to  cerr  here to avoid interfering with pro-
+        // grams that communicate their output via stdout.
+        std::cerr << name << " time: " << watch.human( name )
                   << "\n";
     }
 
