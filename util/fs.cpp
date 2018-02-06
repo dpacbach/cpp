@@ -9,6 +9,10 @@
 #include <algorithm>
 #include <fstream>
 
+#ifndef POSIX
+#   include <windows.h>
+#endif
+
 using namespace std;
 
 namespace util {
@@ -377,6 +381,33 @@ void remove_if_exists( fs::path const& p ) {
     fs::remove( p );
 }
 
+// We use this function  instead  of  fs::rename because it seems
+// that inder MinGW the  fs::rename  does  not  behave  to  spec;
+// namely, it will throw an error if the destination file already
+// exists, as opposed to  overwriting  it  atomically. Also, this
+// function will do  nothing  if  the  two  paths  compare  equal.
+void rename( fs::path const& from, fs::path const& to ) {
+
+    if( from == to )
+        return;
+
+    // Setup a function that takes two file names, does the  move
+    // (with replacement of  existing  files)  and  then  returns
+    // something "true" on error.
+    auto func =
+#ifdef POSIX
+        ::rename;
+#else
+        []( char const* x, char const* y ) -> bool {
+            return !MoveFileEx( x, y, MOVEFILE_REPLACE_EXISTING );
+        };
+#endif
+
+    // Now do the rename and check return code.
+    ASSERT( !func( from.string().c_str(), to.string().c_str() ),
+        "error renaming " << from << " to " << to );
+}
+
 // This utility will rename a file only if it exists. If it  does
 // not  exist  it  will  do nothing. If log is true, the function
 // will  log if the file is renamed, but will not log if the file
@@ -396,8 +427,10 @@ bool rename_if_exists( fs::path const& from,
     if( log )
         util::log << "moving " << from << " to " << to << "\n";
 
-    // Should throw an exception on failure.
-    fs::rename( from, to );
+    // Should throw an exception  on  failure.  Note we are using
+    // util::rename  instead  of fs::rename for reasons explained
+    // in the comments to that function.
+    util::rename( from, to );
 
     return true;
 }

@@ -106,6 +106,13 @@ void touch( fs::path const& p );
 // use this wrapper to avoid throwing in that case.
 void remove_if_exists( fs::path const& p );
 
+// We use this function  instead  of  fs::rename because it seems
+// that inder MinGW the  fs::rename  does  not  behave  to  spec;
+// namely, it will throw an error if the destination file already
+// exists, as opposed to  overwriting  it  atomically. Also, this
+// function will do  nothing  if  the  two  paths  compare  equal.
+void rename( fs::path const& from, fs::path const& to );
+
 // This utility will rename a file only if it exists. If it  does
 // not  exist  it  will  do nothing. If log is true, the function
 // will  log if the file is renamed, but will not log if the file

@@ -277,24 +277,30 @@ TEST( rename )
     EQUALS( fs::exists( f1 ), false );
     EQUALS( fs::exists( f2 ), false );
 
+    bool res;
+
     // Should a) not throw, b) return false
-    EQUALS( util::rename_if_exists( f1, f2 ), false );
+    res = util::rename_if_exists( f1, f2 );
+    EQUALS( res, false );
 
     util::touch( f1 );
 
-    EQUALS( util::rename_if_exists( f1, f2 ), true );
+    res = util::rename_if_exists( f1, f2 );
+    EQUALS( res, true );
 
     EQUALS( fs::exists( f1 ), false );
     EQUALS( fs::exists( f2 ), true  );
 
-    EQUALS( util::rename_if_exists( f1, f2 ), false );
+    res = util::rename_if_exists( f1, f2 );
+    EQUALS( res, false );
 
     EQUALS( fs::exists( f1 ), false );
     EQUALS( fs::exists( f2 ), true  );
 
     util::touch( f1 );
 
-    EQUALS( util::rename_if_exists( f1, f2 ), true );
+    res = util::rename_if_exists( f1, f2 );
+    EQUALS( res, true );
 
     EQUALS( fs::exists( f1 ), false );
     EQUALS( fs::exists( f2 ), true  );
