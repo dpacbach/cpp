@@ -9,6 +9,7 @@
 #include "util.hpp"
 
 using namespace std;
+using namespace std::string_literals;
 
 fs::path const data_common = "../test/data-common";
 fs::path const data_local  = "../test/data-local";
@@ -298,7 +299,7 @@ TEST( sqlite )
     };
     sqlite::insert_many_fast( db, tp3,
         "INSERT INTO user (age, weight) VALUES", LC(
-        string( "(" ) + util::to_string( get<1>( _ ) ) +
+        "("s + util::to_string( get<1>( _ ) ) +
         ", " + util::to_string( 8.9 ) + ")"
     ) );
 

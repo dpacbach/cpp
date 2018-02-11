@@ -8,6 +8,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace std::string_literals;
 
 namespace xml {
 
@@ -81,7 +82,7 @@ void parse( pugi::xml_document& doc, fs::path const& file ) {
     ifstream in( file.string() );
     ASSERT( in.good(), "failed to read file " << file );
 
-    parse( doc, in, string( "failed to parse xml file " )
+    parse( doc, in, "failed to parse xml file "s
            + util::to_string( file ) );
 }
 

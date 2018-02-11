@@ -12,6 +12,7 @@
 #include "string-util.hpp"
 
 using namespace std;
+using namespace std::string_literals;
 
 namespace pr = project;
 
@@ -340,19 +341,19 @@ TEST( bimap )
     TRUE_( r4 ); EQUALS( *r4, 101 );
 
     auto r5 = bmf1.key_safe( 101 );
-    TRUE_( r5 ); EQUALS( (*r5).get(), string( "" ) );
+    TRUE_( r5 ); EQUALS( (*r5).get(), ""s );
     auto r6 = bmf1.key_safe( 3000 );
-    TRUE_( r6 ); EQUALS( (*r6).get(), string( "yyy" ) );
+    TRUE_( r6 ); EQUALS( (*r6).get(), "yyy"s );
     auto r7 = bmf1.key_safe( 6 );
-    TRUE_( r7 ); EQUALS( (*r7).get(), string( "two" ) );
+    TRUE_( r7 ); EQUALS( (*r7).get(), "two"s );
     auto r8 = bmf1.key_safe( 3001 );
     TRUE_( !r8 );
 
     THROWS( bmf1.key(  102  ) );
     THROWS( bmf1.val( "988" ) );
 
-    EQUALS( bmf1.key(  98   ), string( "98" ) );
-    EQUALS( bmf1.key(  3    ), string( "d"  ) );
+    EQUALS( bmf1.key(  98   ), "98"s );
+    EQUALS( bmf1.key(  3    ), "d"s  );
     EQUALS( bmf1.val( "98"  ), 98 );
     EQUALS( bmf1.val( "d"   ), 3  );
 
@@ -362,11 +363,11 @@ TEST( bimap )
         v2.emplace_back( k, v );
 
     EQUALS( v2.size(), 13 );
-    EQUALS( get<0>( v2[0]  ), string( "" )    );
+    EQUALS( get<0>( v2[0]  ), ""s    );
     EQUALS( get<1>( v2[0]  ), 101             );
-    EQUALS( get<0>( v2[2]  ), string( "98" )  );
+    EQUALS( get<0>( v2[2]  ), "98"s  );
     EQUALS( get<1>( v2[2]  ), 98              );
-    EQUALS( get<0>( v2[12] ), string( "yyy" ) );
+    EQUALS( get<0>( v2[12] ), "yyy"s );
     EQUALS( get<1>( v2[12] ), 3000            );
 }
 

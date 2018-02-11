@@ -8,6 +8,7 @@
 #include "types.hpp"
 
 using namespace std;
+using namespace std::string_literals;
 
 namespace testing {
 
@@ -47,7 +48,7 @@ void run_single_test( size_t      line,
     using util::operator<<;
     checkpoint_line = line;
     checkpoint_file = file;
-    string test = string( "Test " ) + name;
+    string test = "Test "s + name;
     cout << left << setw( 40 ) << test;
     enum class Res { PASSED, SKIPPED, FAILED };
     Res result = Res::FAILED;
