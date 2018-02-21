@@ -7,6 +7,7 @@
 #include <map>
 
 using namespace std;
+using namespace std::string_literals;
 
 namespace svn {
 
@@ -146,7 +147,7 @@ namespace util {
 
 template<>
 string to_string( svn::Status const& s ) {
-    return string( "Status( " ) +
+    return "Status( "s +
         "path="   + to_string( s.path          ) + ", " +
         "change=" + to_string( s.change        ) + ", " +
         "tc="     + to_string( s.tree_conflict ) +

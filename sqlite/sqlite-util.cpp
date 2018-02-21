@@ -4,6 +4,7 @@
 #include "sqlite-util.hpp"
 
 using namespace std;
+using namespace std::string_literals;
 
 namespace sqlite {
 
@@ -28,7 +29,7 @@ void dbdesc_exists( DBDesc const& d ) {
 // (namely, the offending SQL query) which is not included in the
 // default message.
 string exception_msg( sqlite_exception const& e ) {
-    return string( "sqlite exception:" ) + e.what() +
+    return "sqlite exception:"s + e.what() +
            ", in query:\n\"" + e.get_sql() + "\"";
 }
 
@@ -78,12 +79,12 @@ sqlite::database_binder& operator<<( sqlite::database_binder& db,
 // them in the sqlite database as strings.
 template<>
 std::string impl::to_string( SysTimePoint const& p ) {
-    return string( "\"" ) + util::to_string( p ) + "\"";
+    return "\""s + util::to_string( p ) + "\"";
 }
 
 template<>
 std::string impl::to_string( ZonedTimePoint const& p ) {
-    return string( "\"" ) + util::to_string( p ) + "\"";
+    return "\""s + util::to_string( p ) + "\"";
 }
 
 // Attach to an existing connection.
