@@ -8,12 +8,9 @@
 #include "io.hpp"
 #include "md5-util.hpp"
 #include "opt-util.hpp"
-#include "preprocessor.hpp"
 #include "string-util.hpp"
 
 using namespace std;
-
-namespace pr = project;
 
 fs::path const data_common = "../test/data-common";
 fs::path const data_local  = "../test/data-local";
@@ -208,40 +205,6 @@ TEST( directed_graph )
     v = g.accessible( "G" );
     sort( begin( v ), end( v ) );
     EQUALS( v, (vector<fs::path>{ "B", "C", "D", "E", "F", "G" }) );
-
-    /*************************************************************
-    * reference_wrapper test
-    *************************************************************/
-    pr::GlobalRefIncludeMap m2;
-
-    fs::path p1 = "A/B/1", p2 = "A/B/2", p3 = "A/B/3", p4 = "A/B/4";
-
-    m2[p1] = { p1, p2 };
-    m2[p2] = { p1, p4 };
-    m2[p3] = { p1     };
-    m2[p4] = { p4     };
-
-    using DG2 = util::DirectedGraph<PathCRef>;
-    DG2 g2 = util::make_graph<PathCRef>( m2 );
-
-    PathCRefVec v2;
-
-    v2 = g2.accessible( p4 );
-    sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (PathCRefVec{ p4 }) );
-
-    v2 = g2.accessible( p3 );
-    sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (PathCRefVec{ p1, p2, p3, p4 }) );
-
-    v2 = g2.accessible( p2 );
-    sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (PathCRefVec{ p1, p2, p4 }) );
-
-    v2 = g2.accessible( p1 );
-    sort( begin( v2 ), end( v2 ) );
-    EQUALS( v2, (PathCRefVec{ p1, p2, p4 }) );
-
 }
 
 TEST( bimap )
