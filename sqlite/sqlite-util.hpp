@@ -123,7 +123,8 @@ std::vector<T> select_struct( sqlite::database_binder&& db,
 
     db >> [&]( Args&&... args ) {
         // Using this emplace_back +  brace  initialization + RVO
-        // we are hoping to avoid any copying or moving.
+        // we are hoping to  avoid any copying (though  there may
+        // be some moving).
         res.emplace_back( T{ std::move( args )... } );
     };
 
