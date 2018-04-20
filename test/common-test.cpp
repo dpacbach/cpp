@@ -19,9 +19,9 @@ namespace testing {
 size_t      checkpoint_line = 0;
 char const* checkpoint_file = "none";
 
-string fail() { return util::c_red    + "Fail" + util::c_norm; }
-string pass() { return util::c_green  + "Pass" + util::c_norm; }
-string skip() { return util::c_yellow + "Skip" + util::c_norm; }
+string fail() { return util::c_red    + "fail" + util::c_norm; }
+string pass() { return util::c_green  + "pass" + util::c_norm; }
+string skip() { return util::c_yellow + "skip" + util::c_norm; }
 
 string bar() {
     return "---------------------------------------------------";
@@ -48,8 +48,7 @@ void run_single_test( size_t      line,
     using util::operator<<;
     checkpoint_line = line;
     checkpoint_file = file;
-    string test = "Test "s + name;
-    cout << left << setw( 40 ) << test;
+    cout << "test "s + name + " ";
     enum class Res { PASSED, SKIPPED, FAILED };
     Res result = Res::FAILED;
     string err;
@@ -78,7 +77,6 @@ void run_single_test( size_t      line,
         err += util::to_string( checkpoint_line );
         result = Res::FAILED;
     }
-    cerr << "     | ";
     bool failed = false;
     switch( result ) {
     case Res::FAILED:
