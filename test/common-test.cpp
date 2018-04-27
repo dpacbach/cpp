@@ -48,7 +48,7 @@ void run_single_test( size_t      line,
     using util::operator<<;
     checkpoint_line = line;
     checkpoint_file = file;
-    cout << "test "s + name + " ";
+    cout << string( name ) + " ";
     enum class Res { PASSED, SKIPPED, FAILED };
     Res result = Res::FAILED;
     string err;
