@@ -25,7 +25,15 @@ public:
 
     template<
         typename NameT_,
-        template<typename Key, typename Val> typename MapT
+        // typename... to allow for maps that may have additional
+        // template parameters (but  which  we  don't  care about
+        // here).
+        template<
+            typename Key,
+            typename Val,
+            typename...
+        >
+        typename MapT
     >
     friend DirectedGraph<NameT_> make_graph(
                MapT<
@@ -65,7 +73,14 @@ DirectedGraph<NameT>::DirectedGraph( GraphVec&& edges,
 
 template<
     typename NameT,
-    template<typename Key, typename Val> typename MapT
+    // typename...  to  allow  for  maps that may have additional
+    // template parameters (but which  we  don't care about here).
+    template<
+        typename Key,
+        typename Val,
+        typename...
+    >
+    typename MapT
 >
 DirectedGraph<NameT> make_graph( MapT<
                                      NameT,

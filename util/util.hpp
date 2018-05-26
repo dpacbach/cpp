@@ -116,7 +116,9 @@ OptRef<ValT const> get_val_safe( MapT<KeyT,ValT> const& m,
 template<
     typename KeyT,
     typename ValT,
-    template<typename KeyT_, typename ValT_>
+    // typename...  to  allow  for  maps that may have additional
+    // template parameters (but which  we  don't care about here).
+    template<typename KeyT_, typename ValT_, typename...>
     typename MapT
 >
 ValT const& get_val( MapT<KeyT,ValT> const& m,
