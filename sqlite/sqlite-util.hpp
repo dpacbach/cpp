@@ -414,7 +414,10 @@ void insert_many_fast( sqlite::database&  db,
 
     // Do  the  entire  operation  in  chunks  to avoid exceeding
     // sqlite's maximum query length.
-    for( auto [l,r] : util::chunks( in.size(), impl::chunk ) ) {
+    for( auto& p : util::chunks( in.size(), impl::chunk ) ) {
+        // clang seems to give an `unused variable' warning if we
+        // put this structured  binding  in  the  for  loop  (?!).
+        auto const& [l,r] = p;
         // This is the number  of  elements  in this chunk, which
         // may  be less than impl::chunk if we're on the last one.
         std::vector<std::string> strs( r-l );
@@ -455,7 +458,10 @@ void insert_many_fast( sqlite::database&     db,
 
     // Do  the  entire  operation  in  chunks  to avoid exceeding
     // sqlite's maximum query length.
-    for( auto [l,r] : util::chunks( in.size(), impl::chunk ) ) {
+    for( auto& p : util::chunks( in.size(), impl::chunk ) ) {
+        // clang seems to give an `unused variable' warning if we
+        // put this structured  binding  in  the  for  loop  (?!).
+        auto const& [l,r] = p;
         // This is the number  of  elements  in this chunk, which
         // may  be less than impl::chunk if we're on the last one.
         std::vector<std::string> strs( r-l );
