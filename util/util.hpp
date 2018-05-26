@@ -152,9 +152,8 @@ void uniq_sort( std::vector<T>& v ) {
 // this  specialization  will not be used (which is what we want).
 namespace std {
 
-    // Specializing hash<>
-    template<>
-    // Adding template for contents of reference_wrapper
+    // Specializing hash<>, but then adding template for contents
+    // of reference_wrapper
     template<typename T>
     struct hash<reference_wrapper<T>> {
         auto operator()(
