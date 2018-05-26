@@ -60,8 +60,9 @@ vector<string_view> split_strip( string_view sv, char c ) {
 
     auto res = split( sv, c );
     transform( begin( res ), end( res ), begin( res ), strip );
-    auto new_end = remove_if(
-            begin( res ), end( res ), std::empty<string_view> );
+    auto new_end = std::remove_if(
+            begin( res ), end( res ),
+            []( string_view sv ){ return sv.empty(); } );
     res.erase( new_end, end( res ) );
     return res;
 }
