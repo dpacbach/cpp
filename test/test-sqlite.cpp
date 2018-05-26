@@ -115,11 +115,13 @@ TEST( sqlite )
 
     db << query >> opt;
 
+#ifndef CLANG_LIBSTDCPP_NO_VARIANT
     // Test variant. Below  function  body  should  not be called.
     auto var = []( int, variant<string> const&, double ){};
     // This  should throw because the variant (with no nullptr_t)
     // type should not allow null values.
     THROWS( db << query >> var );
+#endif
 
     // Test blobs.
     db << "INSERT INTO user (name,data) VALUES (?,?);"
