@@ -249,7 +249,6 @@ TEST( map_par )
     THROWS( util::par::map( inc_err, v7, 0 ) );
 }
 
-#ifndef CLANG_LIBSTDCPP_NO_VARIANT
 TEST( map_par_safe )
 {
     // In this test, when creating vectors of Result's, can't use
@@ -309,6 +308,5 @@ TEST( map_par_safe )
     EQUALS( res_v7[3], util::Result<fs::path>( "3" ) );
     EQUALS( res_v7[4], util::Result<fs::path>( "2" ) );
 }
-#endif
 
 } // namespace testing
