@@ -81,7 +81,7 @@ vector<string_view> split_strip( string_view sv, char c ) {
 }
 
 vector<string> wrap_text_fn( string_view text,
-                             IsStrOkFunc is_too_long ) {
+                             IsStrOkFunc is_ok ) {
   auto words = util::split_strip_any( text, " \n\r\t" );
   vector<string> res;
   string line;
@@ -93,7 +93,7 @@ vector<string> wrap_text_fn( string_view text,
     else
         proposed += ' ' + string( word );
 
-    if( !is_too_long( proposed ) ) {
+    if( is_ok( proposed ) ) {
         line = proposed;
     } else {
         if( line.empty() )
@@ -113,7 +113,7 @@ vector<string> wrap_text_fn( string_view text,
 
 vector<string> wrap_text( string_view text, int max_length ) {
     return wrap_text_fn( text, [max_length]( string_view sv ) {
-        return int( sv.size() ) > max_length;
+        return int( sv.size() ) <= max_length;
     });
 }
 

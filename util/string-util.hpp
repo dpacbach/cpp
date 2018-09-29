@@ -116,19 +116,21 @@ std::vector<std::string_view> split_strip_any(
 
 using IsStrOkFunc = std::function<bool( std::string_view )>;
 
-// Will wrap the text using the is_too_long callback. The call-
-// back should return true is the string given to it is too long.
-// Thus the wrap_text_fn function will return a vector of lines
-// such that each line would case the is_too_long function to re-
-// turn false. The exception to this is when a word is itself
-// "too long", in which case it will be put on its own line any-
-// way.
+// Will wrap the text using the is_ok callback. The callback
+// should return true if the string given to it has an acceptible
+// length. It is assumed that if the function returns false for a
+// given string that it will also return false for all strings
+// longer than it, and conversely for `true`. Thus the
+// wrap_text_fn function will return a vector of lines such that
+// each line would case the is_ok function to return true. The
+// exception to this is when a word is itself "too long", in
+// which case it will be put on its own line anyway.
 //
 // The `text` parameter may contain any manner of spaces, tabs,
 // or newlines between words, and these will all be stripped away
 // (not retained in result).
 std::vector<std::string> wrap_text_fn( std::string_view text,
-                                       IsStrOkFunc is_too_long );
+                                       IsStrOkFunc is_ok );
 
 // Wraps text such that each resulting line will be <= to the
 // max_length. The exception is if a word is itself "too long" in
