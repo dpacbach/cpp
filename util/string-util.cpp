@@ -2,6 +2,7 @@
 * String utilities
 ****************************************************************/
 #include "datetime.hpp"
+#include "macros.hpp"
 #include "string-util.hpp"
 
 #include <algorithm>
@@ -39,12 +40,14 @@ string_view strip( string_view sv ) {
     return sv;
 }
 
-// Split a string on a character.
-vector<string_view> split( string_view sv, char c ) {
-
+// Split a string on any character from the list. NOTE: this does
+// not split on the `chars` string as a whole, it splits on any
+// of the individual characters in the `chars`.
+vector<string_view>
+split_on_any( string_view sv, string_view chars ) {
     vector<string_view> res;
     while( true ) {
-        auto next = sv.find_first_of( c );
+        auto next = sv.find_first_of( chars );
         if( next == string_view::npos ) break;
         res.push_back( sv.substr( 0, next ) );
         // Remove what we just added, plus c
@@ -54,16 +57,64 @@ vector<string_view> split( string_view sv, char c ) {
     return res;
 }
 
+// Split a string on a character.
+vector<string_view> split( string_view sv, char c ) {
+    return split_on_any( sv, string_view( &c, 1 ) );
+}
+
 // Split  a  string, strip all elements, and remove empty strings
 // from result.
-vector<string_view> split_strip( string_view sv, char c ) {
-
-    auto res = split( sv, c );
+vector<string_view> split_strip_any( string_view sv,
+                                     string_view chars ) {
+    auto res = split_on_any( sv, chars );
     transform( begin( res ), end( res ), begin( res ), strip );
     auto new_end = std::remove_if(
             begin( res ), end( res ), L( _.empty() ) );
     res.erase( new_end, end( res ) );
     return res;
+}
+
+// Split  a  string, strip all elements, and remove empty strings
+// from result.
+vector<string_view> split_strip( string_view sv, char c ) {
+    return split_strip_any( sv, string_view( &c, 1 ) );
+}
+
+vector<string> wrap_text_fn( string_view text,
+                             IsStrOkFunc is_too_long ) {
+  auto words = util::split_strip_any( text, " \n\r\t" );
+  vector<string> res;
+  string line;
+  for( auto const& word : words ) {
+    string proposed;
+    proposed = line;
+    if( proposed.empty() )
+        proposed = word;
+    else
+        proposed += ' ' + string( word );
+
+    if( !is_too_long( proposed ) ) {
+        line = proposed;
+    } else {
+        if( line.empty() )
+            // word on its own line.
+            res.emplace_back( move( proposed ) );
+        else {
+            // push current line and put new word on next line.
+            res.emplace_back( move( line ) );
+            line = word;
+        }
+    }
+  }
+  if( !line.empty() )
+      res.emplace_back( move( line ) );
+  return res;
+}
+
+vector<string> wrap_text( string_view text, int max_length ) {
+    return wrap_text_fn( text, [max_length]( string_view sv ) {
+        return int( sv.size() ) > max_length;
+    });
 }
 
 // Convert element type.

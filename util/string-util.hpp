@@ -96,10 +96,45 @@ std::string_view strip( std::string_view sv );
 std::vector<std::string_view>
 split( std::string_view sv, char c );
 
+// Split a string on any character from the list. NOTE: this does
+// not split on the `chars` string as a whole, it splits on any
+// of the individual characters in the `chars`.
+std::vector<std::string_view>
+split_on_any( std::string_view sv, std::string_view chars );
+
 // Split a string, strip all elements, and remove empty strings
 // from result.
 std::vector<std::string_view>
 split_strip( std::string_view sv, char c );
+
+// Split a string, strip all elements, and remove empty strings
+// from result. NOTE: this does not split on the `chars` string
+// as a whole, it splits on any of the individual characters in
+// the `chars`.
+std::vector<std::string_view> split_strip_any(
+        std::string_view sv, std::string_view chars );
+
+using IsStrOkFunc = std::function<bool( std::string_view )>;
+
+// Will wrap the text using the is_too_long callback. The call-
+// back should return true is the string given to it is too long.
+// Thus the wrap_text_fn function will return a vector of lines
+// such that each line would case the is_too_long function to re-
+// turn false. The exception to this is when a word is itself
+// "too long", in which case it will be put on its own line any-
+// way.
+//
+// The `text` parameter may contain any manner of spaces, tabs,
+// or newlines between words, and these will all be stripped away
+// (not retained in result).
+std::vector<std::string> wrap_text_fn( std::string_view text,
+                                       IsStrOkFunc is_too_long );
+
+// Wraps text such that each resulting line will be <= to the
+// max_length. The exception is if a word is itself "too long" in
+// which case it will be put on its own line anyway.
+std::vector<std::string> wrap_text( std::string_view text,
+                                    int max_length );
 
 // Convert element type.
 std::vector<std::string>
