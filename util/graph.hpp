@@ -19,7 +19,7 @@ namespace util {
 ****************************************************************/
 
 template<typename NameT>
-class DirectedGraph : util::non_copyable {
+class DirectedGraph : util::movable_only {
 
 public:
 

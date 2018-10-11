@@ -15,7 +15,7 @@ namespace util {
 /* Error: this struct  is  essentially  just  a  wrapper around a
  * string  for  the purpose of distinguishing it type-wise from a
  * string and to prevent implicit construction. */
-struct Error : public non_copyable {
+struct Error : public movable_only {
     explicit Error() {}
     explicit Error( std::string_view sv ) : msg( sv ) {}
     bool operator==( Error const& rhs ) const

@@ -38,7 +38,7 @@ namespace util {
 * not need to be sorted in any way.
 ****************************************************************/
 template<typename KeyT, typename ValT>
-class BiMapFixed : util::non_copyable {
+class BiMapFixed : util::movable_only {
 
 public:
 
@@ -239,7 +239,7 @@ KeyT const& BiMapFixed<KeyT, ValT>::key( ValT const& val ) const {
 *
 * Values are returned as optional references.
 ****************************************************************/
-template<typename T> class BDIndexMap : util::non_copyable {
+template<typename T> class BDIndexMap : util::movable_only {
 
 public:
     // NOTE: the contained data must be a vector of unique items;
