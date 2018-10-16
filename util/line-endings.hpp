@@ -43,17 +43,21 @@ void unix2dos( Container& in,
     // tional allocation.  However,  this  is  of  course  just a
     // heuristic which will not be optimal or even helpful in all
     // cases.
-    size_t estimate = in.size() + (in.size() / 20);
+    constexpr size_t denominator{20}; // 1/20 == 5%
+    size_t estimate = in.size() + (in.size() / denominator);
     Container out; out.reserve( estimate );
 
+    constexpr char LF = 0x0A;
+    constexpr char CR = 0x0D;
+
     for( auto i = std::begin( in ); i != std::end( in ); ++i ) {
-        if( *i == 0x0A ) {
+        if( *i == LF ) {
             // We have encountered an  LF character, so therefore
             // we need to insert a CR character before  this  one
             // either if we're at the beginning or if there isn't
             // already a CR character before this one.
-            if( i == std::begin( in ) || *(i-1) != 0x0D )
-                out.push_back( 0x0D );
+            if( i == std::begin( in ) || *(i-1) != CR )
+                out.push_back( CR );
         }
         out.push_back( *i );
     }

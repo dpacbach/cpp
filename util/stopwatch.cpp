@@ -63,12 +63,20 @@ string StopWatch::human( string_view name ) const {
     auto m  = minutes( name );
     auto s  = seconds( name );
     auto ms = milliseconds( name );
+
+    constexpr int64_t seconds_in_minute{60};
+    constexpr int64_t millis_in_second{1000};
+
+    // When time is less than this number of seconds then we will
+    // include milliseconds.
+    constexpr int64_t small_enough_seconds_for_millis{10};
+
     if( m > 0 )
-        out << m << "m" << s % 60 << "s";
+        out << m << "m" << s % seconds_in_minute << "s";
     else if( s > 0 ) {
         out << s;
-        if( s < 10 )
-            out << "." << ms % 1000;
+        if( s < small_enough_seconds_for_millis )
+            out << "." << ms % millis_in_second;
         out << "s";
     }
     else

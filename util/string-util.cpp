@@ -135,7 +135,7 @@ fs::path to_path( string_view sv ) {
 vector<fs::path> to_paths( vector<string> const& ss ) {
 
     vector<fs::path> res; res.reserve( ss.size() );
-    for( auto s : ss )
+    for( auto const& s : ss )
         res.emplace_back( s );
     return res;
 }

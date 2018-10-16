@@ -173,9 +173,14 @@ string fmt_time( system_clock::time_point const& p ) {
     // ports outputting times.
     seconds secs( t );
 
+    // A duration less than one second, when expressed in
+    // nanoseconds, will always have <= 9 digits in decimal.
+    constexpr size_t max_nanoseconds_digits = 9;
+
     // Start with the date/time  base  which  we can extract from
     // the time_t, then add in nanoseconds.
-    ss << fmt_time( secs ) << "." << setw( 9 ) << ns.count();
+    ss << fmt_time( secs ) << "."
+       << setw( max_nanoseconds_digits ) << ns.count();
 
     string res = ss.str();
 

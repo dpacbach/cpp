@@ -43,7 +43,8 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
         if constexpr( sizeof( StringT ) == 1 )
             return (std::tolower( l ) == std::tolower( r ));
         int l_i( l ), r_i( r );
-        if( l_i > 127 || r_i > 127 )
+        constexpr int signed_byte_max{127};
+        if( l_i > signed_byte_max || r_i > signed_byte_max )
             // not sure how to make higher-order chars  lower-
             // case, so just compare them.
             return (l_i == r_i);
@@ -282,10 +283,12 @@ std::ostream& operator<<( std::ostream&          out,
 * From-String utilities
 ****************************************************************/
 
+constexpr int default_base{10}; // base 10 is decimal
+
 // This is to replace std::stoi -- it will enforce that the input
 // string is not empty and  that  the parsing consumes the entire
 // string.
-int stoi( std::string const& s, int base = 10 );
+int stoi( std::string const& s, int base = default_base );
 
 } // namespace util
 
