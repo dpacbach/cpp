@@ -168,3 +168,12 @@ namespace std {
     };
 
 } // namespace std
+
+namespace gsl {
+
+// owner<T*> is an alias for T*.  It just marks a pointer as owning,
+// used by tools such as clang-tidy.
+template <class T, class = std::enable_if_t<std::is_pointer<T>::value>>
+using owner = T;
+
+} // namespace gsl

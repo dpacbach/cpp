@@ -15,7 +15,7 @@ struct Logger : public singleton {
 
 public:
     // Get the global logger instance.
-    static Logger& logger();
+    static Logger& logger() noexcept;
 
     // When this flag is  false,  logging  has  no  effect. If it
     // false by default.

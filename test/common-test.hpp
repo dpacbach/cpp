@@ -6,6 +6,12 @@
 #include "colors.hpp"
 #include "macros.hpp"
 
+#include <exception>
+#include <functional>
+#include <regex>
+#include <string>
+#include <vector>
+
 namespace testing {
 
 // These are updated on each  macro  call  and are printed out in

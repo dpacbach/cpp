@@ -21,7 +21,7 @@ using Changer = void( vector<char>& );
 // stamp  will  be  touched  if  any changes to the file are made.
 // Bool return value indicates whether file contents were changed
 // or not (regardless of time stamp).
-bool change_le( Changer* f, fs::path p, bool keepdate ) {
+bool change_le( Changer* f, fs::path const& p, bool keepdate ) {
 
     auto v    = read_file( p );
     auto size = v.size();
@@ -60,8 +60,9 @@ bool change_le( Changer* f, fs::path p, bool keepdate ) {
 // default, the time stamp will be  touched if any changes to the
 // file are made. Bool return value indicates  whether  file  con-
 // tents were changed or not (regardless of time stamp).
-bool dos2unix( fs::path p, bool keepdate ) {
-    return change_le( dos2unix, p, keepdate );
+bool dos2unix( fs::path const& p, bool keepdate ) {
+    auto fn = []( vector<char>& _ ) { dos2unix( _ ); };
+    return change_le( fn, p, keepdate );
 }
 
 // Open  the given path and edit it to change LF to CRLF. This at-
@@ -74,8 +75,9 @@ bool dos2unix( fs::path p, bool keepdate ) {
 // contain  valid  DOS  line endings. Bool return value indicates
 // whether file contents were changed  or not (regardless of time-
 // stamp).
-bool unix2dos( fs::path p, bool keepdate ) {
-    return change_le( unix2dos, p, keepdate );
+bool unix2dos( fs::path const& p, bool keepdate ) {
+    auto fn = []( vector<char>& _ ) { unix2dos( _ ); };
+    return change_le( fn, p, keepdate );
 }
 
 }

@@ -7,7 +7,7 @@ namespace util {
 
 bool Logger::enabled = false;
 
-Logger& Logger::logger() {
+Logger& Logger::logger() noexcept {
     static Logger global_logger;
     return global_logger;
 }

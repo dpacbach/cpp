@@ -81,7 +81,7 @@ vector<string_view> split_strip( string_view sv, char c ) {
 }
 
 vector<string> wrap_text_fn( string_view text,
-                             IsStrOkFunc is_ok ) {
+                             IsStrOkFunc const& is_ok ) {
   auto words = util::split_strip_any( text, " \n\r\t" );
   vector<string> res;
   string line;
@@ -120,7 +120,7 @@ vector<string> wrap_text( string_view text, int max_length ) {
 // Convert element type.
 vector<string> to_strings( vector<string_view> const& svs ) {
 
-    vector<string> res;
+    vector<string> res; res.reserve( svs.size() );
     for( auto sv : svs )
         res.emplace_back( sv );
     return res;
@@ -134,7 +134,7 @@ fs::path to_path( string_view sv ) {
 // Convert element type.
 vector<fs::path> to_paths( vector<string> const& ss ) {
 
-    vector<fs::path> res;
+    vector<fs::path> res; res.reserve( ss.size() );
     for( auto s : ss )
         res.emplace_back( s );
     return res;

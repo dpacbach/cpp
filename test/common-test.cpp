@@ -5,6 +5,7 @@
 #include "main.hpp"
 
 #include "logger.hpp"
+#include "string-util.hpp"
 #include "types.hpp"
 
 using namespace std;
@@ -19,9 +20,9 @@ namespace testing {
 size_t      checkpoint_line = 0;
 char const* checkpoint_file = "none";
 
-string fail() { return util::c_red    + "fail" + util::c_norm; }
-string pass() { return util::c_green  + "pass" + util::c_norm; }
-string skip() { return util::c_yellow + "skip" + util::c_norm; }
+string fail() { return string( util::c_red )    + "fail" + string( util::c_norm ); }
+string pass() { return string( util::c_green )  + "pass" + string( util::c_norm ); }
+string skip() { return string( util::c_yellow ) + "skip" + string( util::c_norm ); }
 
 string bar() {
     return "---------------------------------------------------";
@@ -60,8 +61,8 @@ void run_single_test( size_t      line,
     } catch( failed_exception const& e ) {
         err = e.what();
         result = Res::FAILED;
-    } catch( sqlite::sqlite_exception const& e ) {
-        std::cerr << sqlite::exception_msg( e ) << "\n";
+    //} catch( sqlite::sqlite_exception const& e ) {
+    //    std::cerr << sqlite::exception_msg( e ) << "\n";
     } catch( exception const& e ) {
         err = e.what();
         err += "\nLast checkpoint: ";

@@ -10,6 +10,8 @@
 #include "string-util.hpp"
 #include "util.hpp"
 
+#include <thread>
+
 using namespace std;
 
 fs::path const data_common = "../test/data-common";

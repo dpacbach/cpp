@@ -49,8 +49,8 @@ public:
 
     // If  sorted is false then the data will be sorted according
     // to the first element in the pair.
-    BiMapFixed( std::vector<value_type>&& data,
-                bool sorted = false );
+    explicit BiMapFixed( std::vector<value_type>&& data,
+                         bool sorted = false );
 
     // Data will be sorted according to the first element in pair.
     BiMapFixed( std::initializer_list<value_type> data );
@@ -247,8 +247,8 @@ public:
     // then  set  the is_uniq_sorted flag to false and it will be
     // done for you. If you don't do this then this class may not
     // function properly.
-    BDIndexMap( std::vector<T>&& data,
-                bool             is_uniq_sorted = false );
+    explicit BDIndexMap( std::vector<T>&& data,
+                         bool             is_uniq_sorted = false );
 
     // Returns #keys (== #values)
     size_t size() const { return m_data.size(); }

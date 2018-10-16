@@ -10,6 +10,7 @@ namespace util {
 struct movable_only {
 
     movable_only()                                 = default;
+    ~movable_only()                                = default;
 
     movable_only( movable_only const& )            = delete;
     movable_only& operator=( movable_only const& ) = delete;
@@ -24,6 +25,7 @@ struct movable_only {
 struct non_movable {
 
     non_movable()                                = default;
+    ~non_movable()                               = default;
 
     non_movable( non_movable const& )            = default;
     non_movable& operator=( non_movable const& ) = default;
@@ -37,6 +39,7 @@ struct non_movable {
 struct non_copy_non_move {
 
     non_copy_non_move()                                      = default;
+    ~non_copy_non_move()                                     = default;
 
     non_copy_non_move( non_copy_non_move const& )            = delete;
     non_copy_non_move& operator=( non_copy_non_move const& ) = delete;

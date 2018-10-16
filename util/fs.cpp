@@ -99,7 +99,7 @@ fs::path lexically_normal( fs::path const& p ) {
 
     bool is_abs = p.is_absolute(), is_rel = p.is_relative();
     fs::path res;
-    for( auto c : p ) {
+    for( auto const& c : p ) {
         if( c == "." )
             // The single dot we can always skip  at  this  stage.
             // The only time we need  one  is  when we are normal-

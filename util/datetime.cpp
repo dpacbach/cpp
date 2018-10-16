@@ -30,9 +30,9 @@ TZOffset tz_local() {
     // function will decide based on the current time which phase
     // of daylight savings time  we  are  in  which will be added
     // into tm_gmtoff.
-    time_t time = ::time( NULL );
+    time_t time = ::time( nullptr );
     // This will be populated by localtime_r.
-    tm local;
+    tm local{};
     // localtime_r is a threadsafe version  of localtime since it
     // does  not  mutate  any  global  data, though it may not be
     // fully portable.
@@ -109,15 +109,15 @@ string fmt_time( seconds time ) {
     // epoch time traditionally refers to UTC time zone, but this
     // is not relevant here.
 #ifdef _WIN32
-    tm cal_time; gmtime_s( &cal_time, &t );
+    tm cal_time{}; gmtime_s( &cal_time, &t );
 #else
-    tm cal_time; gmtime_r( &t, &cal_time );
+    tm cal_time{}; gmtime_r( &t, &cal_time );
 #endif
 
     // Place to put the  result.  Size  of  result including null
     // zero; compute it from template  to  avoid magic numbers in
     // code.
-    array<char, sizeof( "0000-00-00 00:00:00" )> cs;
+    array<char, sizeof( "0000-00-00 00:00:00" )> cs{};
 
     char* const start = begin( cs );
 

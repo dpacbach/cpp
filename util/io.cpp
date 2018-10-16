@@ -3,12 +3,15 @@
 ****************************************************************/
 #include "io.hpp"
 #include "macros.hpp"
+#include "util.hpp"
 
 #include <cstdio>
 #include <fstream>
 #include <regex>
 
 using namespace std;
+
+using gsl::owner;
 
 namespace util {
 
@@ -23,7 +26,7 @@ vector<char> read_file( fs::path const& p ) {
     size_t size = fs::file_size( p );
     vector<char> res( size );
 
-    FILE* fp = fopen( p.string().c_str(), "rb" );
+    gsl::owner<FILE*> fp{ fopen( p.string().c_str(), "rb" ) };
     ASSERT( fp, "failed to open file " << p );
 
     // Read the bytes.
@@ -43,7 +46,7 @@ vector<char> read_file( fs::path const& p ) {
 // Open the file, truncate it,  and  write  given  vector  to  it.
 void write_file( fs::path const& p, vector<char> const& v ) {
 
-    FILE* fp = fopen( p.string().c_str(), "wb" );
+    gsl::owner<FILE*> fp{ fopen( p.string().c_str(), "wb" ) };
     ASSERT( fp, "failed to open or create file " << p );
 
     size_t size = v.size();
@@ -73,7 +76,7 @@ void copy_file( fs::path const& from, fs::path const& to ) {
 }
 
 // Read a text file into a string in its entirety.
-string read_file_str( fs::path p ) {
+string read_file_str( fs::path const& p ) {
 
     ifstream in( p.string() );
     ASSERT( in.good(), "failed to open file " << p );
@@ -108,7 +111,7 @@ string read_file_str( fs::path p ) {
 
 // Read  a text file into a string in its entirety and then split
 // it into lines.
-StrVec read_file_lines( fs::path p ) {
+StrVec read_file_lines( fs::path const& p ) {
 
     ifstream in( p.string() );
     ASSERT( in.good(), "failed to open file " << p );

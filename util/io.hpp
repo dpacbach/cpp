@@ -29,11 +29,11 @@ void write_file( fs::path const& p, std::vector<char> const& v );
 void copy_file( fs::path const& from, fs::path const& to );
 
 // Read a text file into a string in its entirety.
-std::string read_file_str( fs::path p );
+std::string read_file_str( fs::path const& p );
 
 // Read  a text file into a string in its entirety and then split
 // it into lines.
-StrVec read_file_lines( fs::path p );
+StrVec read_file_lines( fs::path const& p );
 
 // Take a path whose last  component  (file name) contains a glob
 // expression and  return  results  by  searching  the  directory

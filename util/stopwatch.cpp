@@ -79,10 +79,10 @@ string StopWatch::human( string_view name ) const {
 // Get a list of all results in human readable form.
 vector<StopWatch::result_pair> StopWatch::results() const {
     vector<result_pair> res;
-    for( auto p : start_times ) {
+    for( auto const& p : start_times ) {
         ASSERT( event_complete( p.first.c_str() ),
             "event " << p.first << " is not complete." );
-        res.push_back( make_pair(
+        res.emplace_back( make_pair(
             p.first, human( p.first ) ) );
     }
     return res;

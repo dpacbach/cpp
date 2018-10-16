@@ -21,8 +21,10 @@
     out << "error:" __FILE__ ":";                              \
     out << TO_STRING(__LINE__) ": ASSERT( " << #a << " )";     \
     std::ostringstream out_msg;                                \
+    /* NOLINTNEXTLINE(bugprone-macro-parentheses) */           \
     out_msg << b;                                              \
     if( !out_msg.str().empty() )                               \
+        /* NOLINTNEXTLINE(bugprone-macro-parentheses) */       \
         out << "\n" << b;                                      \
     throw std::logic_error( out.str() );                       \
 }

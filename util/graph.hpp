@@ -126,9 +126,9 @@ DirectedGraph<NameT>::accessible( NameT const& name,
         to_visit.push_back( self );
     }
      
-    while( to_visit.size() ) {
+    while( !to_visit.empty() ) {
         Id i = to_visit.back(); to_visit.pop_back();
-        if( visited[i] )
+        if( visited[i] > 0 )
             // We  may have duplicates in the stack if we include
             // some  thing  a  second  time  before the first one
             // (which is already in the stack) is visited.
@@ -141,7 +141,7 @@ DirectedGraph<NameT>::accessible( NameT const& name,
             // is true (i.e., caller wants it added).
             res.push_back( name );
         for( Id i : m_edges[i] )
-            if( !visited[i] )
+            if( visited[i] == 0 )
                 to_visit.push_back( i );
     }
 

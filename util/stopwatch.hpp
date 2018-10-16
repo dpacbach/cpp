@@ -64,8 +64,14 @@ private:
 class ScopedWatch {
 
 public:
-    ScopedWatch( std::string_view title )
-        : watch(), name( title ) { watch.start( name ); }
+    explicit ScopedWatch( std::string_view title )
+        : name( title ) { watch.start( name ); }
+
+    ScopedWatch( ScopedWatch const& ) = default;
+    ScopedWatch( ScopedWatch&&      ) = default;
+
+    ScopedWatch& operator=( ScopedWatch const& ) = delete;
+    ScopedWatch& operator=( ScopedWatch&& )      = delete;
 
     ~ScopedWatch() {
         watch.stop( name );

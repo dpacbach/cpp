@@ -14,7 +14,10 @@ namespace util {
 // input  (mutating  the argument). The new size of the container
 // will therefore always be less or equal to  its  original  size.
 template<typename Container>
-void dos2unix( Container& c ) {
+void dos2unix( Container& c,
+    std::enable_if_t<std::is_same_v<
+        typename Container::iterator::value_type, char>>*
+            /*unused*/ = 0 ) {
     util::remove_if( c, L( _ == 0x0d ) );
 }
 
@@ -29,7 +32,10 @@ void dos2unix( Container& c ) {
 // unix (e.g., if it contains solitary CR's) then the output  may
 // not contain valid DOS line endings.
 template<typename Container>
-void unix2dos( Container& in ) {
+void unix2dos( Container& in,
+    std::enable_if_t<std::is_same_v<
+        typename Container::iterator::value_type, char>>*
+            /*unused*/ = 0 ) {
 
     // Some quick experiments suggest that the average ascii text
     // file will grow about 3-4% in size after this operation, so
@@ -63,7 +69,7 @@ void unix2dos( Container& in ) {
 // default, the timestamp will be  touched  if any changes to the
 // file are made. Bool return value indicates  whether  file  con-
 // tents were changed or not (regardless of timestamp).
-bool dos2unix( fs::path p, bool keepdate = false );
+bool dos2unix( fs::path const& p, bool keepdate = false );
 
 // Open  the given path and edit it to change LF to CRLF. This at-
 // tempts to emulate the command line utility of  the  same  name.
@@ -75,6 +81,6 @@ bool dos2unix( fs::path p, bool keepdate = false );
 // contain  valid  DOS  line endings. Bool return value indicates
 // whether file contents were changed  or not (regardless of time-
 // stamp).
-bool unix2dos( fs::path p, bool keepdate = false );
+bool unix2dos( fs::path const& p, bool keepdate = false );
 
 }

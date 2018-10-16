@@ -16,7 +16,7 @@ namespace util {
  * string  for  the purpose of distinguishing it type-wise from a
  * string and to prevent implicit construction. */
 struct Error : public movable_only {
-    explicit Error() {}
+    explicit Error() = default;
     explicit Error( std::string_view sv ) : msg( sv ) {}
     bool operator==( Error const& rhs ) const
         { return rhs.msg == msg; }

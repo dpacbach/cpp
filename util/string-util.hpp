@@ -42,15 +42,12 @@ bool iequals( StringT const& s1, StringT const& s2 ) {
     auto predicate = []( auto l, auto r ) {
         if constexpr( sizeof( StringT ) == 1 )
             return (std::tolower( l ) == std::tolower( r ));
-        else {
-            int l_i( l ), r_i( r );
-            if( l_i > 127 || r_i > 127 )
-                // not sure how to make higher-order chars  lower-
-                // case, so just compare them.
-                return (l_i == r_i);
-            else
-                return (tolower( l_i ) == tolower( r_i ));
-        }
+        int l_i( l ), r_i( r );
+        if( l_i > 127 || r_i > 127 )
+            // not sure how to make higher-order chars  lower-
+            // case, so just compare them.
+            return (l_i == r_i);
+        return (tolower( l_i ) == tolower( r_i ));
     };
 
     return std::equal( std::begin( s1 ), std::end( s1 ),
@@ -130,7 +127,7 @@ using IsStrOkFunc = std::function<bool( std::string_view )>;
 // or newlines between words, and these will all be stripped away
 // (not retained in result).
 std::vector<std::string> wrap_text_fn( std::string_view text,
-                                       IsStrOkFunc is_ok );
+                                       IsStrOkFunc const& is_ok );
 
 // Wraps text such that each resulting line will be <= to the
 // max_length. The exception is if a word is itself "too long" in
@@ -166,7 +163,7 @@ to_paths( std::vector<std::string> const& ss );
 * string itself.
 ****************************************************************/
 template<typename T>
-std::string to_string( T const& );
+std::string to_string( T const& /*arg*/ );
 
 // NOTE: This puts single quotes around the character!
 template<>
@@ -228,12 +225,9 @@ std::string to_string( std::tuple<Args...> const& tp );
 // in as an argument apart from using  this  helper  function  in-
 // volving the index_sequence.
 template<typename Tuple, size_t... Indexes>
-StrVec tuple_elems_to_string( Tuple const& tp,
-                              std::index_sequence<Indexes...> );
-
-// Will do JSON-like notation. E.g. (1,2,3)
-template<typename... Args>
-std::string to_string( std::tuple<Args...> const& tp );
+StrVec tuple_elems_to_string(
+        Tuple const& tp,
+        std::index_sequence<Indexes...> /*unused*/ );
 
 // This function exists for the purpose of  having  the  compiler
 // deduce the Indexes variadic integer arguments that we can then
@@ -242,7 +236,7 @@ std::string to_string( std::tuple<Args...> const& tp );
 template<typename Variant, size_t... Indexes>
 std::string variant_elems_to_string(
         Variant const& v,
-        std::index_sequence<Indexes...> );
+        std::index_sequence<Indexes...> /*unused*/ );
 
 template<typename... Args>
 std::string to_string( std::variant<Args...> const& v );
@@ -275,11 +269,6 @@ std::string to_string( SysTimePoint const& p );
 // UTC time zone (hence the +0000 at the end).
 template<>
 std::string to_string( ZonedTimePoint const& p );
-
-// Default  version uses std::to_string which is only defined for
-// a few primitive types.
-template<typename T>
-std::string to_string( T const& arg );
 
 template<typename T>
 std::ostream& operator<<( std::ostream&         out,
