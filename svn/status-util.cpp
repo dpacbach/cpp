@@ -3,6 +3,7 @@
 ****************************************************************/
 #include "status-util.hpp"
 #include "util.hpp"
+#include "xml-util.hpp"
 
 #include <map>
 

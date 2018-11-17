@@ -6,7 +6,6 @@
 #include "bimap.hpp"
 #include "fs.hpp"
 #include "string-util.hpp"
-#include "xml-util.hpp"
 
 #include <iostream>
 #include <string>
