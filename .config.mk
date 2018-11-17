@@ -5,12 +5,11 @@ LDFLAGS  += -lstdc++fs -pthread
 xml.deps       = pugixml util
 sqlite.deps    = sqlite-amal util smcpp
 crypto.deps    = md5
-svn.deps       = xml util
 net.deps       = util
 conv.deps      = util
 
 # Must be in order of dependencies.
-top-level-folders = util conv xml sqlite crypto svn net test
+top-level-folders = util conv xml sqlite crypto net test
 
 main.deps = $(top-level-folders)
 test.deps = $(filter-out test,$(top-level-folders))

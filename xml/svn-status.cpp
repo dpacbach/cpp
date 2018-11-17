@@ -1,7 +1,7 @@
 /****************************************************************
 * SVN-status Utilities
 ****************************************************************/
-#include "status-util.hpp"
+#include "svn-status.hpp"
 #include "util.hpp"
 #include "xml-util.hpp"
 

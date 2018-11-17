@@ -4,7 +4,7 @@
 #include "common-test.hpp"
 
 #include "io.hpp"
-#include "status-util.hpp"
+#include "svn-status.hpp"
 #include "types.hpp"
 
 using namespace std;
