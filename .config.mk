@@ -6,10 +6,9 @@ xml.deps       = pugixml util
 sqlite.deps    = sqlite-amal util smcpp
 crypto.deps    = md5
 net.deps       = util
-conv.deps      = util
 
 # Must be in order of dependencies.
-top-level-folders = util conv xml sqlite crypto net test
+top-level-folders = util xml sqlite crypto net test
 
 main.deps = $(top-level-folders)
 test.deps = $(filter-out test,$(top-level-folders))
